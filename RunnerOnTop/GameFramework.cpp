@@ -264,7 +264,7 @@ void CGameFramework::BuildObjects()
 	pCamera->GenerateViewMatrix();
 
 	//플레이어의 위치를 스페이스-쉽 카메라로 변경한다.
-	pAirplanePlyer->SetPosition(D3DXVECTOR3(0.0f, 200.0f, -1000.0f));
+	pAirplanePlyer->SetPosition(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
 	//pAirplanePlyer->Rotate(90.0f, 90.0f, 0.0f);
 
 	m_ppPlayers[0] = pAirplanePlyer;
@@ -364,7 +364,9 @@ void CGameFramework::FrameAdvance()
 	{
 		if (m_ppPlayers[i]) m_ppPlayers[i]->UpdateShaderVariables(m_pd3dDeviceContext);
 		pCamera = m_ppPlayers[i]->GetCamera();
+		
 		if (m_pScene) m_pScene->Render(m_pd3dDeviceContext, pCamera);
+		
 		//3인칭 카메라일 때 플레이어를 렌더링한다.
 		for (int j = 0; j < m_nPlayers; j++) if (m_ppPlayers[j]) m_ppPlayers[j]->Render(m_pd3dDeviceContext);
 	}

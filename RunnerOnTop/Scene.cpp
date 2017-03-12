@@ -22,7 +22,7 @@ void CScene::BuildObjects(ID3D11Device *pd3dDevice)
 	m_nShaders = 1;
 	m_ppShaders = new CShader*[m_nShaders];
 
-	m_ppShaders[0] = new CAnimateShader();
+	m_ppShaders[0] = new CDiffusedShader();
 	m_ppShaders[0]->CreateShader(pd3dDevice);
 	m_ppShaders[0]->BuildObjects(pd3dDevice);
 
@@ -78,8 +78,8 @@ void CScene::Render(ID3D11DeviceContext*pd3dDeviceContext, CCamera *pCamera)
 		D3DXVECTOR3 d3dxvCameraPosition = pCamera->GetPosition();
 		m_pLights->m_d3dxvCameraPosition = D3DXVECTOR4(d3dxvCameraPosition, 1.0f);
 
-		m_pLights->m_pLights[1].m_d3dxvPosition = d3dxvCameraPosition;
-		m_pLights->m_pLights[1].m_d3dxvDirection = pCamera->GetLookVector();
+		//m_pLights->m_pLights[1].m_d3dxvPosition = d3dxvCameraPosition;
+		//m_pLights->m_pLights[1].m_d3dxvDirection = pCamera->GetLookVector();
 
 		UpdateLights(pd3dDeviceContext);
 	}
@@ -94,7 +94,7 @@ void CScene::BuildLights(ID3D11Device *pd3dDevice)
 	m_pLights = new LIGHTS;
 	::ZeroMemory(m_pLights, sizeof(LIGHTS));
 	//게임 월드 전체를 비추는 주변조명을 설정한다.
-	m_pLights->m_d3dxcGlobalAmbient = D3DXCOLOR(0.1f, 0.1f, 0.1f, 1.0f);
+	m_pLights->m_d3dxcGlobalAmbient = D3DXCOLOR(0.3f, 0.3f, 0.3f, 0.1f);
 
 	//3개의 조명(점 광원, 스팟 광원, 방향성 광원)을 설정한다.
 	m_pLights->m_pLights[0].m_bEnable = 0.0f;
@@ -120,7 +120,7 @@ void CScene::BuildLights(ID3D11Device *pd3dDevice)
 	m_pLights->m_pLights[1].m_fTheta = (float)cos(D3DXToRadian(30.0f));
 	m_pLights->m_pLights[2].m_bEnable = 1.0f;
 	m_pLights->m_pLights[2].m_nType = DIRECTIONAL_LIGHT;
-	m_pLights->m_pLights[2].m_d3dxcAmbient = D3DXCOLOR(1.0f, 1.0f, 1.0f, 0.3f);
+	m_pLights->m_pLights[2].m_d3dxcAmbient = D3DXCOLOR(0.7f, 0.7f, 0.7f, 0.7f);
 	m_pLights->m_pLights[2].m_d3dxcDiffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
 	m_pLights->m_pLights[2].m_d3dxcSpecular = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
 	m_pLights->m_pLights[2].m_d3dxvDirection = D3DXVECTOR3(0.0f, -1.0f, 0.0f);

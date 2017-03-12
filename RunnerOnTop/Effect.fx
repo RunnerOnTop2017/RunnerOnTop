@@ -64,7 +64,6 @@ struct LIGHTEDCOLOR
 LIGHTEDCOLOR DirectionalLight(int i, float3 vNormal, float3 vToCamera)
 {
 	LIGHTEDCOLOR output = (LIGHTEDCOLOR)0;
-
 	float3 vToLight = -gLights[i].m_vDirection;
 	float fDiffuseFactor = dot(vToLight, vNormal);
 	//조명의 방향이 법선 벡터와 이루는 각도가 예각일 때 직접 조명의 영향을 계산한다.
@@ -90,6 +89,7 @@ LIGHTEDCOLOR DirectionalLight(int i, float3 vNormal, float3 vToCamera)
 	}
 	output.m_cAmbient = gMaterial.m_cAmbient * gLights[i].m_cAmbient;
 	return(output);
+
 }
 
 LIGHTEDCOLOR PointLight(int i, float3 vPosition, float3 vNormal, float3 vToCamera)

@@ -38,7 +38,7 @@ protected:
 	CCamera *m_pCamera;
 
 	//3인칭 카메라일 때 플레이어를 그리기 위해 사용하는 쉐이더이다.
-	CShader *m_pShader;
+	CAnimateShader *m_pShader;
 
 public:
 	CPlayer();
@@ -67,7 +67,7 @@ public:
 	void SetCamera(CCamera *pCamera) { m_pCamera = pCamera; }
 
 	//플레이어를 이동하는 함수이다.
-	void Move(ULONG nDirection, float fDistance, bool bVelocity = false);
+	void Move(UINT nDirection, float fDistance, bool bVelocity = false);
 	void Move(const D3DXVECTOR3& d3dxvShift, bool bVelocity = false);
 	void Move(float fxOffset = 0.0f, float fyOffset = 0.0f, float fzOffset = 0.0f);
 	//플레이어를 회전하는 함수이다.

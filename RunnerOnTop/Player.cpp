@@ -53,7 +53,7 @@ void CPlayer::RegenerateWorldMatrix()
 }
 
 /*플레이어의 위치를 변경하는 함수이다. 플레이어의 위치는 기본적으로 사용자가 플레이어를 이동하기 위한 키보드를 누를 때 변경된다. 플레이어의 이동 방향(dwDirection)에 따라 플레이어를 fDistance 만큼 이동한다.*/
-void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
+void CPlayer::Move(UINT dwDirection, float fDistance, bool bUpdateVelocity)
 {
 	if (dwDirection)
 	{
@@ -83,9 +83,11 @@ void CPlayer::Move(const D3DXVECTOR3& d3dxvShift, bool bUpdateVelocity)
 	else
 	{
 		//플레이어를 현재 위치 벡터에서 d3dxvShift 벡터 만큼 이동한다.
+
 		D3DXVECTOR3 d3dxvPosition = m_d3dxvPosition + d3dxvShift;
 		m_d3dxvPosition = d3dxvPosition;
 		RegenerateWorldMatrix();
+
 		//플레이어의 위치가 변경되었으므로 카메라의 위치도 d3dxvShift 벡터 만큼 이동한다.
 		m_pCamera->Move(d3dxvShift);
 	}
@@ -277,9 +279,13 @@ void CPlayer::Render(ID3D11DeviceContext *pd3dDeviceContext)
 	if (m_pShader)
 	{
 		m_pShader->UpdateShaderVariables(pd3dDeviceContext, &m_d3dxmtxWorld);
+		//m_pShader->UpdateShaderVariables(pd3dDeviceContext, m_pShader->GetGameObject(0)->m_pTexture);
+		//m_pShader->UpdateShaderVariables(pd3dDeviceContext)
+		m_pShader->m_ppObjects[0]->m_d3dxmtxWorld = m_d3dxmtxWorld;
+
 		m_pShader->Render(pd3dDeviceContext);
 	}
-	if (m_pMesh) m_pMesh->Render(pd3dDeviceContext);
+	//if (m_pMesh) m_pMesh->Render(pd3dDeviceContext);
 }
 
 void CPlayer::OnPlayerUpdated(float fTimeElapsed)
@@ -294,13 +300,14 @@ void CPlayer::OnCameraUpdated(float fTimeElapsed)
 CAirplanePlayer::CAirplanePlayer(ID3D11Device *pd3dDevice)
 {
 	//비행기 메쉬를 생성한다.
-	CMesh *pAirplaneMesh = new CCharacterMesh(pd3dDevice, 20.0f, 20.0f, 4.0f);// D3DCOLOR_XRGB(0, 255, 0));
+	CMesh *pAirplaneMesh = new CCharacterMesh(pd3dDevice);
 	SetMesh(pAirplaneMesh);
 
 	//플레이어(비행기) 메쉬를 렌더링할 때 사용할 쉐이더를 생성한다.
 	m_pShader = new CAnimateShader();
 	m_pShader->CreateShader(pd3dDevice);
-	m_pShader->CreateShaderVariables(pd3dDevice);
+	//m_pShader->CreateShaderVariables(pd3dDevice);
+	m_pShader->BuildObjects(pd3dDevice);
 
 	//플레이어를 위한 쉐이더 변수를 생성한다.
 	CreateShaderVariables(pd3dDevice);

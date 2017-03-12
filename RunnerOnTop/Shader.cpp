@@ -138,6 +138,7 @@ void CShader::UpdateShaderVariables(ID3D11DeviceContext *pd3dDeviceContext, D3DX
 	pd3dDeviceContext->Unmap(m_pd3dcbWorldMatrix, 0);
 	pd3dDeviceContext->VSSetConstantBuffers(VS_SLOT_WORLD_MATRIX, 1, &m_pd3dcbWorldMatrix);
 }
+
 void CShader::UpdateShaderVariables(ID3D11DeviceContext *pd3dDeviceContext, MATERIAL *pMaterial)
 {
 	D3D11_MAPPED_SUBRESOURCE d3dMappedResource;
@@ -188,6 +189,11 @@ void CShader::Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamera)
 	}
 }
 
+CGameObject * CShader::GetGameObject(int index)
+{
+	return m_ppObjects[index];
+}
+
 
 CDiffusedShader::CDiffusedShader()
 {
@@ -222,7 +228,7 @@ void CDiffusedShader::UpdateShaderVariables(ID3D11DeviceContext *pd3dDeviceConte
 
 void CDiffusedShader::BuildObjects(ID3D11Device *pd3dDevice)
 {
-	CMesh *pCubeMesh = new CMesh(pd3dDevice);// , 12.0f, 12.0f, 12.0f, D3DCOLOR_XRGB(0, 0, 128));
+	CMesh *pCubeMesh = new CAirplaneMesh(pd3dDevice);// , 12.0f, 12.0f, 12.0f, D3DCOLOR_XRGB(0, 0, 128));
 
 	int xObjects = 6, yObjects = 6, zObjects = 6, i = 0;
 	m_nObjects = (xObjects + ((xObjects % 2) ? 0 : 1)) * (yObjects + ((yObjects % 2) ? 0 : 1)) * (zObjects + ((zObjects % 2) ? 0 : 1));
@@ -242,7 +248,7 @@ void CDiffusedShader::BuildObjects(ID3D11Device *pd3dDevice)
 				pRotatingObject->SetMesh(pCubeMesh);
 				pRotatingObject->SetPosition(fxPitch*x, fyPitch*y, fzPitch*z);
 				pRotatingObject->SetRotationAxis(D3DXVECTOR3(0.0f, 1.0f, 0.0f));
-				pRotatingObject->SetRotationSpeed(10.0f*(i % 10));
+				pRotatingObject->SetRotationSpeed(1.0f*(i % 10));
 				m_ppObjects[i++] = pRotatingObject;
 			}
 		}
@@ -394,9 +400,9 @@ void CAnimateShader::BuildObjects(ID3D11Device *pd3dDevice)
 {
 	CMaterial **ppMaterials = new CMaterial*[3];
 	ppMaterials[0] = new CMaterial();
-	ppMaterials[0]->m_Material.m_d3dxcDiffuse = D3DXCOLOR(0.3f, 0.3f, 0.3f, 1.0f);
+	ppMaterials[0]->m_Material.m_d3dxcDiffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
 	ppMaterials[0]->m_Material.m_d3dxcAmbient = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
-	ppMaterials[0]->m_Material.m_d3dxcSpecular = D3DXCOLOR(0.5f, 0.5f, 0.5f, 5.0f);
+	ppMaterials[0]->m_Material.m_d3dxcSpecular = D3DXCOLOR(0.5f, 0.5f, 0.5f, 1.0f);
 	ppMaterials[0]->m_Material.m_d3dxcEmissive = D3DXCOLOR(0.0f, 0.0f, 0.0f, 1.0f);
 	ppMaterials[1] = new CMaterial();
 	ppMaterials[1]->m_Material.m_d3dxcDiffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
@@ -467,16 +473,16 @@ void CAnimateShader::BuildObjects(ID3D11Device *pd3dDevice)
 	float fxPitch = 12.0f * 1.7f;
 	float fyPitch = 12.0f * 1.7f;
 	float fzPitch = 12.0f * 1.7f;
-	CRotatingObject *pRotatingObject = NULL;
+	CGameObject *pRotatingObject = NULL;
 
-	pRotatingObject = new CRotatingObject();
+	pRotatingObject = new CGameObject();
 	pRotatingObject->SetMesh(pMeshIlluminatedTextured);
 	pRotatingObject->SetMaterial(ppMaterials[i % 3]);
 	pRotatingObject->SetTexture(p_Texture);
 	pRotatingObject->SetBump(pBump);
 	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
-	pRotatingObject->SetRotationAxis(D3DXVECTOR3(0.0f, 1.0f, 0.0f));
-	pRotatingObject->SetRotationSpeed(1.0f);// *(i % 10));
+	//pRotatingObject->SetRotationAxis(D3DXVECTOR3(0.0f, 1.0f, 0.0f));
+	//pRotatingObject->SetRotationSpeed(1.0f);// *(i % 10));
 	pRotatingObject->Scale(10.0f);
 	m_ppObjects[i++] = pRotatingObject;
 

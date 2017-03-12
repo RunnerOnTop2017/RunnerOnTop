@@ -34,6 +34,8 @@ public:
 	virtual void ReleaseObjects();
 	virtual void AnimateObjects(ID3D11Device *pd3dDevice, float fTimeElapsed);
 	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamera = NULL);
+public:
+	CGameObject* GetGameObject(int index);
 
 public:
 	ID3D11InputLayout *m_pd3dVertexLayout;
