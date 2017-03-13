@@ -59,7 +59,11 @@ void CPlayer::Move(UINT dwDirection, float fDistance, bool bUpdateVelocity)
 	{
 		D3DXVECTOR3 d3dxvShift = D3DXVECTOR3(0, 0, 0);
 		//화살표 키 ‘↑’를 누르면 로컬 z-축 방향으로 이동(전진)한다. ‘↓’를 누르면 반대 방향으로 이동한다.
-		if (dwDirection & DIR_FORWARD) d3dxvShift += m_d3dxvLook * fDistance;
+		if (dwDirection & DIR_FORWARD)
+		{
+			d3dxvShift += m_d3dxvLook * fDistance;
+			//MoveForward(fDistance);
+		}
 		if (dwDirection & DIR_BACKWARD) d3dxvShift -= m_d3dxvLook * fDistance;
 		//화살표 키 ‘→’를 누르면 로컬 x-축 방향으로 이동한다. ‘←’를 누르면 반대 방향으로 이동한다.
 		if (dwDirection & DIR_RIGHT) d3dxvShift += m_d3dxvRight * fDistance;
@@ -86,7 +90,9 @@ void CPlayer::Move(const D3DXVECTOR3& d3dxvShift, bool bUpdateVelocity)
 
 		D3DXVECTOR3 d3dxvPosition = m_d3dxvPosition + d3dxvShift;
 		m_d3dxvPosition = d3dxvPosition;
+		
 		RegenerateWorldMatrix();
+		//D3DXMatrixTranslation(&m_d3dxmtxWorld, d3dxvPosition.x, d3dxvPosition.y, d3dxvPosition.z);
 
 		//플레이어의 위치가 변경되었으므로 카메라의 위치도 d3dxvShift 벡터 만큼 이동한다.
 		m_pCamera->Move(d3dxvShift);
@@ -278,7 +284,7 @@ void CPlayer::Render(ID3D11DeviceContext *pd3dDeviceContext)
 {
 	if (m_pShader)
 	{
-		m_pShader->UpdateShaderVariables(pd3dDeviceContext, &m_d3dxmtxWorld);
+		//m_pShader->UpdateShaderVariables(pd3dDeviceContext, &m_d3dxmtxWorld);
 		//m_pShader->UpdateShaderVariables(pd3dDeviceContext, m_pShader->GetGameObject(0)->m_pTexture);
 		//m_pShader->UpdateShaderVariables(pd3dDeviceContext)
 		m_pShader->m_ppObjects[0]->m_d3dxmtxWorld = m_d3dxmtxWorld;

@@ -42,7 +42,7 @@ void CGameObject::SetMesh(CMesh *pMesh)
 
 void CGameObject::Animate(ID3D11Device *pd3dDevice,float fTimeElapsed)
 {
-	
+	//MoveForward(100.0f);
 }
 
 void CGameObject::SetPosition(float x, float y, float z)

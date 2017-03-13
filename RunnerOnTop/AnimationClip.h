@@ -26,4 +26,3 @@ public:
 	// 블랜딩된 애니메이션을 얻어올 수 있다.  
 	bool GetBlenAnimation(char* name_a, char* name_b, int frame_a, int frame_b, float ratio, D3DXMATRIX* buf);
 };
-

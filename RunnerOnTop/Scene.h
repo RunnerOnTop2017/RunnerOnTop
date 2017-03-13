@@ -3,7 +3,7 @@
 #include"GameObject.h"
 #include"Shader.h"
 
-#define MAX_LIGHTS		4 
+#define MAX_LIGHTS		1
 #define POINT_LIGHT		1.0f
 #define SPOT_LIGHT		2.0f
 #define DIRECTIONAL_LIGHT	3.0f

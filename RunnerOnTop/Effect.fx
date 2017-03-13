@@ -7,7 +7,7 @@
 // 조명
 
 
-#define MAX_LIGHTS		4 
+#define MAX_LIGHTS		1 
 #define POINT_LIGHT		1.0f
 #define SPOT_LIGHT		2.0f
 #define DIRECTIONAL_LIGHT	3.0f
@@ -64,10 +64,10 @@ struct LIGHTEDCOLOR
 LIGHTEDCOLOR DirectionalLight(int i, float3 vNormal, float3 vToCamera)
 {
 	LIGHTEDCOLOR output = (LIGHTEDCOLOR)0;
-	float3 vToLight = -gLights[i].m_vDirection;
+	float3 vToLight = normalize(-gLights[i].m_vDirection);
 	float fDiffuseFactor = dot(vToLight, vNormal);
 	//조명의 방향이 법선 벡터와 이루는 각도가 예각일 때 직접 조명의 영향을 계산한다.
-	if (fDiffuseFactor > 0.0f)
+	if (true)//fDiffuseFactor > 0.0f)
 	{
 		//물질의 스펙큘러 파워가 0이 아닐 때만 스펙큘러 조명의 영향을 계산한다.
 		if (gMaterial.m_cSpecular.a != 0.0f)
@@ -183,7 +183,7 @@ float4 Lighting(float3 vPosition, float3 vNormal)
 {
 	int i;
 	float3 vCameraPosition = float3(gvCameraPosition.x, gvCameraPosition.y, gvCameraPosition.z);
-	float3 vToCamera = normalize(vCameraPosition - vPosition);
+	float3 vToCamera = normalize(float3(0.0f, 0.0f, -100.0f));//vCameraPosition - vPosition);
 	LIGHTEDCOLOR LightedColor = (LIGHTEDCOLOR)0;
 	float4 cColor = float4(0.0f, 0.0f, 0.0f, 0.0f);
 	for (i = 0; i < MAX_LIGHTS; i++)
@@ -380,10 +380,10 @@ SkinnedVertexOut SkinnedVS(SkinnedVertexIn vin)
 
 	}
 	//posL = vin.PosL;
-	vout.positionW = mul(float4(posL, 1.0f), gmtxWorld).xzy;
-	vout.normalW = mul(float4(normalL, 1.0f), gmtxWorld).xyz;
-	vout.binormalW = mul(float4(binormalL, 1.0f), gmtxWorld).xyz;
-	vout.tangentW = mul(float4(TangentL, 1.0f), gmtxWorld).xyz;
+	vout.positionW = mul(float4(posL, 1.0f), gmtxWorld).xyz;
+	vout.normalW = mul(normalL,(float3x3)gmtxWorld);
+	vout.binormalW = mul(binormalL,(float3x3)gmtxWorld);
+	vout.tangentW = mul(TangentL,(float3x3)gmtxWorld);
 
 	//월드뷰투영변환행렬 생성
 	matrix mtxWorldViewProjection = mul(gmtxWorld, gmtxView);
@@ -473,13 +473,11 @@ float4 SkinnedPS(SkinnedVertexOut input) : SV_Target
 		cColor = gtxtTexture[7].Sample(gSamplerState, input.tex2dcoord);
 		BumpMap = gtxBump[7].Sample(gSamplerState, input.tex2dcoord);
 	}
-
-	
 	input.normalW = normalize(input.normalW);
 	input.binormalW = normalize(input.binormalW);
 	input.tangentW = normalize(input.tangentW);
 	BumpMap = (BumpMap * 2.0f) - 1.0f;
-	float3 BumpNormal = input.normalW + BumpMap.x * input.tangentW + BumpMap.y * input.binormalW;
+	float3 BumpNormal = input.normalW + (BumpMap.x * input.tangentW) + (BumpMap.y * input.binormalW);
 	BumpNormal = normalize(BumpNormal);
 	float4 cIllumination = Lighting(input.positionW, BumpNormal);
 
