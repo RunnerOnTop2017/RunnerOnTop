@@ -255,7 +255,7 @@ CCamera *CPlayer::OnChangeCamera(ID3D11Device *pd3dDevice, DWORD nNewCameraMode,
 		m_d3dxvUp = m_pCamera->GetUpVector();
 		m_d3dxvLook = m_pCamera->GetLookVector();
 	}
-
+	
 	if (pNewCamera)
 	{
 		//기존 카메라가 없으면 새로운 카메라를 위한 쉐이더 변수를 생성한다.
@@ -347,7 +347,7 @@ void CAirplanePlayer::ChangeCamera(ID3D11Device *pd3dDevice, DWORD nNewCameraMod
 	case FIRST_PERSON_CAMERA:
 		//플레이어의 특성을 1인칭 카메라 모드에 맞게 변경한다. 중력은 적용하지 않는다.
 		SetFriction(200.0f);
-		SetGravity(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
+		SetGravity(D3DXVECTOR3(0.0f, -10.0f, 0.0f));
 		SetMaxVelocityXZ(125.0f);
 		SetMaxVelocityY(400.0f);
 		m_pCamera = OnChangeCamera(pd3dDevice, FIRST_PERSON_CAMERA, nCurrentCameraMode);
@@ -358,7 +358,7 @@ void CAirplanePlayer::ChangeCamera(ID3D11Device *pd3dDevice, DWORD nNewCameraMod
 	case SPACESHIP_CAMERA:
 		//플레이어의 특성을 스페이스-쉽 카메라 모드에 맞게 변경한다. 중력은 적용하지 않는다.
 		SetFriction(125.0f);
-		SetGravity(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
+		SetGravity(D3DXVECTOR3(0.0f, -10.0f, 0.0f));
 		SetMaxVelocityXZ(400.0f);
 		SetMaxVelocityY(400.0f);
 		m_pCamera = OnChangeCamera(pd3dDevice, SPACESHIP_CAMERA, nCurrentCameraMode);
@@ -375,7 +375,7 @@ void CAirplanePlayer::ChangeCamera(ID3D11Device *pd3dDevice, DWORD nNewCameraMod
 		m_pCamera = OnChangeCamera(pd3dDevice, THIRD_PERSON_CAMERA, nCurrentCameraMode);
 		m_pCamera->SetTimeLag(0.25f);
 		m_pCamera->SetOffset(D3DXVECTOR3(0.0f,50.0f, -100.0f));
-		m_pCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 60.0f);
+		m_pCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 45.0f);
 		break;
 	default:
 		break;

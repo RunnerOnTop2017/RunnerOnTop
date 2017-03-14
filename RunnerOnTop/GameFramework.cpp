@@ -264,7 +264,7 @@ void CGameFramework::BuildObjects()
 	pCamera->GenerateViewMatrix();
 
 	//플레이어의 위치를 스페이스-쉽 카메라로 변경한다.
-	pAirplanePlyer->SetPosition(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
+	pAirplanePlyer->SetPosition(D3DXVECTOR3(0.0f, 140.0f, 0.0f));
 	//pAirplanePlyer->Rotate(90.0f, 90.0f, 0.0f);
 
 	m_ppPlayers[0] = pAirplanePlyer;

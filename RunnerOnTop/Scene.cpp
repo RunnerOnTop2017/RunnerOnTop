@@ -22,7 +22,7 @@ void CScene::BuildObjects(ID3D11Device *pd3dDevice)
 	m_nShaders = 1;
 	m_ppShaders = new CShader*[m_nShaders];
 
-	m_ppShaders[0] = new CDiffusedShader();
+	m_ppShaders[0] = new CTextureShader();
 	m_ppShaders[0]->CreateShader(pd3dDevice);
 	m_ppShaders[0]->BuildObjects(pd3dDevice);
 
@@ -103,8 +103,7 @@ void CScene::BuildLights(ID3D11Device *pd3dDevice)
 	m_pLights->m_pLights[0].m_d3dxcDiffuse = D3DXCOLOR(0.5f, 0.5f, 0.5f, 0.0f);
 	m_pLights->m_pLights[0].m_d3dxcSpecular = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
 	m_pLights->m_pLights[0].m_d3dxvDirection = D3DXVECTOR3(0.0f, -1000.0f, 0.0f);
-	//m_pLights->m_pLights[0].m_d3dxvPosition = D3DXVECTOR3(0.0f, 100.0f, 0.0f);
-
+	
 	D3D11_BUFFER_DESC d3dBufferDesc;
 	ZeroMemory(&d3dBufferDesc, sizeof(d3dBufferDesc));
 	d3dBufferDesc.Usage = D3D11_USAGE_DYNAMIC;

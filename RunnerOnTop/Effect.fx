@@ -337,8 +337,8 @@ VS_TEXTURED_LIGHTING_OUTPUT VSTexturedLighting(VS_TEXTURED_LIGHTING_INPUT input)
 	VS_TEXTURED_LIGHTING_OUTPUT output = (VS_TEXTURED_LIGHTING_OUTPUT)0;
 
 	output.normalW = mul(input.normal, (float3x3)gmtxWorld);
-	output.positionW = mul(input.position, (float3x3)gmtxWorld);
-	output.positionW += float3(gmtxWorld._41, gmtxWorld._42, gmtxWorld._43);
+	output.positionW = mul((float4)(input.position,1.0f), gmtxWorld).xyz;
+	//output.positionW += float3(gmtxWorld._41, gmtxWorld._42, gmtxWorld._43);
 
 	matrix mtxWorldViewProjection = mul(gmtxWorld, gmtxView);
 	mtxWorldViewProjection = mul(mtxWorldViewProjection, gmtxProjection);

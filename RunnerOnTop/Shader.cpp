@@ -181,6 +181,7 @@ void CShader::Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamera)
 			}
 			if (m_ppObjects[j]->transform)
 			{
+				delete m_ppObjects[j]->transform;
 				m_ppObjects[j]->transform = m_ppObjects[j]->m_pMesh->getTransform(m_ppObjects[j]->framenumber++);
 				UpdateShaderVariables(pd3dDeviceContext, m_ppObjects[j]->transform, m_ppObjects[j]->m_pMesh->GetBoneDataSize());
 			}
@@ -314,6 +315,63 @@ void CTextureShader::UpdateShaderVariables(ID3D11DeviceContext *pd3dDeviceContex
 void CTextureShader::UpdateShaderVariables(ID3D11DeviceContext * pd3dDeviceContext, MATERIAL * pMaterial)
 {
 	CShader::UpdateShaderVariables(pd3dDeviceContext, pMaterial);
+}
+void CTextureShader::BuildObjects(ID3D11Device * pd3dDevice)
+{
+	CMaterial **ppMaterials = new CMaterial*[1];
+	ppMaterials[0] = new CMaterial();
+	ppMaterials[0]->m_Material.m_d3dxcDiffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
+	ppMaterials[0]->m_Material.m_d3dxcAmbient = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
+	ppMaterials[0]->m_Material.m_d3dxcSpecular = D3DXCOLOR(0.5f, 0.5f, 0.5f, 1.0f);
+	ppMaterials[0]->m_Material.m_d3dxcEmissive = D3DXCOLOR(0.0f, 0.0f, 0.0f, 1.0f);
+
+	ID3D11SamplerState *pd3dSamplerState = NULL;
+	D3D11_SAMPLER_DESC d3dSamplerDesc;
+	ZeroMemory(&d3dSamplerDesc, sizeof(D3D11_SAMPLER_DESC));
+	d3dSamplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	d3dSamplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	d3dSamplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	d3dSamplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	d3dSamplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+	d3dSamplerDesc.MinLOD = 0;
+	d3dSamplerDesc.MaxLOD = 0;
+	pd3dDevice->CreateSamplerState(&d3dSamplerDesc, &pd3dSamplerState);
+
+	ID3D11ShaderResourceView *pd3dTexture = NULL;
+
+	CTexture *p_Texture = new CTexture(1);
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Maps\\Texture\\map01_s1.png"), NULL, NULL, &pd3dTexture, NULL);
+	p_Texture->SetTexture(0, pd3dTexture, pd3dSamplerState);
+	
+	CMesh *pMeshIlluminatedTextured = new CMeshTextured(pd3dDevice, 12.0f, 12.0f, 12.0f);//CCubeMeshIlluminatedTextured(pd3dDevice, 12.0f, 12.0f, 12.0f);
+
+	int xObjects = 3, yObjects = 3, zObjects = 3, i = 0, nObjectTypes = 2;
+	m_nObjects = 1;//((xObjects * 2) + 1) * ((yObjects * 2) + 1) * ((zObjects * 2) + 1);
+	m_ppObjects = new CGameObject*[m_nObjects];
+
+	float fxPitch = 12.0f * 1.7f;
+	float fyPitch = 12.0f * 1.7f;
+	float fzPitch = 12.0f * 1.7f;
+	CGameObject *pRotatingObject = NULL;
+
+	pRotatingObject = new CGameObject();
+	pRotatingObject->SetMesh(pMeshIlluminatedTextured);
+	pRotatingObject->SetMaterial(ppMaterials[0]);
+	pRotatingObject->SetTexture(p_Texture);
+
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+	//pRotatingObject->SetRotationAxis(D3DXVECTOR3(0.0f, 1.0f, 0.0f));
+	//pRotatingObject->SetRotationSpeed(1.0f);// *(i % 10));
+	pRotatingObject->Scale(0.1f);
+	m_ppObjects[i++] = pRotatingObject;
+
+
+
+	CreateShaderVariables(pd3dDevice);
+
+	//delete[] ppTextures;
+	//delete p_Texture;
+	delete[] ppMaterials;
 }
 void CTextureShader::ReleaseObjects()
 {
