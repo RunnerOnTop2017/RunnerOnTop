@@ -229,32 +229,19 @@ void CDiffusedShader::UpdateShaderVariables(ID3D11DeviceContext *pd3dDeviceConte
 
 void CDiffusedShader::BuildObjects(ID3D11Device *pd3dDevice)
 {
-	CMesh *pCubeMesh = new CAirplaneMesh(pd3dDevice);// , 12.0f, 12.0f, 12.0f, D3DCOLOR_XRGB(0, 0, 128));
+	CMesh *pCubeMesh = new CCubeMesh(pd3dDevice);// , 12.0f, 12.0f, 12.0f, D3DCOLOR_XRGB(0, 0, 128));
 
-	int xObjects = 6, yObjects = 6, zObjects = 6, i = 0;
-	m_nObjects = (xObjects + ((xObjects % 2) ? 0 : 1)) * (yObjects + ((yObjects % 2) ? 0 : 1)) * (zObjects + ((zObjects % 2) ? 0 : 1));
+	m_nObjects = 1;
 	m_ppObjects = new CGameObject*[m_nObjects];
 
-	float fxPitch = 12.0f * 1.7f;
-	float fyPitch = 12.0f * 1.7f;
-	float fzPitch = 12.0f * 1.7f;
-	CRotatingObject *pRotatingObject = NULL;
-	for (int x = -xObjects; x <= xObjects; x += 2)
-	{
-		for (int y = -yObjects; y <= yObjects; y += 2)
-		{
-			for (int z = -zObjects; z <= zObjects; z += 2)
-			{
-				pRotatingObject = new CRotatingObject();
+	CGameObject *pRotatingObject = new CGameObject();
+	
 				pRotatingObject->SetMesh(pCubeMesh);
-				pRotatingObject->SetPosition(fxPitch*x, fyPitch*y, fzPitch*z);
-				pRotatingObject->SetRotationAxis(D3DXVECTOR3(0.0f, 1.0f, 0.0f));
-				pRotatingObject->SetRotationSpeed(1.0f*(i % 10));
-				m_ppObjects[i++] = pRotatingObject;
-			}
-		}
-	}
-
+				pRotatingObject->SetPosition(0.0f, 140.0f, 0.0f);
+				//pRotatingObject->SetRotationAxis(D3DXVECTOR3(0.0f, 1.0f, 0.0f));
+				//pRotatingObject->SetRotationSpeed(1.0f*(i % 10));
+				m_ppObjects[0] = pRotatingObject;
+		
 	CreateShaderVariables(pd3dDevice);
 }
 
@@ -541,7 +528,7 @@ void CAnimateShader::BuildObjects(ID3D11Device *pd3dDevice)
 	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
 	//pRotatingObject->SetRotationAxis(D3DXVECTOR3(0.0f, 1.0f, 0.0f));
 	//pRotatingObject->SetRotationSpeed(1.0f);// *(i % 10));
-	pRotatingObject->Scale(10.0f);
+	//pRotatingObject->Scale(1.0f);
 	m_ppObjects[i++] = pRotatingObject;
 
 

@@ -38,6 +38,7 @@ public:
 	//정점의 색상을 나타내는 멤버 변수(D3DXCOLOR 구조체)를 선언한다. 
 	D3DXCOLOR m_d3dxcDiffuse;
 	CDiffuseNormalVertex() {}
+	CDiffuseNormalVertex(D3DXVECTOR3 vPosition, D3DXVECTOR3 vNormal, D3DXCOLOR Color) { m_d3dxvPosition = vPosition; m_d3dxvNormal = vNormal;  m_d3dxcDiffuse = Color; }
 	~CDiffuseNormalVertex() {}
 };
 
@@ -193,11 +194,19 @@ public:
 
 class CCubeMesh : public CMesh
 {
+	CDiffuseNormalVertex pVertices[8];
 public:
 	CCubeMesh(ID3D11Device *pd3dDevice);
 	~CCubeMesh();
 	virtual void CreateRasterizerState(ID3D11Device *pd3dDevice);
 	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext);
+	void GetBottom(D3DXVECTOR3* vPlanes);
+	void GetFront(D3DXVECTOR3* vPlanes);
+	void GetBack(D3DXVECTOR3* vPlanes);
+	void GetRight(D3DXVECTOR3* vPlanes);
+	void GetLeft(D3DXVECTOR3* vPlanes);
+
+
 };
 
 class CMeshIlluminated : public CMesh

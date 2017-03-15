@@ -188,11 +188,14 @@ void CPlayer::Update(float fTimeElapsed)
 	fLength = sqrtf(m_d3dxvVelocity.y * m_d3dxvVelocity.y);
 	if (fLength > m_fMaxVelocityY) m_d3dxvVelocity.y *= (m_fMaxVelocityY / fLength);
 
-	/*플레이어를 속도 벡터 만큼 이동한다. 속도 벡터에 fTimeElapsed를 곱하는 것은 속도를 시간에 비례하도록 적용한다는 의미이다.*/
-	Move(m_d3dxvVelocity * fTimeElapsed, false);
 
 	/*플레이어의 위치가 변경될 때 추가로 수행할 작업을 수행한다. 예를 들어, 플레이어의 위치가 변경되었지만 플레이어 객체에는 지형(Terrain)의 정보가 없다. 플레이어의 새로운 위치가 유효한 위치가 아닐 수도 있고 또는 플레이어의 충돌 검사 등을 수행할 필요가 있다. 이러한 상황에서 플레이어의 위치를 유효한 위치로 다시 변경할 수 있다.*/
 	if (m_pPlayerUpdatedContext) OnPlayerUpdated(fTimeElapsed);
+
+
+	/*플레이어를 속도 벡터 만큼 이동한다. 속도 벡터에 fTimeElapsed를 곱하는 것은 속도를 시간에 비례하도록 적용한다는 의미이다.*/
+	Move(m_d3dxvVelocity * fTimeElapsed, false);
+
 
 	DWORD nCurrentCameraMode = m_pCamera->GetMode();
 	//플레이어의 위치가 변경되었으므로 카메라의 상태를 갱신한다.
@@ -302,13 +305,79 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 	
 	CTexturedNormalVertex *mVertices = pShader->m_ppObjects[0]->m_pMesh->m_pVertices;
 	int nIndex = pShader->m_ppObjects[0]->m_pMesh->m_nVertices;
+
+	D3DXVECTOR3 plane1[4]; // 아래
+	D3DXVECTOR3 plane2[4]; // left,right
+	D3DXVECTOR3 plane3[4]; // front back
+
+	pCollision->GetBottom(plane1);
 	
-	for (int i = 0; i < nIndex; i += 3)
+	if (dxvShift.z > 0) pCollision->GetFront(plane3);
+	else pCollision->GetBack(plane3);
+
+	if (dxvShift.x > 0) pCollision->GetLeft(plane3);
+	else pCollision->GetRight(plane3);
+
+	D3DXVECTOR4 planes[3][4];
+
+	for (int i = 0; i < 4; ++i)
 	{
+		D3DXVec3Transform(&planes[0][i], &plane1[i], &m_d3dxmtxWorld);
+		D3DXVec3Transform(&planes[1][i], &plane2[i], &m_d3dxmtxWorld);
+		D3DXVec3Transform(&planes[2][i], &plane3[i], &m_d3dxmtxWorld);
 
 	}
-	//std::cout << nIndex << std::endl;
 
+	for (int i = 0; i < nIndex; i += 3)
+	{
+		D3DXVECTOR4 p[3];
+		D3DXVec3Transform(&p[0], &mVertices[i].m_d3dxvPosition, &pShader->m_ppObjects[0]->m_d3dxmtxWorld);
+		D3DXVec3Transform(&p[1], &mVertices[i + 1].m_d3dxvPosition, &pShader->m_ppObjects[0]->m_d3dxmtxWorld);
+		D3DXVec3Transform(&p[2], &mVertices[i + 2].m_d3dxvPosition, &pShader->m_ppObjects[0]->m_d3dxmtxWorld);
+		float minX = p[0].x, maxX = p[0].x;
+		float minY = p[0].y, maxY = p[0].y;
+		float minZ = p[0].z, maxZ = p[0].z;
+
+		for (int j = 1; j < 3; ++j)
+		{
+			if (minX > p[j].x) minX = p[j].x;
+			if (minY > p[j].y) minY = p[j].y;
+			if (minZ > p[j].z) minZ = p[j].z;
+
+			if (maxX < p[j].x) maxX = p[j].x;
+			if (maxY < p[j].y) maxY = p[j].y;
+			if (maxZ < p[j].z) maxZ = p[j].z;
+		}
+
+		for (int j = 0; j < 4; ++j)
+		{
+			
+			if (minX <= planes[0][j].x && maxX >= planes[0][j].x && minZ <= planes[0][j].z && maxZ >= planes[0][j].z)
+			{
+				if (maxY >= planes[0][j].y + dxvShift.y)
+				{
+					m_d3dxvVelocity.y = 0.0f;
+				}
+			}
+
+			if (minY < planes[2][j].y && maxY > planes[2][j].y && minZ < planes[2][j].z && maxZ > planes[2][j].z)
+			{
+				if( ( dxvShift.x < 0.0f &&  maxX < planes[2][j].x + dxvShift.x ) || (dxvShift.x > 0.0f &&  minX < planes[2][j].x + dxvShift.x))
+				{
+					m_d3dxvVelocity.x = 0.0f;
+				}
+			}
+
+			if (minY < planes[2][j].y && maxY > planes[2][j].y && minX < planes[2][j].x && maxX > planes[2][j].x)
+			{
+				if (minZ < planes[2][j].z + dxvShift.z && maxZ > planes[2][j].z + dxvShift.z)
+				{
+					m_d3dxvVelocity.z = 0.0f;
+				}
+			}
+
+		}
+	}
 	return true;
 }
 
@@ -321,8 +390,9 @@ CAirplanePlayer::CAirplanePlayer(ID3D11Device *pd3dDevice)
 {
 	//비행기 메쉬를 생성한다.
 	CMesh *pAirplaneMesh = new CCharacterMesh(pd3dDevice);
+	CCubeMesh *Collision = new CCubeMesh(pd3dDevice);
 	SetMesh(pAirplaneMesh);
-
+	pCollision = Collision;
 	//플레이어(비행기) 메쉬를 렌더링할 때 사용할 쉐이더를 생성한다.
 	m_pShader = new CAnimateShader();
 	m_pShader->CreateShader(pd3dDevice);
@@ -383,7 +453,7 @@ void CAirplanePlayer::ChangeCamera(ID3D11Device *pd3dDevice, DWORD nNewCameraMod
 	case THIRD_PERSON_CAMERA:
 		//플레이어의 특성을 3인칭 카메라 모드에 맞게 변경한다. 지연 효과와 카메라 오프셋을 설정한다.
 		SetFriction(250.0f);
-		SetGravity(D3DXVECTOR3(0.0f, -300.0f, 0.0f));
+		SetGravity(D3DXVECTOR3(0.0f, -400.0f, 0.0f));
 		SetMaxVelocityXZ(125.0f);
 		SetMaxVelocityY(400.0f);
 		m_pCamera = OnChangeCamera(pd3dDevice, THIRD_PERSON_CAMERA, nCurrentCameraMode);

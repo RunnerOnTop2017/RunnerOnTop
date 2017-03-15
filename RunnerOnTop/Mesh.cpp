@@ -420,21 +420,21 @@ void CCharacterMesh::Render(ID3D11DeviceContext *pd3dDeviceContext)
 
 CCubeMesh::CCubeMesh(ID3D11Device *pd3dDevice)
 {
-	m_nStride = sizeof(CSkinnedVertex);
+	m_nStride = sizeof(CDiffuseNormalVertex);
 	m_nOffset = 0;
 	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 	
-	CDiffusedVertex pVertices[8];
+	//CDiffuseNormalVertex pVertices[8];
 	m_nVertices = 8;
 	
-	pVertices[0] = CDiffusedVertex(D3DXVECTOR3(-100.0f, 0.0f, -100.0f), D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f));
-	pVertices[1] = CDiffusedVertex(D3DXVECTOR3(100.0f, 0.0f, -100.0f), D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f));
-	pVertices[2] = CDiffusedVertex(D3DXVECTOR3(-100.0f, 0.0f, 100.0f), D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f));
-	pVertices[3] = CDiffusedVertex(D3DXVECTOR3(100.0f, 0.0f, 100.0f), D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f));
-	pVertices[4] = CDiffusedVertex(D3DXVECTOR3(-100.0f, 100.0f, -100.0f), D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f));
-	pVertices[5] = CDiffusedVertex(D3DXVECTOR3(100.0f, 100.0f, -100.0f), D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f));
-	pVertices[6] = CDiffusedVertex(D3DXVECTOR3(-100.0f, 100.0f, 100.0f), D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f));
-	pVertices[7] = CDiffusedVertex(D3DXVECTOR3(100.0f, 100.0f, 100.0f), D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f));
+	pVertices[0] = CDiffuseNormalVertex(D3DXVECTOR3(-10.0f, 0.0f, -10.0f), D3DXVECTOR3(0.0f,0.0f,0.0f), D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f));
+	pVertices[1] = CDiffuseNormalVertex(D3DXVECTOR3(10.0f, 0.0f, -10.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f));
+	pVertices[2] = CDiffuseNormalVertex(D3DXVECTOR3(-10.0f, 0.0f, 10.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f));
+	pVertices[3] = CDiffuseNormalVertex(D3DXVECTOR3(10.0f, 0.0f, 10.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f));
+	pVertices[4] = CDiffuseNormalVertex(D3DXVECTOR3(-10.0f, 60.0f, -10.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f));
+	pVertices[5] = CDiffuseNormalVertex(D3DXVECTOR3(10.0f, 60.0f, -10.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f));
+	pVertices[6] = CDiffuseNormalVertex(D3DXVECTOR3(-10.0f, 60.0f, 10.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f));
+	pVertices[7] = CDiffuseNormalVertex(D3DXVECTOR3(10.0f, 60.0f, 10.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f));
 
 
 	D3D11_BUFFER_DESC d3dBufferDesc;
@@ -453,7 +453,7 @@ CCubeMesh::CCubeMesh(ID3D11Device *pd3dDevice)
 	//  0	1		4	5
 
 	m_nIndices = 36;
-	WORD pIndices[24];
+	WORD pIndices[36];
 	//아래
 	pIndices[0] = 0; //5,6,4 - cw
 	pIndices[1] = 1; //6,4,7 - ccw
@@ -502,7 +502,7 @@ CCubeMesh::CCubeMesh(ID3D11Device *pd3dDevice)
 
 	ZeroMemory(&d3dBufferDesc, sizeof(D3D11_BUFFER_DESC));
 	d3dBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	d3dBufferDesc.ByteWidth = sizeof(WORD)* m_nIndices;
+	d3dBufferDesc.ByteWidth = sizeof(WORD) * m_nIndices;
 	d3dBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
 	d3dBufferDesc.CPUAccessFlags = 0;
 	ZeroMemory(&d3dBufferData, sizeof(D3D11_SUBRESOURCE_DATA));
@@ -523,7 +523,7 @@ void CCubeMesh::CreateRasterizerState(ID3D11Device * pd3dDevice)
 {
 	D3D11_RASTERIZER_DESC d3dRasterizerDesc;
 	ZeroMemory(&d3dRasterizerDesc, sizeof(D3D11_RASTERIZER_DESC));
-	d3dRasterizerDesc.CullMode = D3D11_CULL_BACK;
+	d3dRasterizerDesc.CullMode = D3D11_CULL_NONE;
 	d3dRasterizerDesc.FillMode = D3D11_FILL_WIREFRAME;
 	d3dRasterizerDesc.DepthClipEnable = true;
 	pd3dDevice->CreateRasterizerState(&d3dRasterizerDesc, &m_pd3dRasterizerState);
@@ -532,4 +532,50 @@ void CCubeMesh::CreateRasterizerState(ID3D11Device * pd3dDevice)
 void CCubeMesh::Render(ID3D11DeviceContext * pd3dDeviceContext)
 {
 	CMesh::Render(pd3dDeviceContext);
+}
+
+void CCubeMesh::GetBottom(D3DXVECTOR3* vPlanes)
+{
+	int i = 0;
+	vPlanes[i++] = pVertices[0].m_d3dxvPosition;
+	vPlanes[i++] = pVertices[1].m_d3dxvPosition;
+	vPlanes[i++] = pVertices[3].m_d3dxvPosition;
+	vPlanes[i++] = pVertices[2].m_d3dxvPosition;
+
+}
+
+void CCubeMesh::GetFront(D3DXVECTOR3* vPlanes)
+{
+	int i = 0;
+	vPlanes[i++] = pVertices[2].m_d3dxvPosition;
+	vPlanes[i++] = pVertices[3].m_d3dxvPosition;
+	vPlanes[i++] = pVertices[7].m_d3dxvPosition;
+	vPlanes[i++] = pVertices[6].m_d3dxvPosition;
+}
+
+void CCubeMesh::GetBack(D3DXVECTOR3* vPlanes)
+{
+	int i = 0;
+	vPlanes[i++] = pVertices[0].m_d3dxvPosition;
+	vPlanes[i++] = pVertices[1].m_d3dxvPosition;
+	vPlanes[i++] = pVertices[5].m_d3dxvPosition;
+	vPlanes[i++] = pVertices[4].m_d3dxvPosition;
+}
+
+void CCubeMesh::GetRight(D3DXVECTOR3* vPlanes)
+{
+	int i = 0;
+	vPlanes[i++] = pVertices[3].m_d3dxvPosition;
+	vPlanes[i++] = pVertices[1].m_d3dxvPosition;
+	vPlanes[i++] = pVertices[5].m_d3dxvPosition;
+	vPlanes[i++] = pVertices[7].m_d3dxvPosition;
+}
+
+void CCubeMesh::GetLeft(D3DXVECTOR3* vPlanes)
+{
+	int i = 0;
+	vPlanes[i++] = pVertices[2].m_d3dxvPosition;
+	vPlanes[i++] = pVertices[0].m_d3dxvPosition;
+	vPlanes[i++] = pVertices[4].m_d3dxvPosition;
+	vPlanes[i++] = pVertices[6].m_d3dxvPosition;
 }

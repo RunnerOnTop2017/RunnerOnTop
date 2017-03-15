@@ -40,6 +40,8 @@ protected:
 	//3인칭 카메라일 때 플레이어를 그리기 위해 사용하는 쉐이더이다.
 	CAnimateShader *m_pShader;
 
+	CCubeMesh *pCollision;
+
 public:
 	CPlayer();
 	~CPlayer();
