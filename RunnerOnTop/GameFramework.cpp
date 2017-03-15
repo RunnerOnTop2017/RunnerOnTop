@@ -362,8 +362,12 @@ void CGameFramework::FrameAdvance()
 	CCamera *pCamera = NULL;
 	for (int i = 0; i < m_nPlayers; i++)
 	{
-		if (m_ppPlayers[i]) m_ppPlayers[i]->UpdateShaderVariables(m_pd3dDeviceContext);
-		pCamera = m_ppPlayers[i]->GetCamera();
+		if (m_ppPlayers[i])
+		{
+			m_ppPlayers[i]->UpdateShaderVariables(m_pd3dDeviceContext);
+			pCamera = m_ppPlayers[i]->GetCamera();
+			m_ppPlayers[i]->SetPlayerUpdatedContext(m_pScene->m_ppShaders[0]);
+		}
 		
 		if (m_pScene) m_pScene->Render(m_pd3dDeviceContext, pCamera);
 		

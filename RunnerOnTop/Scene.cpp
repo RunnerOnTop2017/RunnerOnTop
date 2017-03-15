@@ -6,8 +6,8 @@ CScene::CScene()
 {
 	m_ppShaders = NULL;
 	m_nShaders = 0;
-	m_ppObjects = NULL;
-	m_nObjects = 0;
+	//m_ppObjects = NULL;
+	//m_nObjects = 0;
 	m_pLights = NULL;
 }
 
@@ -40,13 +40,13 @@ void CScene::ReleaseObjects()
 		delete[]m_ppShaders;
 	}
 
-	if (m_ppObjects)
-	{
-		for (int i = 0; i < m_nObjects; i++)
-			m_ppObjects[i]->Release();
+	//if (m_ppObjects)
+	//{
+	//	for (int i = 0; i < m_nObjects; i++)
+	//		m_ppObjects[i]->Release();
 
-		delete[]m_ppObjects;
-	}
+	//	delete[]m_ppObjects;
+	//}
 }
 
 bool CScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
@@ -78,6 +78,8 @@ void CScene::Render(ID3D11DeviceContext*pd3dDeviceContext, CCamera *pCamera)
 		D3DXVECTOR3 d3dxvCameraPosition = pCamera->GetPosition();
 		m_pLights->m_d3dxvCameraPosition = D3DXVECTOR4(d3dxvCameraPosition, 1.0f);
 
+
+		
 		//m_pLights->m_pLights[1].m_d3dxvPosition = d3dxvCameraPosition;
 		//m_pLights->m_pLights[1].m_d3dxvDirection = pCamera->GetLookVector();
 

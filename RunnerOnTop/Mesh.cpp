@@ -313,8 +313,8 @@ CMeshTextured::CMeshTextured(ID3D11Device *pd3dDevice, float fWidth, float fHeig
 	FILE *fp = fopen("Data\\Maps\\maps1_s1.arc", "rb");
 	int size;
 	fread((char*)&size, sizeof(int), 1, fp);
-	CTexturedNormalVertex *pVertices = new CTexturedNormalVertex[size];
-	fread((char*)pVertices, sizeof(CTexturedNormalVertex), size, fp);
+	m_pVertices = new CTexturedNormalVertex[size];
+	fread((char*)m_pVertices, sizeof(CTexturedNormalVertex), size, fp);
 	fclose(fp);
 
 	m_nVertices = size;
@@ -327,7 +327,7 @@ CMeshTextured::CMeshTextured(ID3D11Device *pd3dDevice, float fWidth, float fHeig
 	d3dBufferDesc.CPUAccessFlags = 0;
 	D3D11_SUBRESOURCE_DATA d3dBufferData;
 	ZeroMemory(&d3dBufferData, sizeof(D3D11_SUBRESOURCE_DATA));
-	d3dBufferData.pSysMem = pVertices;
+	d3dBufferData.pSysMem = m_pVertices;
 	pd3dDevice->CreateBuffer(&d3dBufferDesc, &d3dBufferData, &m_pd3dVertexBuffer);
 
 
@@ -414,6 +414,122 @@ void CCharacterMesh::SetRasterizerState(ID3D11Device *pd3dDevice)
 }
 
 void CCharacterMesh::Render(ID3D11DeviceContext *pd3dDeviceContext)
+{
+	CMesh::Render(pd3dDeviceContext);
+}
+
+CCubeMesh::CCubeMesh(ID3D11Device *pd3dDevice)
+{
+	m_nStride = sizeof(CSkinnedVertex);
+	m_nOffset = 0;
+	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+	
+	CDiffusedVertex pVertices[8];
+	m_nVertices = 8;
+	
+	pVertices[0] = CDiffusedVertex(D3DXVECTOR3(-100.0f, 0.0f, -100.0f), D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f));
+	pVertices[1] = CDiffusedVertex(D3DXVECTOR3(100.0f, 0.0f, -100.0f), D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f));
+	pVertices[2] = CDiffusedVertex(D3DXVECTOR3(-100.0f, 0.0f, 100.0f), D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f));
+	pVertices[3] = CDiffusedVertex(D3DXVECTOR3(100.0f, 0.0f, 100.0f), D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f));
+	pVertices[4] = CDiffusedVertex(D3DXVECTOR3(-100.0f, 100.0f, -100.0f), D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f));
+	pVertices[5] = CDiffusedVertex(D3DXVECTOR3(100.0f, 100.0f, -100.0f), D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f));
+	pVertices[6] = CDiffusedVertex(D3DXVECTOR3(-100.0f, 100.0f, 100.0f), D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f));
+	pVertices[7] = CDiffusedVertex(D3DXVECTOR3(100.0f, 100.0f, 100.0f), D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f));
+
+
+	D3D11_BUFFER_DESC d3dBufferDesc;
+	ZeroMemory(&d3dBufferDesc, sizeof(D3D11_BUFFER_DESC));
+	d3dBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	d3dBufferDesc.ByteWidth = m_nStride * m_nVertices;
+	d3dBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	d3dBufferDesc.CPUAccessFlags = 0;
+	D3D11_SUBRESOURCE_DATA d3dBufferData;
+	ZeroMemory(&d3dBufferData, sizeof(D3D11_SUBRESOURCE_DATA));
+	d3dBufferData.pSysMem = pVertices;
+	pd3dDevice->CreateBuffer(&d3dBufferDesc, &d3dBufferData, &m_pd3dVertexBuffer);
+
+
+	//  2	3		6	7
+	//  0	1		4	5
+
+	m_nIndices = 36;
+	WORD pIndices[24];
+	//아래
+	pIndices[0] = 0; //5,6,4 - cw
+	pIndices[1] = 1; //6,4,7 - ccw
+	pIndices[2] = 2; //4,7,0 - cw
+
+	pIndices[3] = 1; //7,0,3 - ccw
+	pIndices[4] = 3; //0,3,1 - cw
+	pIndices[5] = 2; //3,1,2 - ccw
+
+	//위
+	pIndices[6] = 4; //1,2,2 - cw 
+	pIndices[7] = 5; //2,2,3 - ccw
+	pIndices[8] = 6; //2,3,3 - cw  - Degenerated Index(2)
+
+	pIndices[9] = 5; //3,3,7 - ccw - Degenerated Index(3)
+	pIndices[10] = 7;//3,7,2 - cw  - Degenerated Index(3)
+	pIndices[11] = 6;//7,2,6 - ccw
+
+	//앞
+	pIndices[12] = 2;//2,6,1 - cw
+	pIndices[13] = 3;//6,1,5 - ccw
+	pIndices[14] = 6;//1,5,0 - cw
+
+	pIndices[15] = 3;//5,0,4 - ccw
+	pIndices[16] = 7;
+	pIndices[17] = 6;
+
+
+	// 뒤
+	pIndices[18] = 0;
+	pIndices[19] = 1;
+	pIndices[20] = 4;
+
+	pIndices[21] = 1;
+	pIndices[22] = 5;
+	pIndices[23] = 4;
+
+	// 왼
+	pIndices[24] = 2;
+	pIndices[25] = 0;
+	pIndices[26] = 6;
+
+	pIndices[27] = 0;
+	pIndices[28] = 4;
+	pIndices[29] = 6;
+
+	ZeroMemory(&d3dBufferDesc, sizeof(D3D11_BUFFER_DESC));
+	d3dBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	d3dBufferDesc.ByteWidth = sizeof(WORD)* m_nIndices;
+	d3dBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	d3dBufferDesc.CPUAccessFlags = 0;
+	ZeroMemory(&d3dBufferData, sizeof(D3D11_SUBRESOURCE_DATA));
+	d3dBufferData.pSysMem = pIndices;
+	//인덱스 버퍼를 생성한다.
+	pd3dDevice->CreateBuffer(&d3dBufferDesc, &d3dBufferData, &m_pd3dIndexBuffer);
+
+
+	CreateRasterizerState(pd3dDevice);
+
+}
+
+CCubeMesh::~CCubeMesh()
+{
+}
+
+void CCubeMesh::CreateRasterizerState(ID3D11Device * pd3dDevice)
+{
+	D3D11_RASTERIZER_DESC d3dRasterizerDesc;
+	ZeroMemory(&d3dRasterizerDesc, sizeof(D3D11_RASTERIZER_DESC));
+	d3dRasterizerDesc.CullMode = D3D11_CULL_BACK;
+	d3dRasterizerDesc.FillMode = D3D11_FILL_WIREFRAME;
+	d3dRasterizerDesc.DepthClipEnable = true;
+	pd3dDevice->CreateRasterizerState(&d3dRasterizerDesc, &m_pd3dRasterizerState);
+}
+
+void CCubeMesh::Render(ID3D11DeviceContext * pd3dDeviceContext)
 {
 	CMesh::Render(pd3dDeviceContext);
 }

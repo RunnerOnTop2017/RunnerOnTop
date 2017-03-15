@@ -80,7 +80,7 @@ public:
 	void RegenerateWorldMatrix();
 
 	//플레이어의 위치가 바뀔 때마다 호출되는 함수와 그 함수에서 사용하는 정보를 설정하는 함수이다.
-	virtual void OnPlayerUpdated(float fTimeElapsed);
+	virtual bool OnPlayerUpdated(float fTimeElapsed);
 	void SetPlayerUpdatedContext(LPVOID pContext) { m_pPlayerUpdatedContext = pContext; }
 
 	//카메라의 위치가 바뀔 때마다 호출되는 함수와 그 함수에서 사용하는 정보를 설정하는 함수이다.

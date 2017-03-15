@@ -294,8 +294,22 @@ void CPlayer::Render(ID3D11DeviceContext *pd3dDeviceContext)
 	//if (m_pMesh) m_pMesh->Render(pd3dDeviceContext);
 }
 
-void CPlayer::OnPlayerUpdated(float fTimeElapsed)
+bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 {
+
+	D3DXVECTOR3 dxvShift = m_d3dxvVelocity * fTimeElapsed;
+	CTextureShader *pShader = (CTextureShader*)m_pPlayerUpdatedContext;
+	
+	CTexturedNormalVertex *mVertices = pShader->m_ppObjects[0]->m_pMesh->m_pVertices;
+	int nIndex = pShader->m_ppObjects[0]->m_pMesh->m_nVertices;
+	
+	for (int i = 0; i < nIndex; i += 3)
+	{
+
+	}
+	//std::cout << nIndex << std::endl;
+
+	return true;
 }
 
 void CPlayer::OnCameraUpdated(float fTimeElapsed)
@@ -369,7 +383,7 @@ void CAirplanePlayer::ChangeCamera(ID3D11Device *pd3dDevice, DWORD nNewCameraMod
 	case THIRD_PERSON_CAMERA:
 		//플레이어의 특성을 3인칭 카메라 모드에 맞게 변경한다. 지연 효과와 카메라 오프셋을 설정한다.
 		SetFriction(250.0f);
-		SetGravity(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
+		SetGravity(D3DXVECTOR3(0.0f, -300.0f, 0.0f));
 		SetMaxVelocityXZ(125.0f);
 		SetMaxVelocityY(400.0f);
 		m_pCamera = OnChangeCamera(pd3dDevice, THIRD_PERSON_CAMERA, nCurrentCameraMode);

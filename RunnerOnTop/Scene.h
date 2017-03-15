@@ -39,11 +39,10 @@ struct LIGHTS
 class CScene
 {
 private:
-	CShader **m_ppShaders;
-	int m_nShaders;
+	
 
-	CGameObject **m_ppObjects;
-	int m_nObjects;
+	//CGameObject **m_ppObjects;
+	//int m_nObjects;
 public:
 	CScene();
 	~CScene();
@@ -56,6 +55,9 @@ public:
 	bool ProcessInput();
 	void AnimateObjects(ID3D11Device *pd3dDevice,float fTimeElapsed);
 	void Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamera);
+
+	CShader **m_ppShaders;
+	int m_nShaders;
 
 	LIGHTS *m_pLights;
 	ID3D11Buffer *m_pd3dcbLights;
