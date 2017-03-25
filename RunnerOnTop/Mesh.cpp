@@ -310,7 +310,7 @@ CMeshTextured::CMeshTextured(ID3D11Device *pd3dDevice, float fWidth, float fHeig
 	m_nOffset = 0;
 	m_d3dPrimitiveTopology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
-	FILE *fp = fopen("Data\\Maps\\maps1_s1.arc", "rb");
+	FILE *fp = fopen("Data\\Maps\\maps1.arc", "rb");
 	int size;
 	fread((char*)&size, sizeof(int), 1, fp);
 	m_pVertices = new CTexturedNormalVertex[size];
@@ -318,6 +318,8 @@ CMeshTextured::CMeshTextured(ID3D11Device *pd3dDevice, float fWidth, float fHeig
 	fclose(fp);
 
 	m_nVertices = size;
+	//SetTriAngleListVertexNormal((BYTE*)m_pVertices);
+
 
 	D3D11_BUFFER_DESC d3dBufferDesc;
 	ZeroMemory(&d3dBufferDesc, sizeof(D3D11_BUFFER_DESC));
@@ -342,7 +344,7 @@ void CMeshTextured::SetRasterizerState(ID3D11Device *pd3dDevice)
 {
 	D3D11_RASTERIZER_DESC d3dRasterizerDesc;
 	ZeroMemory(&d3dRasterizerDesc, sizeof(D3D11_RASTERIZER_DESC));
-	d3dRasterizerDesc.CullMode = D3D11_CULL_FRONT;
+	d3dRasterizerDesc.CullMode = D3D11_CULL_NONE;
 	d3dRasterizerDesc.FillMode = D3D11_FILL_SOLID;
 	pd3dDevice->CreateRasterizerState(&d3dRasterizerDesc, &m_pd3dRasterizerState);
 }

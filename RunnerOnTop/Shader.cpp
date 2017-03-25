@@ -347,9 +347,9 @@ void CTextureShader::BuildObjects(ID3D11Device * pd3dDevice)
 	pRotatingObject->SetTexture(p_Texture);
 
 	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
-	//pRotatingObject->SetRotationAxis(D3DXVECTOR3(0.0f, 1.0f, 0.0f));
-	//pRotatingObject->SetRotationSpeed(1.0f);// *(i % 10));
-	pRotatingObject->Scale(0.1f);
+	pRotatingObject->Rotate(&D3DXVECTOR3(1.0f, 0.0f, 0.0f), -90.0f);
+	//pRotatingObject->
+	pRotatingObject->Scale(0.4f);
 	m_ppObjects[i++] = pRotatingObject;
 
 

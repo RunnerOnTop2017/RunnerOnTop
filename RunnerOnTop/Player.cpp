@@ -69,7 +69,7 @@ void CPlayer::Move(UINT dwDirection, float fDistance, bool bUpdateVelocity)
 		if (dwDirection & DIR_RIGHT) d3dxvShift += m_d3dxvRight * fDistance;
 		if (dwDirection & DIR_LEFT) d3dxvShift -= m_d3dxvRight * fDistance;
 		//‘Page Up’을 누르면 로컬 y-축 방향으로 이동한다. ‘Page Down’을 누르면 반대 방향으로 이동한다.
-		if (dwDirection & DIR_UP) d3dxvShift += m_d3dxvUp * fDistance;
+		if (dwDirection & DIR_UP) d3dxvShift += m_d3dxvUp * fDistance * 100.0f;
 		if (dwDirection & DIR_DOWN) d3dxvShift -= m_d3dxvUp * fDistance;
 
 		//플레이어를 현재 위치 벡터에서 d3dxvShift 벡터 만큼 이동한다.
@@ -191,7 +191,6 @@ void CPlayer::Update(float fTimeElapsed)
 
 	/*플레이어의 위치가 변경될 때 추가로 수행할 작업을 수행한다. 예를 들어, 플레이어의 위치가 변경되었지만 플레이어 객체에는 지형(Terrain)의 정보가 없다. 플레이어의 새로운 위치가 유효한 위치가 아닐 수도 있고 또는 플레이어의 충돌 검사 등을 수행할 필요가 있다. 이러한 상황에서 플레이어의 위치를 유효한 위치로 다시 변경할 수 있다.*/
 	if (m_pPlayerUpdatedContext) OnPlayerUpdated(fTimeElapsed);
-
 
 	/*플레이어를 속도 벡터 만큼 이동한다. 속도 벡터에 fTimeElapsed를 곱하는 것은 속도를 시간에 비례하도록 적용한다는 의미이다.*/
 	Move(m_d3dxvVelocity * fTimeElapsed, false);
