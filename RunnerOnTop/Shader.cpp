@@ -540,4 +540,94 @@ void CAnimateShader::BuildObjects(ID3D11Device *pd3dDevice)
 	delete[] ppMaterials;
 }
 
+CSkyBoxShader::CSkyBoxShader()
+{
+}
 
+CSkyBoxShader::~CSkyBoxShader()
+{
+}
+
+void CSkyBoxShader::CreateShader(ID3D11Device * pd3dDevice)
+{
+	CTextureShader::CreateShader(pd3dDevice);
+}
+
+void CSkyBoxShader::CreateShaderVariables(ID3D11Device * pd3dDevice)
+{
+	CTextureShader::CreateShaderVariables(pd3dDevice);
+
+}
+
+void CSkyBoxShader::UpdateShaderVariables(ID3D11DeviceContext * pd3dDeviceContext, D3DXMATRIX * pd3dxmtxWorld)
+{
+	CTextureShader::UpdateShaderVariables(pd3dDeviceContext, pd3dxmtxWorld);
+}
+
+void CSkyBoxShader::UpdateShaderVariables(ID3D11DeviceContext * pd3dDeviceContext, MATERIAL * pMaterial)
+{
+	CTextureShader::UpdateShaderVariables(pd3dDeviceContext, pMaterial);
+}
+
+void CSkyBoxShader::UpdateShaderVariables(ID3D11DeviceContext * pd3dDeviceContext, CTexture * pTexture)
+{
+	CTextureShader::UpdateShaderVariables(pd3dDeviceContext, pTexture);
+}
+
+void CSkyBoxShader::BuildObjects(ID3D11Device * pd3dDevice)
+{
+	CMaterial **ppMaterials = new CMaterial*[1];
+	ppMaterials[0] = new CMaterial();
+	ppMaterials[0]->m_Material.m_d3dxcDiffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
+	ppMaterials[0]->m_Material.m_d3dxcAmbient = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
+	ppMaterials[0]->m_Material.m_d3dxcSpecular = D3DXCOLOR(0.5f, 0.5f, 0.5f, 1.0f);
+	ppMaterials[0]->m_Material.m_d3dxcEmissive = D3DXCOLOR(0.0f, 0.0f, 0.0f, 1.0f);
+
+	ID3D11SamplerState *pd3dSamplerState = NULL;
+	D3D11_SAMPLER_DESC d3dSamplerDesc;
+	ZeroMemory(&d3dSamplerDesc, sizeof(D3D11_SAMPLER_DESC));
+	d3dSamplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	d3dSamplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	d3dSamplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	d3dSamplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	d3dSamplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+	d3dSamplerDesc.MinLOD = 0;
+	d3dSamplerDesc.MaxLOD = 0;
+	pd3dDevice->CreateSamplerState(&d3dSamplerDesc, &pd3dSamplerState);
+
+	ID3D11ShaderResourceView *pd3dTexture = NULL;
+
+	CTexture *p_Texture = new CTexture(1);
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Maps\\Texture\\SkyBox1.png"), NULL, NULL, &pd3dTexture, NULL);
+	p_Texture->SetTexture(0, pd3dTexture, pd3dSamplerState);
+
+	CMesh *pMesh = new CSkyBoxMesh(pd3dDevice);
+
+	m_nObjects = 1;
+	m_ppObjects = new CGameObject*[m_nObjects];
+
+	CGameObject *pObject = NULL;
+
+	pObject = new CGameObject();
+	pObject->SetMesh(pMesh);
+	pObject->SetMaterial(ppMaterials[0]);
+	pObject->SetTexture(p_Texture);
+
+	pObject->SetPosition(0.0f, 0.0f, 0.0f);
+	pObject->Scale(10.0f);
+	m_ppObjects[0] = pObject;
+	CreateShaderVariables(pd3dDevice);
+	delete[] ppMaterials;
+}
+
+void CSkyBoxShader::ReleaseObjects()
+{
+	CTextureShader::ReleaseObjects();
+}
+
+void CSkyBoxShader::Render(ID3D11DeviceContext * pd3dDeviceContext, CCamera * pCamera)
+{
+	if (pCamera)
+		m_ppObjects[0]->SetPosition(pCamera->GetPosition());
+	CTextureShader::Render(pd3dDeviceContext, pCamera);
+}

@@ -58,6 +58,7 @@ public:
 
 	CShader **m_ppShaders;
 	int m_nShaders;
+	CSkyBoxShader *m_pSkybox;
 
 	LIGHTS *m_pLights;
 	ID3D11Buffer *m_pd3dcbLights;

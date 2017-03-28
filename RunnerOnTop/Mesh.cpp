@@ -581,3 +581,53 @@ void CCubeMesh::GetLeft(D3DXVECTOR3* vPlanes)
 	vPlanes[i++] = pVertices[4].m_d3dxvPosition;
 	vPlanes[i++] = pVertices[6].m_d3dxvPosition;
 }
+
+CSkyBoxMesh::CSkyBoxMesh(ID3D11Device * pd3dDevice, float fWidth, float fHeight, float fDepth) : CMeshTextured(pd3dDevice)
+{
+	m_nStride = sizeof(CTexturedNormalVertex);
+	m_nOffset = 0;
+	m_d3dPrimitiveTopology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
+
+
+	FILE *fp = fopen("Data\\Maps\\skyboxMesh.arc", "rb");
+	int size;
+	fread((char*)&size, sizeof(int), 1, fp);
+	m_pVertices = new CTexturedNormalVertex[size];
+	fread((char*)m_pVertices, sizeof(CTexturedNormalVertex), size, fp);
+	fclose(fp);
+
+	m_nVertices = size;
+	//SetTriAngleListVertexNormal((BYTE*)m_pVertices);
+
+
+	D3D11_BUFFER_DESC d3dBufferDesc;
+	ZeroMemory(&d3dBufferDesc, sizeof(D3D11_BUFFER_DESC));
+	d3dBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	d3dBufferDesc.ByteWidth = m_nStride * m_nVertices;
+	d3dBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	d3dBufferDesc.CPUAccessFlags = 0;
+	D3D11_SUBRESOURCE_DATA d3dBufferData;
+	ZeroMemory(&d3dBufferData, sizeof(D3D11_SUBRESOURCE_DATA));
+	d3dBufferData.pSysMem = m_pVertices;
+	pd3dDevice->CreateBuffer(&d3dBufferDesc, &d3dBufferData, &m_pd3dVertexBuffer);
+
+}
+
+CSkyBoxMesh::~CSkyBoxMesh()
+{
+}
+
+void CSkyBoxMesh::SetRasterizerState(ID3D11Device * pd3dDevice)
+{
+	D3D11_RASTERIZER_DESC d3dRasterizerDesc;
+	ZeroMemory(&d3dRasterizerDesc, sizeof(D3D11_RASTERIZER_DESC));
+	d3dRasterizerDesc.CullMode = D3D11_CULL_NONE;
+	d3dRasterizerDesc.FillMode = D3D11_FILL_SOLID;
+	d3dRasterizerDesc.DepthClipEnable = true;
+	pd3dDevice->CreateRasterizerState(&d3dRasterizerDesc, &m_pd3dRasterizerState);
+}
+
+void CSkyBoxMesh::Render(ID3D11DeviceContext * pd3dDeviceContext)
+{
+	CMeshTextured::Render(pd3dDeviceContext);
+}

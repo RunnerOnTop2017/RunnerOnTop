@@ -19,18 +19,17 @@ CScene::~CScene()
 
 void CScene::BuildObjects(ID3D11Device *pd3dDevice)
 {
-	m_nShaders = 2;
+	m_nShaders = 1;
 	m_ppShaders = new CShader*[m_nShaders];
 
 	m_ppShaders[0] = new CTextureShader();
 	m_ppShaders[0]->CreateShader(pd3dDevice);
 	m_ppShaders[0]->BuildObjects(pd3dDevice);
 
-	m_ppShaders[1] = new CDiffusedShader();
-	m_ppShaders[1]->CreateShader(pd3dDevice);
-	m_ppShaders[1]->BuildObjects(pd3dDevice);
-
-
+	m_pSkybox = new CSkyBoxShader();
+	m_pSkybox->CreateShader(pd3dDevice);
+	m_pSkybox->BuildObjects(pd3dDevice);
+	
 	BuildLights(pd3dDevice);
 }
 
@@ -43,6 +42,11 @@ void CScene::ReleaseObjects()
 		for (int i = 0; i < m_nShaders; ++i)	m_ppShaders[i]->ReleaseObjects();
 
 		delete[]m_ppShaders;
+	}
+
+	if (m_pSkybox)
+	{
+		delete m_pSkybox;
 	}
 
 	//if (m_ppObjects)
@@ -94,6 +98,11 @@ void CScene::Render(ID3D11DeviceContext*pd3dDeviceContext, CCamera *pCamera)
 	for (int i = 0; i < m_nShaders; i++)
 	{
 		m_ppShaders[i]->Render(pd3dDeviceContext, pCamera);
+	}
+
+	if (m_pSkybox)
+	{
+		m_pSkybox->Render(pd3dDeviceContext, pCamera);
 	}
 }
 void CScene::BuildLights(ID3D11Device *pd3dDevice)
