@@ -31,8 +31,8 @@
 #include <d3d9types.h>
 #include <xnamath.h>
 
-#define FRAME_BUFFER_WIDTH	640
-#define FRAME_BUFFER_HEIGHT	480
+#define FRAME_BUFFER_WIDTH	1280
+#define FRAME_BUFFER_HEIGHT	720
 #define VS_SLOT_VIEWPROJECTION_MATRIX	0x00
 #define VS_SLOT_WORLD_MATRIX			0x01
 #define PS_SLOT_COLOR	0x00

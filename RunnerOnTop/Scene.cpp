@@ -9,6 +9,7 @@ CScene::CScene()
 	//m_ppObjects = NULL;
 	//m_nObjects = 0;
 	m_pLights = NULL;
+	m_pSkybox = NULL;
 }
 
 
@@ -26,9 +27,9 @@ void CScene::BuildObjects(ID3D11Device *pd3dDevice)
 	m_ppShaders[0]->CreateShader(pd3dDevice);
 	m_ppShaders[0]->BuildObjects(pd3dDevice);
 
-	m_pSkybox = new CSkyBoxShader();
-	m_pSkybox->CreateShader(pd3dDevice);
-	m_pSkybox->BuildObjects(pd3dDevice);
+	//m_pSkybox = new CSkyBoxShader();
+	//m_pSkybox->CreateShader(pd3dDevice);
+	//m_pSkybox->BuildObjects(pd3dDevice);
 	
 	BuildLights(pd3dDevice);
 }

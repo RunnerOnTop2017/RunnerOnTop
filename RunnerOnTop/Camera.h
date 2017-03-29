@@ -56,7 +56,7 @@ protected:
 	D3DXVECTOR3 m_d3dxvOffset;
 	//플레이어가 회전할 때 얼마만큼의 시간을 지연시킨 후 카메라를 회전시킬 것인가를 나타낸다.
 	float m_fTimeLag;
-
+	
 public:
 	//카메라 변환행렬을 생성한다.
 	void GenerateViewMatrix();
@@ -82,7 +82,7 @@ public:
 	void SetPlayer(CPlayer *pPlayer) { m_pPlayer = pPlayer; }
 	CPlayer *GetPlayer() { return(m_pPlayer); }
 
-	CSkyBoxShader *pSkyboxShader;
+	
 
 	//뷰-포트를 설정하는 멤버 함수를 선언한다.
 	void SetViewport(ID3D11DeviceContext *pd3dDeviceContext, DWORD xStart, DWORD yStart, DWORD nWidth, DWORD nHeight, float fMinZ = 0.0f, float fMaxZ = 1.0f);

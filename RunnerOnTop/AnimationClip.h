@@ -1,6 +1,17 @@
 #pragma once
 #include"stdafx.h"
 
+class CAnimation
+{
+	int m_size;
+	D3DXMATRIX* m_pAnimationData;
+public:
+	CAnimation();
+	~CAnimation();
+
+	void setSize(int)
+};
+
 class CAnimationClip
 {
 private:
@@ -15,7 +26,7 @@ public:
 	~CAnimationClip();
 	
 	// 파일로 부터 애니메이션 추가
-	bool AddAnimation(char *filename);
+	bool LoadAnimation();
 	
 	// 애니메이션 하나의 전체 행렬을 얻어올 수 있다.
 	bool GetAnimationClip(char *name, D3DXMATRIX* buf);
