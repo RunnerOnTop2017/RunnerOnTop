@@ -9,7 +9,7 @@ public:
 	CAnimation();
 	~CAnimation();
 
-	void setSize(int)
+	void setSize(int);
 };
 
 class CAnimationClip

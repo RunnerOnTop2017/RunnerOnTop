@@ -81,6 +81,17 @@ public:
 	~CTexturedNormalVertex() { }
 };
 
+class CTexturedNormalVertexUVW
+{
+public:
+	D3DXVECTOR3 m_d3dxvPosition;
+	D3DXVECTOR3 m_d3dxvNormal;
+	D3DXVECTOR3 m_d3dxvTexCoordUVW;
+
+	CTexturedNormalVertexUVW() {}
+	~CTexturedNormalVertexUVW() {}
+};
+
 class CSkinnedVertex
 {
 public:
