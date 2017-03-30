@@ -633,7 +633,7 @@ void CSkyBoxShader::BuildObjects(ID3D11Device * pd3dDevice)
 	pObject->SetTexture(p_Texture);
 	//pObject->Rotate(&D3DXVECTOR3(1.0f, 0.0f, 0.0f), -90.0f);
 	//pObject->SetPosition(0.0f, -1000.0f, 0.0f);
-	pObject->Scale(0.5f);
+	pObject->Scale(100.0f);
 	m_ppObjects[0] = pObject;
 	CreateShaderVariables(pd3dDevice);
 	delete[] ppMaterials;

@@ -1,9 +1,10 @@
 #pragma once
 
 
-#define IDLE 0
-#define RUN 1
-#define JUMP 2
+#define STATE_IDLE 0
+#define STATE_RUN 1
+#define STATE_JUMP 10
+#define STATE_RUNJUMP 11
 #define STATENUMBER int
 
 
@@ -15,5 +16,7 @@ public:
 	~CState();
 	STATENUMBER GetState();
 	void ChangeState(STATENUMBER newState);
+
+	void ProcessInput(UINT uMessage, WPARAM wParam, LPARAM lParam);
 };
 
