@@ -586,7 +586,7 @@ CSkyBoxMesh::CSkyBoxMesh(ID3D11Device * pd3dDevice, float fWidth, float fHeight,
 {
 	m_nStride = sizeof(CTexturedNormalVertexUVW);
 	m_nOffset = 0;
-	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
+	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
 
 	m_nVertices = 24;
@@ -884,7 +884,7 @@ void CSkyBoxMesh::SetRasterizerState(ID3D11Device * pd3dDevice)
 	D3D11_RASTERIZER_DESC d3dRasterizerDesc;
 	ZeroMemory(&d3dRasterizerDesc, sizeof(D3D11_RASTERIZER_DESC));
 	d3dRasterizerDesc.CullMode = D3D11_CULL_BACK;
-	d3dRasterizerDesc.FillMode = D3D11_FILL_WIREFRAME;
+	d3dRasterizerDesc.FillMode = D3D11_FILL_SOLID;
 	d3dRasterizerDesc.DepthClipEnable = true;
 	pd3dDevice->CreateRasterizerState(&d3dRasterizerDesc, &m_pd3dRasterizerState);
 }
