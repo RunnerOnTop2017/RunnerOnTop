@@ -555,11 +555,11 @@ void CSkyBoxShader::CreateShader(ID3D11Device * pd3dDevice)
 	{
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "TEXCOORD0", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TEXCOORD0", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
 	UINT nElements = ARRAYSIZE(d3dInputLayout);
-	CreateVertexShaderFromFile(pd3dDevice, L"Effect.fx", "VSTexturedUVWLighting", "vs_4_0", &m_pd3dVertexShader, d3dInputLayout, nElements, &m_pd3dVertexLayout);
-	CreatePixelShaderFromFile(pd3dDevice, L"Effect.fx", "PSTexturedUVWLighting", "ps_4_0", &m_pd3dPixelShader);
+	CreateVertexShaderFromFile(pd3dDevice, L"Effect.fx", "VSTexturedLighting", "vs_4_0", &m_pd3dVertexShader, d3dInputLayout, nElements, &m_pd3dVertexLayout);
+	CreatePixelShaderFromFile(pd3dDevice, L"Effect.fx", "PSTexturedLighting", "ps_4_0", &m_pd3dPixelShader);
 }
 
 void CSkyBoxShader::CreateShaderVariables(ID3D11Device * pd3dDevice)
@@ -606,20 +606,10 @@ void CSkyBoxShader::BuildObjects(ID3D11Device * pd3dDevice)
 
 	ID3D11ShaderResourceView *pd3dTexture = NULL;
 
-	CTexture *p_Texture = new CTexture(6);
-	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Maps\\Texture\\SkyBox_Bottom.png"), NULL, NULL, &pd3dTexture, NULL);
+	CTexture *p_Texture = new CTexture(1);
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Maps\\Texture\\Sky_03.png"), NULL, NULL, &pd3dTexture, NULL);
 	p_Texture->SetTexture(0, pd3dTexture, pd3dSamplerState);
-	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Maps\\Texture\\SkyBox_Back.png"), NULL, NULL, &pd3dTexture, NULL);
-	p_Texture->SetTexture(1, pd3dTexture, pd3dSamplerState);
-	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Maps\\Texture\\SkyBox_Front.png"), NULL, NULL, &pd3dTexture, NULL);
-	p_Texture->SetTexture(2, pd3dTexture, pd3dSamplerState);
-	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Maps\\Texture\\SkyBox_Left.png"), NULL, NULL, &pd3dTexture, NULL);
-	p_Texture->SetTexture(3, pd3dTexture, pd3dSamplerState);
-	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Maps\\Texture\\SkyBox_Right.png"), NULL, NULL, &pd3dTexture, NULL);
-	p_Texture->SetTexture(4, pd3dTexture, pd3dSamplerState);
-	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Maps\\Texture\\SkyBox_Top.png"), NULL, NULL, &pd3dTexture, NULL);
-	p_Texture->SetTexture(5, pd3dTexture, pd3dSamplerState);
-
+	
 	CMesh *pMesh = new CSkyBoxMesh(pd3dDevice);
 
 	m_nObjects = 1;
@@ -631,9 +621,11 @@ void CSkyBoxShader::BuildObjects(ID3D11Device * pd3dDevice)
 	pObject->SetMesh(pMesh);
 	pObject->SetMaterial(ppMaterials[0]);
 	pObject->SetTexture(p_Texture);
-	//pObject->Rotate(&D3DXVECTOR3(1.0f, 0.0f, 0.0f), -90.0f);
+	pObject->Rotate(&D3DXVECTOR3(1.0f, 0.0f, 0.0f), -90.0f);
+	pObject->Rotate(&D3DXVECTOR3(0.0f, 0.0f, 1.0f), -90.0f);
+
 	//pObject->SetPosition(0.0f, -1000.0f, 0.0f);
-	pObject->Scale(100.0f);
+	pObject->Scale(0.7f);
 	m_ppObjects[0] = pObject;
 	CreateShaderVariables(pd3dDevice);
 	delete[] ppMaterials;

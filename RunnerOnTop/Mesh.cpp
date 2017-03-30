@@ -584,282 +584,291 @@ void CCubeMesh::GetLeft(D3DXVECTOR3* vPlanes)
 
 CSkyBoxMesh::CSkyBoxMesh(ID3D11Device * pd3dDevice, float fWidth, float fHeight, float fDepth) : CMeshTextured(pd3dDevice)
 {
-	m_nStride = sizeof(CTexturedNormalVertexUVW);
+	m_nStride = sizeof(CTexturedNormalVertex);
 	m_nOffset = 0;
 	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
 
-	m_nVertices = 24;
-	m_nIndices = 24;
-	D3DXVECTOR3 tmp[8] = {
-		{ -5000.0f, -5000.0f, -5000.0f },
-		{ 5000.0f, -5000.0f, -5000.0f },
-		{ -5000.0f, -5000.0f, 5000.0f},
-		{ 5000.0f, -5000.0f, 5000.0f},
-		{ -5000.0f, 5000.0f, -5000.0f},
-		{ 5000.0f, 5000.0f, -5000.0f},
-		{ -5000.0f, 5000.0f, 5000.0f},
-		{ 5000.0f, 5000.0f, 5000.0f },
-	};
-	
-	D3DXVECTOR3 zero = { 0.0f, 0.0f ,0.0f };
+	//m_nVertices = 24;
+	//m_nIndices = 24;
 
-	//  2	3		6	7
-	//  0	1		4	5
-	CTexturedNormalVertexUVW *pVertices = new CTexturedNormalVertexUVW[36];
-	int i = 0;
-	CTexturedNormalVertexUVW vertices[24];// =
-	
-		vertices[0].m_d3dxvPosition = { -250.0f, 250.0f, -250.0f };
-		vertices[0].m_d3dxvTexCoordUVW =  { 0.0f, 0.0f, 5.0f };		// Top vertices
-		vertices[0].m_d3dxvNormal = zero;
-		
-		vertices[1].m_d3dxvPosition = { 250.0f, 250.0f, -250.0f };
-		vertices[1].m_d3dxvTexCoordUVW = { 1.0f, 0.0f, 5.0f };		
-		vertices[1].m_d3dxvNormal = zero;
-		
-		vertices[2].m_d3dxvPosition = { -250.0f, 250.0f,  250.0f };
-		vertices[2].m_d3dxvTexCoordUVW = { 0.0f, 1.0f, 5.0f };		
-		vertices[2].m_d3dxvNormal = zero;
+	FILE *fp = fopen("Data\\Maps\\skyMesh.arc", "rb");
+	int size;
+	fread((char*)&size, sizeof(int), 1, fp);
+	m_pVertices = new CTexturedNormalVertex[size];
+	fread((char*)m_pVertices, sizeof(CTexturedNormalVertex), size, fp);
+	fclose(fp);
 
-		vertices[3].m_d3dxvPosition = { 250.0f, 250.0f,  250.0f };
-		vertices[3].m_d3dxvTexCoordUVW = { 1.0f, 1.0f, 5.0f };		
-		vertices[3].m_d3dxvNormal = zero;
-		
-		vertices[4].m_d3dxvPosition = { -250.0f, 250.0f,  250.0f };
-		vertices[4].m_d3dxvTexCoordUVW = { 0.0f, 0.0f, 2.0f };		// Front vertices
-		vertices[4].m_d3dxvNormal = zero;
+	m_nVertices = size;
+	//D3DXVECTOR3 tmp[8] = {
+	//	{ -5000.0f, -5000.0f, -5000.0f },
+	//	{ 5000.0f, -5000.0f, -5000.0f },
+	//	{ -5000.0f, -5000.0f, 5000.0f},
+	//	{ 5000.0f, -5000.0f, 5000.0f},
+	//	{ -5000.0f, 5000.0f, -5000.0f},
+	//	{ 5000.0f, 5000.0f, -5000.0f},
+	//	{ -5000.0f, 5000.0f, 5000.0f},
+	//	{ 5000.0f, 5000.0f, 5000.0f },
+	//};
+	//
+	//D3DXVECTOR3 zero = { 0.0f, 0.0f ,0.0f };
 
-		vertices[5].m_d3dxvPosition = { 250.0f, 250.0f, 250.0f };
-		vertices[5].m_d3dxvTexCoordUVW = { 1.0f, 0.0f, 2.0f };		
-		vertices[5].m_d3dxvNormal = zero;
+	////  2	3		6	7
+	////  0	1		4	5
+	//CTexturedNormalVertexUVW *pVertices = new CTexturedNormalVertexUVW[36];
+	//int i = 0;
+	//CTexturedNormalVertexUVW vertices[24];// =
+	//
+	//	vertices[0].m_d3dxvPosition = { -250.0f, 250.0f, -250.0f };
+	//	vertices[0].m_d3dxvTexCoordUVW =  { 0.0f, 0.0f, 5.0f };		// Top vertices
+	//	vertices[0].m_d3dxvNormal = zero;
+	//	
+	//	vertices[1].m_d3dxvPosition = { 250.0f, 250.0f, -250.0f };
+	//	vertices[1].m_d3dxvTexCoordUVW = { 1.0f, 0.0f, 5.0f };		
+	//	vertices[1].m_d3dxvNormal = zero;
+	//	
+	//	vertices[2].m_d3dxvPosition = { -250.0f, 250.0f,  250.0f };
+	//	vertices[2].m_d3dxvTexCoordUVW = { 0.0f, 1.0f, 5.0f };		
+	//	vertices[2].m_d3dxvNormal = zero;
 
-		vertices[6].m_d3dxvPosition = { -250.0f, -250.0f, 250.0f };
-		vertices[6].m_d3dxvTexCoordUVW = { 0.0f, 1.0f, 2.0f };		
-		vertices[6].m_d3dxvNormal = zero;
+	//	vertices[3].m_d3dxvPosition = { 250.0f, 250.0f,  250.0f };
+	//	vertices[3].m_d3dxvTexCoordUVW = { 1.0f, 1.0f, 5.0f };		
+	//	vertices[3].m_d3dxvNormal = zero;
+	//	
+	//	vertices[4].m_d3dxvPosition = { -250.0f, 250.0f,  250.0f };
+	//	vertices[4].m_d3dxvTexCoordUVW = { 0.0f, 0.0f, 2.0f };		// Front vertices
+	//	vertices[4].m_d3dxvNormal = zero;
 
-		vertices[7].m_d3dxvPosition = { 250.0f,-250.0f,  250.0f };
-		vertices[7].m_d3dxvTexCoordUVW = { 1.0f, 1.0f, 2.0f };		
-		vertices[7].m_d3dxvNormal = zero;
+	//	vertices[5].m_d3dxvPosition = { 250.0f, 250.0f, 250.0f };
+	//	vertices[5].m_d3dxvTexCoordUVW = { 1.0f, 0.0f, 2.0f };		
+	//	vertices[5].m_d3dxvNormal = zero;
 
-		vertices[8].m_d3dxvPosition = { 250.0f, 250.0f,  -250.0f };
-		vertices[8].m_d3dxvTexCoordUVW = { 0.0f, 0.0f, 1.0f };		// Back vertices
-		vertices[8].m_d3dxvNormal = zero;
+	//	vertices[6].m_d3dxvPosition = { -250.0f, -250.0f, 250.0f };
+	//	vertices[6].m_d3dxvTexCoordUVW = { 0.0f, 1.0f, 2.0f };		
+	//	vertices[6].m_d3dxvNormal = zero;
 
-		vertices[9].m_d3dxvPosition = { -250.0f, 250.0f, -250.0f };
-		vertices[9].m_d3dxvTexCoordUVW = { 1.0f, 0.0f, 1.0f };
-		vertices[9].m_d3dxvNormal = zero;
+	//	vertices[7].m_d3dxvPosition = { 250.0f,-250.0f,  250.0f };
+	//	vertices[7].m_d3dxvTexCoordUVW = { 1.0f, 1.0f, 2.0f };		
+	//	vertices[7].m_d3dxvNormal = zero;
 
-		vertices[10].m_d3dxvPosition = { 250.0f, -250.0f, -250.0f };
-		vertices[10].m_d3dxvTexCoordUVW = { 0.0f, 1.0f, 1.0f };
-		vertices[10].m_d3dxvNormal = zero;
+	//	vertices[8].m_d3dxvPosition = { 250.0f, 250.0f,  -250.0f };
+	//	vertices[8].m_d3dxvTexCoordUVW = { 0.0f, 0.0f, 1.0f };		// Back vertices
+	//	vertices[8].m_d3dxvNormal = zero;
 
-		vertices[11].m_d3dxvPosition = { -250.0f,-250.0f,  -250.0f };
-		vertices[11].m_d3dxvTexCoordUVW = { 1.0f, 1.0f, 1.0f };
-		vertices[11].m_d3dxvNormal = zero;
+	//	vertices[9].m_d3dxvPosition = { -250.0f, 250.0f, -250.0f };
+	//	vertices[9].m_d3dxvTexCoordUVW = { 1.0f, 0.0f, 1.0f };
+	//	vertices[9].m_d3dxvNormal = zero;
 
-		vertices[12].m_d3dxvPosition = { -250.0f, 250.0f,  -250.0f };
-		vertices[12].m_d3dxvTexCoordUVW = { 0.0f, 0.0f, 3.0f };		// Left vertices
-		vertices[12].m_d3dxvNormal = zero;
+	//	vertices[10].m_d3dxvPosition = { 250.0f, -250.0f, -250.0f };
+	//	vertices[10].m_d3dxvTexCoordUVW = { 0.0f, 1.0f, 1.0f };
+	//	vertices[10].m_d3dxvNormal = zero;
 
-		vertices[13].m_d3dxvPosition = { -250.0f, 250.0f, 250.0f };
-		vertices[13].m_d3dxvTexCoordUVW = { 1.0f, 0.0f, 3.0f };
-		vertices[13].m_d3dxvNormal = zero;
+	//	vertices[11].m_d3dxvPosition = { -250.0f,-250.0f,  -250.0f };
+	//	vertices[11].m_d3dxvTexCoordUVW = { 1.0f, 1.0f, 1.0f };
+	//	vertices[11].m_d3dxvNormal = zero;
 
-		vertices[14].m_d3dxvPosition = { -250.0f, -250.0f, -250.0f };
-		vertices[14].m_d3dxvTexCoordUVW = { 0.0f, 1.0f, 3.0f };
-		vertices[14].m_d3dxvNormal = zero;
+	//	vertices[12].m_d3dxvPosition = { -250.0f, 250.0f,  -250.0f };
+	//	vertices[12].m_d3dxvTexCoordUVW = { 0.0f, 0.0f, 3.0f };		// Left vertices
+	//	vertices[12].m_d3dxvNormal = zero;
 
-		vertices[15].m_d3dxvPosition = { -250.0f, -250.0f, 250.0f };
-		vertices[15].m_d3dxvTexCoordUVW = { 1.0f, 1.0f, 3.0f };
-		vertices[15].m_d3dxvNormal = zero;
+	//	vertices[13].m_d3dxvPosition = { -250.0f, 250.0f, 250.0f };
+	//	vertices[13].m_d3dxvTexCoordUVW = { 1.0f, 0.0f, 3.0f };
+	//	vertices[13].m_d3dxvNormal = zero;
 
-		vertices[16].m_d3dxvPosition = { 250.0f, 250.0f, 250.0f };
-		vertices[16].m_d3dxvTexCoordUVW = { 0.0f, 0.0f, 4.0f };		// Right vertices
-		vertices[16].m_d3dxvNormal = zero;
+	//	vertices[14].m_d3dxvPosition = { -250.0f, -250.0f, -250.0f };
+	//	vertices[14].m_d3dxvTexCoordUVW = { 0.0f, 1.0f, 3.0f };
+	//	vertices[14].m_d3dxvNormal = zero;
 
-		vertices[17].m_d3dxvPosition = { 250.0f, 250.0f, -250.0f };
-		vertices[17].m_d3dxvTexCoordUVW = { 1.0f, 0.0f, 4.0f };
-		vertices[17].m_d3dxvNormal = zero;
+	//	vertices[15].m_d3dxvPosition = { -250.0f, -250.0f, 250.0f };
+	//	vertices[15].m_d3dxvTexCoordUVW = { 1.0f, 1.0f, 3.0f };
+	//	vertices[15].m_d3dxvNormal = zero;
 
-		vertices[18].m_d3dxvPosition = { 250.0f, -250.0f, 250.0f };
-		vertices[18].m_d3dxvTexCoordUVW = { 0.0f, 1.0f, 4.0f };
-		vertices[18].m_d3dxvNormal = zero;
+	//	vertices[16].m_d3dxvPosition = { 250.0f, 250.0f, 250.0f };
+	//	vertices[16].m_d3dxvTexCoordUVW = { 0.0f, 0.0f, 4.0f };		// Right vertices
+	//	vertices[16].m_d3dxvNormal = zero;
 
-		vertices[19].m_d3dxvPosition = { 250.0f, -250.0f, -250.0f };
-		vertices[19].m_d3dxvTexCoordUVW = { 1.0f, 1.0f, 4.0f };
-		vertices[19].m_d3dxvNormal = zero;
-		
-		vertices[20].m_d3dxvPosition = { -250.0f, -250.0f, 250.0f };
-		vertices[20].m_d3dxvTexCoordUVW = { 0.0f, 0.0f, 0.0f };		// Bottom vertices
-		vertices[20].m_d3dxvNormal = zero;
+	//	vertices[17].m_d3dxvPosition = { 250.0f, 250.0f, -250.0f };
+	//	vertices[17].m_d3dxvTexCoordUVW = { 1.0f, 0.0f, 4.0f };
+	//	vertices[17].m_d3dxvNormal = zero;
 
-		vertices[21].m_d3dxvPosition = { 250.0f, -250.0f, 250.0f };
-		vertices[21].m_d3dxvTexCoordUVW = { 1.0f, 0.0f, 0.0f };
-		vertices[21].m_d3dxvNormal = zero;
+	//	vertices[18].m_d3dxvPosition = { 250.0f, -250.0f, 250.0f };
+	//	vertices[18].m_d3dxvTexCoordUVW = { 0.0f, 1.0f, 4.0f };
+	//	vertices[18].m_d3dxvNormal = zero;
 
-		vertices[22].m_d3dxvPosition = { -250.0f, -250.0f, -250.0f };
-		vertices[22].m_d3dxvTexCoordUVW = { 0.0f, 1.0f, 0.0f };
-		vertices[22].m_d3dxvNormal = zero;
+	//	vertices[19].m_d3dxvPosition = { 250.0f, -250.0f, -250.0f };
+	//	vertices[19].m_d3dxvTexCoordUVW = { 1.0f, 1.0f, 4.0f };
+	//	vertices[19].m_d3dxvNormal = zero;
+	//	
+	//	vertices[20].m_d3dxvPosition = { -250.0f, -250.0f, 250.0f };
+	//	vertices[20].m_d3dxvTexCoordUVW = { 0.0f, 0.0f, 0.0f };		// Bottom vertices
+	//	vertices[20].m_d3dxvNormal = zero;
 
-		vertices[23].m_d3dxvPosition = { 250.0f, -250.0f, -250.0f };
-		vertices[23].m_d3dxvTexCoordUVW = { 1.0f, 1.0f, 0.0f };
-		vertices[23].m_d3dxvNormal = zero;
-		
+	//	vertices[21].m_d3dxvPosition = { 250.0f, -250.0f, 250.0f };
+	//	vertices[21].m_d3dxvTexCoordUVW = { 1.0f, 0.0f, 0.0f };
+	//	vertices[21].m_d3dxvNormal = zero;
 
-		
-	// 아래
-	pVertices[i].m_d3dxvPosition = tmp[0] ;
-	pVertices[i].m_d3dxvNormal = zero;
-	pVertices[i++].m_d3dxvTexCoordUVW = { 0.0f, 1.0f, 0.0f };
+	//	vertices[22].m_d3dxvPosition = { -250.0f, -250.0f, -250.0f };
+	//	vertices[22].m_d3dxvTexCoordUVW = { 0.0f, 1.0f, 0.0f };
+	//	vertices[22].m_d3dxvNormal = zero;
 
-	pVertices[i].m_d3dxvPosition = tmp[1];
-	pVertices[i].m_d3dxvNormal = zero;
-	pVertices[i++].m_d3dxvTexCoordUVW = { 1.0f, 1.0f, 0.0f };
+	//	vertices[23].m_d3dxvPosition = { 250.0f, -250.0f, -250.0f };
+	//	vertices[23].m_d3dxvTexCoordUVW = { 1.0f, 1.0f, 0.0f };
+	//	vertices[23].m_d3dxvNormal = zero;
+	//	
 
-	pVertices[i].m_d3dxvPosition = tmp[2];
-	pVertices[i].m_d3dxvNormal = zero;
-	pVertices[i++].m_d3dxvTexCoordUVW = { 0.0f, 0.0f, 0.0f };
+	//	
+	//// 아래
+	//pVertices[i].m_d3dxvPosition = tmp[0] ;
+	//pVertices[i].m_d3dxvNormal = zero;
+	//pVertices[i++].m_d3dxvTexCoordUVW = { 0.0f, 1.0f, 0.0f };
 
-	pVertices[i].m_d3dxvPosition = tmp[1];
-	pVertices[i].m_d3dxvNormal = zero;
-	pVertices[i++].m_d3dxvTexCoordUVW = { 1.0f, 1.0f, 0.0f };
+	//pVertices[i].m_d3dxvPosition = tmp[1];
+	//pVertices[i].m_d3dxvNormal = zero;
+	//pVertices[i++].m_d3dxvTexCoordUVW = { 1.0f, 1.0f, 0.0f };
 
-	pVertices[i].m_d3dxvPosition = tmp[3];
-	pVertices[i].m_d3dxvNormal = zero;
-	pVertices[i++].m_d3dxvTexCoordUVW = { 1.0f, 0.0f, 0.0f };
+	//pVertices[i].m_d3dxvPosition = tmp[2];
+	//pVertices[i].m_d3dxvNormal = zero;
+	//pVertices[i++].m_d3dxvTexCoordUVW = { 0.0f, 0.0f, 0.0f };
 
-	pVertices[i].m_d3dxvPosition = tmp[2];
-	pVertices[i].m_d3dxvNormal = zero;
-	pVertices[i++].m_d3dxvTexCoordUVW = { 0.0f, 0.0f, 0.0f };
+	//pVertices[i].m_d3dxvPosition = tmp[1];
+	//pVertices[i].m_d3dxvNormal = zero;
+	//pVertices[i++].m_d3dxvTexCoordUVW = { 1.0f, 1.0f, 0.0f };
 
-	
-	//뒤
-	pVertices[i].m_d3dxvPosition = tmp[0];
-	pVertices[i].m_d3dxvNormal = zero;
-	pVertices[i++].m_d3dxvTexCoordUVW = { 0.0f, 1.0f, 1.0f };
+	//pVertices[i].m_d3dxvPosition = tmp[3];
+	//pVertices[i].m_d3dxvNormal = zero;
+	//pVertices[i++].m_d3dxvTexCoordUVW = { 1.0f, 0.0f, 0.0f };
 
-	pVertices[i].m_d3dxvPosition = tmp[1];
-	pVertices[i].m_d3dxvNormal = zero;
-	pVertices[i++].m_d3dxvTexCoordUVW = { 1.0f, 1.0f, 1.0f };
+	//pVertices[i].m_d3dxvPosition = tmp[2];
+	//pVertices[i].m_d3dxvNormal = zero;
+	//pVertices[i++].m_d3dxvTexCoordUVW = { 0.0f, 0.0f, 0.0f };
 
-	pVertices[i].m_d3dxvPosition = tmp[4];
-	pVertices[i].m_d3dxvNormal = zero;
-	pVertices[i++].m_d3dxvTexCoordUVW = { 0.0f, 0.0f, 1.0f };
+	//
+	////뒤
+	//pVertices[i].m_d3dxvPosition = tmp[0];
+	//pVertices[i].m_d3dxvNormal = zero;
+	//pVertices[i++].m_d3dxvTexCoordUVW = { 0.0f, 1.0f, 1.0f };
 
-	pVertices[i].m_d3dxvPosition = tmp[1];
-	pVertices[i].m_d3dxvNormal = zero;
-	pVertices[i++].m_d3dxvTexCoordUVW = { 1.0f, 1.0f, 1.0f };
+	//pVertices[i].m_d3dxvPosition = tmp[1];
+	//pVertices[i].m_d3dxvNormal = zero;
+	//pVertices[i++].m_d3dxvTexCoordUVW = { 1.0f, 1.0f, 1.0f };
 
-	pVertices[i].m_d3dxvPosition = tmp[5];
-	pVertices[i].m_d3dxvNormal = zero;
-	pVertices[i++].m_d3dxvTexCoordUVW = { 1.0f, 0.0f, 1.0f };
+	//pVertices[i].m_d3dxvPosition = tmp[4];
+	//pVertices[i].m_d3dxvNormal = zero;
+	//pVertices[i++].m_d3dxvTexCoordUVW = { 0.0f, 0.0f, 1.0f };
 
-	pVertices[i].m_d3dxvPosition = tmp[4];
-	pVertices[i].m_d3dxvNormal = zero;
-	pVertices[i++].m_d3dxvTexCoordUVW = { 0.0f, 0.0f, 1.0f };
+	//pVertices[i].m_d3dxvPosition = tmp[1];
+	//pVertices[i].m_d3dxvNormal = zero;
+	//pVertices[i++].m_d3dxvTexCoordUVW = { 1.0f, 1.0f, 1.0f };
 
-	
-	//앞
-	pVertices[i].m_d3dxvPosition = tmp[2];
-	pVertices[i].m_d3dxvNormal = zero;
-	pVertices[i++].m_d3dxvTexCoordUVW = { 1.0f, 1.0f, 2.0f };
+	//pVertices[i].m_d3dxvPosition = tmp[5];
+	//pVertices[i].m_d3dxvNormal = zero;
+	//pVertices[i++].m_d3dxvTexCoordUVW = { 1.0f, 0.0f, 1.0f };
 
-	pVertices[i].m_d3dxvPosition = tmp[3];
-	pVertices[i].m_d3dxvNormal = zero;
-	pVertices[i++].m_d3dxvTexCoordUVW = { 0.0f, 1.0f, 2.0f };
+	//pVertices[i].m_d3dxvPosition = tmp[4];
+	//pVertices[i].m_d3dxvNormal = zero;
+	//pVertices[i++].m_d3dxvTexCoordUVW = { 0.0f, 0.0f, 1.0f };
 
-	pVertices[i].m_d3dxvPosition = tmp[6];
-	pVertices[i].m_d3dxvNormal = zero;
-	pVertices[i++].m_d3dxvTexCoordUVW = { 1.0f, 0.0f, 2.0f };
+	//
+	////앞
+	//pVertices[i].m_d3dxvPosition = tmp[2];
+	//pVertices[i].m_d3dxvNormal = zero;
+	//pVertices[i++].m_d3dxvTexCoordUVW = { 1.0f, 1.0f, 2.0f };
 
-	pVertices[i].m_d3dxvPosition = tmp[3];
-	pVertices[i].m_d3dxvNormal = zero;
-	pVertices[i++].m_d3dxvTexCoordUVW = { 0.0f, 1.0f, 2.0f };
+	//pVertices[i].m_d3dxvPosition = tmp[3];
+	//pVertices[i].m_d3dxvNormal = zero;
+	//pVertices[i++].m_d3dxvTexCoordUVW = { 0.0f, 1.0f, 2.0f };
 
-	pVertices[i].m_d3dxvPosition = tmp[7];
-	pVertices[i].m_d3dxvNormal = zero;
-	pVertices[i++].m_d3dxvTexCoordUVW = { 0.0f, 0.0f, 2.0f };
+	//pVertices[i].m_d3dxvPosition = tmp[6];
+	//pVertices[i].m_d3dxvNormal = zero;
+	//pVertices[i++].m_d3dxvTexCoordUVW = { 1.0f, 0.0f, 2.0f };
 
-	pVertices[i].m_d3dxvPosition = tmp[6];
-	pVertices[i].m_d3dxvNormal = zero;
-	pVertices[i++].m_d3dxvTexCoordUVW = { 1.0f, 0.0f, 2.0f };
+	//pVertices[i].m_d3dxvPosition = tmp[3];
+	//pVertices[i].m_d3dxvNormal = zero;
+	//pVertices[i++].m_d3dxvTexCoordUVW = { 0.0f, 1.0f, 2.0f };
 
-	//왼
-	pVertices[i].m_d3dxvPosition = tmp[2];
-	pVertices[i].m_d3dxvNormal = zero;
-	pVertices[i++].m_d3dxvTexCoordUVW = { 0.0f, 1.0f, 3.0f };
+	//pVertices[i].m_d3dxvPosition = tmp[7];
+	//pVertices[i].m_d3dxvNormal = zero;
+	//pVertices[i++].m_d3dxvTexCoordUVW = { 0.0f, 0.0f, 2.0f };
 
-	pVertices[i].m_d3dxvPosition = tmp[0];
-	pVertices[i].m_d3dxvNormal = zero;
-	pVertices[i++].m_d3dxvTexCoordUVW = { 1.0f, 1.0f, 3.0f };
+	//pVertices[i].m_d3dxvPosition = tmp[6];
+	//pVertices[i].m_d3dxvNormal = zero;
+	//pVertices[i++].m_d3dxvTexCoordUVW = { 1.0f, 0.0f, 2.0f };
 
-	pVertices[i].m_d3dxvPosition = tmp[6];
-	pVertices[i].m_d3dxvNormal = zero;
-	pVertices[i++].m_d3dxvTexCoordUVW = { 0.0f, 0.0f, 3.0f };
+	////왼
+	//pVertices[i].m_d3dxvPosition = tmp[2];
+	//pVertices[i].m_d3dxvNormal = zero;
+	//pVertices[i++].m_d3dxvTexCoordUVW = { 0.0f, 1.0f, 3.0f };
 
-	pVertices[i].m_d3dxvPosition = tmp[0];
-	pVertices[i].m_d3dxvNormal = zero;
-	pVertices[i++].m_d3dxvTexCoordUVW = { 1.0f, 1.0f, 3.0f };
+	//pVertices[i].m_d3dxvPosition = tmp[0];
+	//pVertices[i].m_d3dxvNormal = zero;
+	//pVertices[i++].m_d3dxvTexCoordUVW = { 1.0f, 1.0f, 3.0f };
 
-	pVertices[i].m_d3dxvPosition = tmp[4];
-	pVertices[i].m_d3dxvNormal = zero;
-	pVertices[i++].m_d3dxvTexCoordUVW = { 1.0f, 0.0f, 3.0f };
+	//pVertices[i].m_d3dxvPosition = tmp[6];
+	//pVertices[i].m_d3dxvNormal = zero;
+	//pVertices[i++].m_d3dxvTexCoordUVW = { 0.0f, 0.0f, 3.0f };
 
-	pVertices[i].m_d3dxvPosition = tmp[6];
-	pVertices[i].m_d3dxvNormal = zero;
-	pVertices[i++].m_d3dxvTexCoordUVW = { 0.0f, 0.0f, 3.0f };
+	//pVertices[i].m_d3dxvPosition = tmp[0];
+	//pVertices[i].m_d3dxvNormal = zero;
+	//pVertices[i++].m_d3dxvTexCoordUVW = { 1.0f, 1.0f, 3.0f };
+
+	//pVertices[i].m_d3dxvPosition = tmp[4];
+	//pVertices[i].m_d3dxvNormal = zero;
+	//pVertices[i++].m_d3dxvTexCoordUVW = { 1.0f, 0.0f, 3.0f };
+
+	//pVertices[i].m_d3dxvPosition = tmp[6];
+	//pVertices[i].m_d3dxvNormal = zero;
+	//pVertices[i++].m_d3dxvTexCoordUVW = { 0.0f, 0.0f, 3.0f };
 
 
-	//오른
-	pVertices[i].m_d3dxvPosition = tmp[3];
-	pVertices[i].m_d3dxvNormal = zero;
-	pVertices[i++].m_d3dxvTexCoordUVW = { 0.0f, 1.0f, 4.0f };
+	////오른
+	//pVertices[i].m_d3dxvPosition = tmp[3];
+	//pVertices[i].m_d3dxvNormal = zero;
+	//pVertices[i++].m_d3dxvTexCoordUVW = { 0.0f, 1.0f, 4.0f };
 
-	pVertices[i].m_d3dxvPosition = tmp[1];
-	pVertices[i].m_d3dxvNormal = zero;
-	pVertices[i++].m_d3dxvTexCoordUVW = { 1.0f, 1.0f, 4.0f };
+	//pVertices[i].m_d3dxvPosition = tmp[1];
+	//pVertices[i].m_d3dxvNormal = zero;
+	//pVertices[i++].m_d3dxvTexCoordUVW = { 1.0f, 1.0f, 4.0f };
 
-	pVertices[i].m_d3dxvPosition = tmp[7];
-	pVertices[i].m_d3dxvNormal = zero;
-	pVertices[i++].m_d3dxvTexCoordUVW = { 1.0f, 0.0f, 4.0f };
+	//pVertices[i].m_d3dxvPosition = tmp[7];
+	//pVertices[i].m_d3dxvNormal = zero;
+	//pVertices[i++].m_d3dxvTexCoordUVW = { 1.0f, 0.0f, 4.0f };
 
-	pVertices[i].m_d3dxvPosition = tmp[1];
-	pVertices[i].m_d3dxvNormal = zero;
-	pVertices[i++].m_d3dxvTexCoordUVW = { 1.0f, 1.0f, 4.0f };
+	//pVertices[i].m_d3dxvPosition = tmp[1];
+	//pVertices[i].m_d3dxvNormal = zero;
+	//pVertices[i++].m_d3dxvTexCoordUVW = { 1.0f, 1.0f, 4.0f };
 
-	pVertices[i].m_d3dxvPosition = tmp[7];
-	pVertices[i].m_d3dxvNormal = zero;
-	pVertices[i++].m_d3dxvTexCoordUVW = { 1.0f, 0.0f, 4.0f };
+	//pVertices[i].m_d3dxvPosition = tmp[7];
+	//pVertices[i].m_d3dxvNormal = zero;
+	//pVertices[i++].m_d3dxvTexCoordUVW = { 1.0f, 0.0f, 4.0f };
 
-	pVertices[i].m_d3dxvPosition = tmp[5];
-	pVertices[i].m_d3dxvNormal = zero;
-	pVertices[i++].m_d3dxvTexCoordUVW = { 0.0f, 0.0f, 4.0f };
+	//pVertices[i].m_d3dxvPosition = tmp[5];
+	//pVertices[i].m_d3dxvNormal = zero;
+	//pVertices[i++].m_d3dxvTexCoordUVW = { 0.0f, 0.0f, 4.0f };
 
-	// 위
-	pVertices[i].m_d3dxvPosition = tmp[6];
-	pVertices[i].m_d3dxvNormal = zero;
-	pVertices[i++].m_d3dxvTexCoordUVW = { 0.0f, 0.0f, 5.0f };
+	//// 위
+	//pVertices[i].m_d3dxvPosition = tmp[6];
+	//pVertices[i].m_d3dxvNormal = zero;
+	//pVertices[i++].m_d3dxvTexCoordUVW = { 0.0f, 0.0f, 5.0f };
 
-	pVertices[i].m_d3dxvPosition = tmp[7];
-	pVertices[i].m_d3dxvNormal = zero;
-	pVertices[i++].m_d3dxvTexCoordUVW = { 1.0f, 0.0f, 5.0f };
+	//pVertices[i].m_d3dxvPosition = tmp[7];
+	//pVertices[i].m_d3dxvNormal = zero;
+	//pVertices[i++].m_d3dxvTexCoordUVW = { 1.0f, 0.0f, 5.0f };
 
-	pVertices[i].m_d3dxvPosition = tmp[4];
-	pVertices[i].m_d3dxvNormal = zero;
-	pVertices[i++].m_d3dxvTexCoordUVW = { 0.0f, 1.0f, 5.0f };
+	//pVertices[i].m_d3dxvPosition = tmp[4];
+	//pVertices[i].m_d3dxvNormal = zero;
+	//pVertices[i++].m_d3dxvTexCoordUVW = { 0.0f, 1.0f, 5.0f };
 
-	pVertices[i].m_d3dxvPosition = tmp[7];
-	pVertices[i].m_d3dxvNormal = zero;
-	pVertices[i++].m_d3dxvTexCoordUVW = { 1.0f, 0.0f, 5.0f };
+	//pVertices[i].m_d3dxvPosition = tmp[7];
+	//pVertices[i].m_d3dxvNormal = zero;
+	//pVertices[i++].m_d3dxvTexCoordUVW = { 1.0f, 0.0f, 5.0f };
 
-	pVertices[i].m_d3dxvPosition = tmp[5];
-	pVertices[i].m_d3dxvNormal = zero;
-	pVertices[i++].m_d3dxvTexCoordUVW = { 1.0f, 1.0f, 5.0f };
+	//pVertices[i].m_d3dxvPosition = tmp[5];
+	//pVertices[i].m_d3dxvNormal = zero;
+	//pVertices[i++].m_d3dxvTexCoordUVW = { 1.0f, 1.0f, 5.0f };
 
-	pVertices[i].m_d3dxvPosition = tmp[4];
-	pVertices[i].m_d3dxvNormal = zero;
-	pVertices[i++].m_d3dxvTexCoordUVW = { 0.0f, 1.0f, 5.0f };
+	//pVertices[i].m_d3dxvPosition = tmp[4];
+	//pVertices[i].m_d3dxvNormal = zero;
+	//pVertices[i++].m_d3dxvTexCoordUVW = { 0.0f, 1.0f, 5.0f };
 
 	D3D11_BUFFER_DESC d3dBufferDesc;
 	ZeroMemory(&d3dBufferDesc, sizeof(D3D11_BUFFER_DESC));
@@ -869,7 +878,7 @@ CSkyBoxMesh::CSkyBoxMesh(ID3D11Device * pd3dDevice, float fWidth, float fHeight,
 	d3dBufferDesc.CPUAccessFlags = 0;
 	D3D11_SUBRESOURCE_DATA d3dBufferData;
 	ZeroMemory(&d3dBufferData, sizeof(D3D11_SUBRESOURCE_DATA));
-	d3dBufferData.pSysMem = vertices;
+	d3dBufferData.pSysMem = m_pVertices;
 	pd3dDevice->CreateBuffer(&d3dBufferDesc, &d3dBufferData, &m_pd3dVertexBuffer);
 
 	SetRasterizerState(pd3dDevice);
@@ -883,7 +892,7 @@ void CSkyBoxMesh::SetRasterizerState(ID3D11Device * pd3dDevice)
 {
 	D3D11_RASTERIZER_DESC d3dRasterizerDesc;
 	ZeroMemory(&d3dRasterizerDesc, sizeof(D3D11_RASTERIZER_DESC));
-	d3dRasterizerDesc.CullMode = D3D11_CULL_BACK;
+	d3dRasterizerDesc.CullMode = D3D11_CULL_NONE;
 	d3dRasterizerDesc.FillMode = D3D11_FILL_SOLID;
 	d3dRasterizerDesc.DepthClipEnable = true;
 	pd3dDevice->CreateRasterizerState(&d3dRasterizerDesc, &m_pd3dRasterizerState);

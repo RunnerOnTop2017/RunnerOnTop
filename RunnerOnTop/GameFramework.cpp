@@ -12,7 +12,7 @@ CGameFramework::CGameFramework()
 	m_nWndClientHeight = FRAME_BUFFER_HEIGHT;
 
 	m_pScene = NULL;
-	_tcscpy_s(m_pszBuffer, _T("LapProject("));
+	_tcscpy_s(m_pszBuffer, _T("RunnerOnTop : "));
 
 	m_nPlayers = 0;
 	m_ppPlayers = NULL;
@@ -377,7 +377,7 @@ void CGameFramework::FrameAdvance()
 
 	m_pDXGISwapChain->Present(0, 0);
 
-	m_GameTimer.GetFrameRate((LPSTR)m_pszBuffer + 22, 27);
+	m_GameTimer.GetFrameRate((LPSTR)m_pszBuffer + 28, 30);
 	::SetWindowText(m_hWnd, m_pszBuffer);
 }
 
