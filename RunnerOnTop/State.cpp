@@ -12,6 +12,11 @@ CState::~CState()
 {
 }
 
+void CState::SetAnimationClip(CAnimationClip* clip)
+{
+	m_pAnimationClip = clip;
+}
+
 void CState::ProcessInput(UINT uMessage, WPARAM wParam, LPARAM lParam)
 {
 	switch (uMessage)

@@ -1,5 +1,6 @@
 #pragma once
-
+#include"stdafx.h"
+#include"AnimationClip.h"
 
 #define STATE_IDLE 0
 #define STATE_RUN 1
@@ -11,11 +12,14 @@
 class CState
 {
 	STATENUMBER m_state;
+	CAnimationClip * m_pAnimationClip;
 public:
 	CState();
 	~CState();
 	STATENUMBER GetState();
 	void ChangeState(STATENUMBER newState);
+
+	void SetAnimationClip(CAnimationClip* clip);
 
 	void ProcessInput(UINT uMessage, WPARAM wParam, LPARAM lParam);
 };
