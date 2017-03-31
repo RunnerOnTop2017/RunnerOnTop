@@ -400,6 +400,8 @@ CAirplanePlayer::CAirplanePlayer(ID3D11Device *pd3dDevice)
 
 	//플레이어를 위한 쉐이더 변수를 생성한다.
 	CreateShaderVariables(pd3dDevice);
+
+	m_pShader->m_ppObjects[0]->m_pState = m_pState;
 }
 
 CAirplanePlayer::~CAirplanePlayer()
@@ -419,6 +421,13 @@ void CAirplanePlayer::Render(ID3D11DeviceContext *pd3dDeviceContext)
 
 		CPlayer::Render(pd3dDeviceContext);
 	}
+}
+
+void CAirplanePlayer::SetState(CState * pState)
+{
+	m_pState = pState;
+
+	m_pShader->m_ppObjects[0]->m_pState = pState;
 }
 
 void CAirplanePlayer::ChangeCamera(ID3D11Device *pd3dDevice, DWORD nNewCameraMode, float fTimeElapsed)

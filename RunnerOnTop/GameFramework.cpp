@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "GameFramework.h"
-
+#include "State.h"
 CGameFramework::CGameFramework()
 {
 	m_pd3dDevice = NULL;
@@ -266,7 +266,14 @@ void CGameFramework::BuildObjects()
 	//플레이어의 위치를 스페이스-쉽 카메라로 변경한다.
 	pAirplanePlyer->SetPosition(D3DXVECTOR3(0.0f, 1500.0f, 0.0f));
 	//pAirplanePlyer->Rotate(90.0f, 90.0f, 0.0f);
+	CState *pState = new CState();
+	CAnimationClip *pAnimationClip = new CAnimationClip();
+	pAnimationClip->LoadAnimation("idle");
+	pAnimationClip->LoadAnimation("run");
 
+	pState->SetAnimationClip(pAnimationClip);
+
+	pAirplanePlyer->SetState(pState);
 	m_ppPlayers[0] = pAirplanePlyer;
 
 	if (m_pScene)

@@ -26,6 +26,7 @@ void CScene::BuildObjects(ID3D11Device *pd3dDevice)
 	m_ppShaders[0] = new CTextureShader();
 	m_ppShaders[0]->CreateShader(pd3dDevice);
 	m_ppShaders[0]->BuildObjects(pd3dDevice);
+	
 
 	m_pSkybox = new CSkyBoxShader();
 	m_pSkybox->CreateShader(pd3dDevice);

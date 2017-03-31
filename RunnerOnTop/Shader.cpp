@@ -179,11 +179,11 @@ void CShader::Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamera)
 				pd3dDeviceContext->PSSetShaderResources(0x09, m_ppObjects[j]->m_pBump->m_nTextures, m_ppObjects[j]->m_pBump->m_ppd3dsrvTextures);
 				pd3dDeviceContext->PSSetSamplers(0x01, 1, &m_ppObjects[j]->m_pBump->m_ppd3dSamplerStates[0]);
 			}
-			if (m_ppObjects[j]->transform)
+			if (m_ppObjects[j]->m_pState)
 			{
-				delete m_ppObjects[j]->transform;
-				m_ppObjects[j]->transform = m_ppObjects[j]->m_pMesh->getTransform(m_ppObjects[j]->framenumber++);
-				UpdateShaderVariables(pd3dDeviceContext, m_ppObjects[j]->transform, m_ppObjects[j]->m_pMesh->GetBoneDataSize());
+
+				m_ppObjects[j]->transform = m_ppObjects[j]->m_pState->GetAnimation();
+				UpdateShaderVariables(pd3dDeviceContext, m_ppObjects[j]->transform, m_ppObjects[j]->m_pState->GetBoneSize());
 			}
 			m_ppObjects[j]->Render(pd3dDeviceContext);
 		}

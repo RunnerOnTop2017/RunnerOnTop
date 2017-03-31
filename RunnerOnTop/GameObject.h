@@ -6,7 +6,7 @@
 
 #include"Mesh.h"
 #include"Camera.h"
-
+#include"State.h"
 
 #define DIR_FORWARD	0x01
 #define DIR_BACKWARD	0x02
@@ -69,7 +69,7 @@ public:
 	D3DXMATRIX *transform;
 	int framenumber;
 	CMesh *m_pMesh;
-
+	CState* m_pState;
 	virtual void SetMesh(CMesh *pMesh);
 	virtual void Animate(ID3D11Device *pd3dDevice,float fTimeElapsed);
 	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamera = NULL);

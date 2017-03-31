@@ -3,6 +3,7 @@
 #include "Camera.h"
 #include "GameObject.h"
 #include "Shader.h"
+#include "State.h"
 
 class CPlayer : public CGameObject
 {
@@ -108,4 +109,5 @@ public:
 
 	virtual void ChangeCamera(ID3D11Device *pd3dDevice, DWORD nNewCameraMode, float fTimeElapsed);
 	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext);
+	void SetState(CState* pState);
 };

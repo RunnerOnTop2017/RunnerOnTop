@@ -11,6 +11,7 @@ CGameObject::CGameObject()
 	m_pBump = NULL;
 	transform = NULL;
 	framenumber = 0;
+	m_pState = NULL;
 }
 
 CGameObject::~CGameObject()

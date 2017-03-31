@@ -48,9 +48,18 @@ CAnimation::CAnimation(const char * pAnimationName)
 	
 }
 
+CAnimation::CAnimation(const CAnimation & anm)
+{
+	bonesize = anm.bonesize;
+	m_size = anm.bonesize;
+	name = anm.name;
+	m_pAnimationData = anm.m_pAnimationData;
+	m_AnimationByFrame = anm.m_AnimationByFrame;
+}
+
 CAnimation::~CAnimation()
 {
-	for (int i = 0; i < m_pAnimationData.size; ++i)
+	for (int i = 0; i < m_pAnimationData.size(); ++i)
 	{
 		delete m_pAnimationData[i];
 	}
@@ -86,7 +95,6 @@ D3DXMATRIX * CAnimation::GetMatrixByFrame(int & frame)
 
 CAnimationClip::CAnimationClip()
 {
-	DATA.clear();
 }
 
 
@@ -97,24 +105,31 @@ CAnimationClip::~CAnimationClip()
 
 bool CAnimationClip::LoadAnimation(char * name)
 {
-	DATA.insert(std::make_pair(name, CAnimation(name)));
-	if (DATA.find(name)->second.GetBoneSize() == 0 || DATA.find(name) == DATA.end())
-		return false;
-
+	//CAnimation *pAnimation = new CAnimation(name);
+	auto ret = DATA.insert({ name, nullptr });
+	if (ret.second)
+	{
+		ret.first->second = new CAnimation(name);
+	}
 	return true;
 }
 
-bool CAnimationClip::GetAnimation(char * name, int frame, D3DXMATRIX * buf)
+D3DXMATRIX* CAnimationClip::GetAnimation(char * name, int frame, D3DXMATRIX * buf)
 {
-	buf = DATA.find(name)->second.GetMatrixByFrame(frame);
-	return true;
+	return DATA.find(name)->second->GetMatrixByFrame(frame);
+	//return true;
+}
+
+int CAnimationClip::GetBoneSize(char * name)
+{
+	return DATA.find(name)->second->GetBoneSize();
 }
 
 bool CAnimationClip::GetBlenAnimation(char * name_a, char * name_b, int frame_a, int frame_b, float ratio, D3DXMATRIX * buf)
 {
-	int size = DATA.find(name_a)->second.GetBoneSize();
-	D3DXMATRIX *tmp1 = DATA.find(name_a)->second.GetMatrixByFrame(frame_a);
-	D3DXMATRIX *tmp2 = DATA.find(name_b)->second.GetMatrixByFrame(frame_b);
+	int size = DATA.find(name_a)->second->GetBoneSize();
+	D3DXMATRIX *tmp1 = DATA.find(name_a)->second->GetMatrixByFrame(frame_a);
+	D3DXMATRIX *tmp2 = DATA.find(name_b)->second->GetMatrixByFrame(frame_b);
 
 	for (int i = 0; i < size; ++i)
 	{
