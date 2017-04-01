@@ -228,6 +228,7 @@ LRESULT CALLBACK CGameFramework::OnProcessingWindowMessage(HWND hWnd, UINT nMess
 	case WM_KEYDOWN:
 	case WM_KEYUP:
 		OnProcessingKeyboardMessage(hWnd, nMessageID, wParam, lParam);
+		m_ppPlayers[0]->m_pState->ProcessInput(nMessageID, wParam, lParam);
 		break;
 	}
 	return(0);

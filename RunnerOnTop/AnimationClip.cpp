@@ -95,6 +95,7 @@ D3DXMATRIX * CAnimation::GetMatrixByFrame(int & frame)
 
 CAnimationClip::CAnimationClip()
 {
+	m_pblendedMatrix = NULL;
 }
 
 
@@ -125,15 +126,21 @@ int CAnimationClip::GetBoneSize(char * name)
 	return DATA.find(name)->second->GetBoneSize();
 }
 
-bool CAnimationClip::GetBlenAnimation(char * name_a, char * name_b, int frame_a, int frame_b, float ratio, D3DXMATRIX * buf)
+D3DXMATRIX* CAnimationClip::GetBlenAnimation(char * name_a, char * name_b, int frame_a, int frame_b, float ratio, D3DXMATRIX * buf)
 {
+	if (m_pblendedMatrix)
+	{
+		delete m_pblendedMatrix;
+	}
 	int size = DATA.find(name_a)->second->GetBoneSize();
+	m_pblendedMatrix = new D3DXMATRIX[size];
 	D3DXMATRIX *tmp1 = DATA.find(name_a)->second->GetMatrixByFrame(frame_a);
 	D3DXMATRIX *tmp2 = DATA.find(name_b)->second->GetMatrixByFrame(frame_b);
 
 	for (int i = 0; i < size; ++i)
 	{
-		buf[i] = (tmp1[i] * ratio) + (tmp2[i] * (1.0f - ratio));
+		m_pblendedMatrix[i] = (tmp1[i] * ratio) + (tmp2[i] * (1.0f - ratio));
 	}
-	return true;
+	
+	return m_pblendedMatrix;
 }

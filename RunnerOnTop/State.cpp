@@ -6,6 +6,7 @@ CState::CState()
 {
 	m_state = STATE_IDLE;
 	frame = 0;
+	frame2 = 0;
 }
 
 
@@ -20,20 +21,23 @@ STATENUMBER CState::GetState()
 
 void CState::ChangeState(STATENUMBER newState)
 {
+	STATENUMBER prev = m_state;
 	switch (newState)
 	{
 	case STATE_IDLE:
 		m_state = STATE_IDLE;
 		break;
 	case STATE_RUN:
-		m_state = STATE_RUN;
+		if(m_state != STATE_RUN)
+			m_state = STATE_RUN;
 		break;
 	case STATE_JUMP:
 		m_state = m_state % 10 + STATE_JUMP;
 		break;
 
 	}
-	frame = 0;
+	if(prev!= m_state)
+		frame = 0;
 }
 
 void CState::SetAnimationClip(CAnimationClip* clip)
@@ -46,8 +50,28 @@ void CState::ProcessInput(UINT uMessage, WPARAM wParam, LPARAM lParam)
 	switch (uMessage)
 	{
 	case WM_KEYDOWN:
+		
+		switch (wParam)
+		{
+		case 0x57: // W key
+			ChangeState(STATE_RUN);
+			break;
+		}
+
 		break;
+
 	case WM_KEYUP:
+		
+		switch (wParam)
+		{
+		case 0x57: // W key
+			ChangeState(STATE_IDLE);
+			break;
+		}
+
+		break;
+
+	case WM_CHAR:
 		break;
 	default:
 		break;
@@ -67,8 +91,12 @@ D3DXMATRIX * CState::GetAnimation()
 		break;
 	}
 	D3DXMATRIX *buf = NULL;
+	if (m_state == STATE_RUN)
+	{
+		return m_pAnimationClip->GetBlenAnimation((char *)str.c_str(), "idle", frame++, frame2++, 0.5f, buf);
+	}
 	return m_pAnimationClip->GetAnimation((char *)str.c_str(), frame++, buf);
-	//return buf;
+	
 }
 
 int CState::GetBoneSize()

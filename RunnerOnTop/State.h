@@ -15,6 +15,7 @@ class CState
 	CAnimationClip * m_pAnimationClip;
 	CGameTimer * pTimer;
 	int frame;
+	int frame2;
 public:
 	CState();
 	~CState();

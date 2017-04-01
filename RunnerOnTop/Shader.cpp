@@ -439,6 +439,8 @@ void CAnimateShader::UpdateShaderVariables(ID3D11DeviceContext * pd3dDeviceConte
 	pd3dDeviceContext->Unmap(m_pd3dcbSkinned, 0);
 	pd3dDeviceContext->VSSetConstantBuffers(0x02, 1, &m_pd3dcbSkinned);
 
+	//delete pd3dTransform;
+
 }
 
 void CAnimateShader::BuildObjects(ID3D11Device *pd3dDevice)
