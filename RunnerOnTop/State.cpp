@@ -4,11 +4,16 @@
 
 CState::CState()
 {
+	hashMap.insert({ STATE_IDLE,"idle" });
+	hashMap.insert({ STATE_RUN, "run" });
+	hashMap.insert({ STATE_IDLEJUMP, "jumping" });
+	hashMap.insert({ STATE_RUNJUMP, "jump" });
+	
+	m_prev_state = STATE_IDLE;
 	m_state = STATE_IDLE;
 	frame = 0;
 	frame2 = 0;
-	currentStateName = "idle";
-
+	ratio = 0.0f;
 }
 
 
@@ -28,30 +33,38 @@ void CState::ChangeState(STATENUMBER newState)
 	{
 	case STATE_IDLE:
 		m_state = STATE_IDLE;
-		currentStateName.clear();
-		currentStateName = "idle";
+		
 
 		break;
 	case STATE_RUN:
 		if(m_state != STATE_RUN)
 			m_state = STATE_RUN;
-		currentStateName.clear();
-		currentStateName = "run";
+	
 
 		break;
 	case STATE_JUMP:
-		m_state = m_state % 10 + STATE_JUMP;
-		currentStateName.clear();
-		currentStateName = "jump";
+		if (m_state == STATE_IDLE)
+		{
+			m_state = STATE_IDLEJUMP;
+		}
+		else if (m_state == STATE_RUN)
+		{
+			m_state = STATE_RUNJUMP;
+		}
 		break;
 	}
-	if(prev!= m_state)
+	if (prev != m_state)
+	{
+		frame2 = frame;
 		frame = 0;
+		m_prev_state = prev;
+	}
 }
 
 void CState::SetTimer(CGameTimer * timer)
 {
 	pTimer = timer;
+	time = 0;
 }
 
 void CState::SetAnimationClip(CAnimationClip* clip)
@@ -71,7 +84,6 @@ void CState::ProcessInput(UINT uMessage, WPARAM wParam, LPARAM lParam)
 			ChangeState(STATE_RUN);
 			break;
 		}
-
 		break;
 
 	case WM_KEYUP:
@@ -85,7 +97,6 @@ void CState::ProcessInput(UINT uMessage, WPARAM wParam, LPARAM lParam)
 			ChangeState(STATE_JUMP);
 			break;
 		}
-
 		break;
 
 	case WM_CHAR:
@@ -97,21 +108,47 @@ void CState::ProcessInput(UINT uMessage, WPARAM wParam, LPARAM lParam)
 
 D3DXMATRIX * CState::GetAnimation()
 {
-	
 	D3DXMATRIX *buf = NULL;
-	if (frame != 0 && m_pAnimationClip->GetCurrentMatirxSize((char *)currentStateName.c_str()) == frame && m_state == STATE_JUMP)
-		ChangeState(STATE_IDLE);
-
-	if (m_state == STATE_RUN)
+	if (frame != 0 && m_pAnimationClip->GetCurrentMatirxSize((char *)hashMap.find(m_state)->second.c_str()) == frame && (m_state == STATE_IDLEJUMP || m_state == STATE_RUNJUMP))
 	{
-		//return m_pAnimationClip->GetBlenAnimation((char *)str.c_str(), "idle", frame++, frame2++, 0.5f, buf);
+		if(STATE_IDLEJUMP == m_state)
+			ChangeState(STATE_IDLE);
+		if (STATE_RUNJUMP == m_state)
+			ChangeState(STATE_RUN);
+
 	}
-	pTimer->GetTimeElapsed();
-	return m_pAnimationClip->GetAnimation((char *)currentStateName.c_str(), frame++, buf);
-	
+	time += pTimer->GetTimeElapsed();
+	std::cout << m_prev_state <<std::endl;
+	if (time > TIME_ANIMATE_ELAPSED * 1.5f)
+	{
+		frame2 += 1;
+		frame += 1;
+		time = 0;
+	}
+	if (m_prev_state != m_state && m_prev_state!= STATE_RUNJUMP)
+	{
+		if (ratio >= 1.0f)
+		{
+			ratio = 0.0f;
+			m_prev_state = m_state;
+			frame2 = 0;
+		}
+		else
+		{
+			ratio += 0.05f;
+			return m_pAnimationClip->GetBlendAnimation((char*)hashMap.find(m_state)->second.c_str(), (char*)hashMap.find(m_prev_state)->second.c_str(),
+				frame, frame2, ratio, NULL);
+		}
+	}
+	return m_pAnimationClip->GetAnimation((char *)hashMap.find(m_state)->second.c_str(), frame, buf);	
 }
 
 int CState::GetBoneSize()
 {
-	return m_pAnimationClip->GetBoneSize((char*)currentStateName.c_str());
+	return m_pAnimationClip->GetBoneSize((char *)hashMap.find(m_state)->second.c_str());
+}
+
+std::string CState::StateNumberToString(STATENUMBER s)
+{
+	return std::string();
 }

@@ -125,7 +125,7 @@ int CAnimationClip::GetBoneSize(char * name)
 	return DATA.find(name)->second->GetBoneSize();
 }
 
-D3DXMATRIX* CAnimationClip::GetBlenAnimation(char * name_a, char * name_b, int frame_a, int frame_b, float ratio, D3DXMATRIX * buf)
+D3DXMATRIX* CAnimationClip::GetBlendAnimation(char * name_a, char * name_b, int frame_a, int frame_b, float ratio, D3DXMATRIX * buf)
 {
 	if (m_pblendedMatrix)
 	{

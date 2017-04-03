@@ -9,15 +9,20 @@
 #define STATE_RUNJUMP 11
 #define STATENUMBER int
 
+#define TIME_ANIMATE_ELAPSED 1.0f/60.0f
+
+
 class CState
 {
 	STATENUMBER m_state;
+	STATENUMBER m_prev_state;
 	CAnimationClip * m_pAnimationClip;
 	CGameTimer * pTimer;
-	std::string currentStateName;
 	float time;
+	float ratio;
 	int frame;
 	int frame2;
+	std::map<int, std::string> hashMap;
 public:
 	CState();
 	~CState();
@@ -30,5 +35,6 @@ public:
 
 	D3DXMATRIX* GetAnimation();
 	int GetBoneSize();
+	std::string StateNumberToString(STATENUMBER s);
 };
 

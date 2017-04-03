@@ -273,6 +273,8 @@ void CGameFramework::BuildObjects()
 	pAnimationClip->LoadAnimation("idle");
 	pAnimationClip->LoadAnimation("run");
 	pAnimationClip->LoadAnimation("jump");
+	pAnimationClip->LoadAnimation("jumping");
+
 
 
 	pState->SetAnimationClip(pAnimationClip);
@@ -317,7 +319,7 @@ void CGameFramework::ProcessInput()
 			if (pKeyBuffer[VK_DOWN] & 0xF0 || pKeyBuffer[VkKeyScan('s')] & 0xF0) dwDirection |= DIR_BACKWARD;
 			if (pKeyBuffer[VK_LEFT] & 0xF0 || pKeyBuffer[VkKeyScan('a')] & 0xF0) dwDirection |= DIR_LEFT;
 			if (pKeyBuffer[VK_RIGHT] & 0xF0 || pKeyBuffer[VkKeyScan('d')] & 0xF0) dwDirection |= DIR_RIGHT;
-			if (pKeyBuffer[VK_PRIOR] & 0xF0 || pKeyBuffer[VkKeyScan('r')] & 0xF0) dwDirection |= DIR_UP;
+			if (pKeyBuffer[VK_SPACE] & 0xF0 || pKeyBuffer[VkKeyScan('r')] & 0xF0) dwDirection |= DIR_UP;
 			if (pKeyBuffer[VK_NEXT] & 0xF0 || pKeyBuffer[VkKeyScan('f')] & 0xF0) dwDirection |= DIR_DOWN;
 		}
 		float cxDelta = 0.0f, cyDelta = 0.0f;
