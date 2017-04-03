@@ -319,6 +319,7 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 
 	D3DXVECTOR4 planes[3][4];
 
+	// 캐릭터 좌표 월드좌표로 변경
 	for (int i = 0; i < 4; ++i)
 	{
 		D3DXVec3Transform(&planes[0][i], &plane1[i], &m_d3dxmtxWorld);
@@ -329,10 +330,15 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 
 	for (int i = 0; i < nIndex; i += 3)
 	{
+		
 		D3DXVECTOR4 p[3];
+
+		//각 정점 월드 좌표로 변환
 		D3DXVec3Transform(&p[0], &mVertices[i].m_d3dxvPosition, &pShader->m_ppObjects[0]->m_d3dxmtxWorld);
 		D3DXVec3Transform(&p[1], &mVertices[i + 1].m_d3dxvPosition, &pShader->m_ppObjects[0]->m_d3dxmtxWorld);
 		D3DXVec3Transform(&p[2], &mVertices[i + 2].m_d3dxvPosition, &pShader->m_ppObjects[0]->m_d3dxmtxWorld);
+
+		//x, y, z, 최고 최저값 찾기
 		float minX = p[0].x, maxX = p[0].x;
 		float minY = p[0].y, maxY = p[0].y;
 		float minZ = p[0].z, maxZ = p[0].z;
@@ -348,9 +354,11 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 			if (maxZ < p[j].z) maxZ = p[j].z;
 		}
 
+		// 충돌 체크
+
 		for (int j = 0; j < 4; ++j)
 		{
-			
+			// 바닥과 y축 체크
 			if (minX <= planes[0][j].x && maxX >= planes[0][j].x && minZ <= planes[0][j].z && maxZ >= planes[0][j].z)
 			{
 				if (maxY >= planes[0][j].y + dxvShift.y)
@@ -359,6 +367,7 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 				}
 			}
 
+			//x축 체크
 			if (minY < planes[2][j].y && maxY > planes[2][j].y && minZ < planes[2][j].z && maxZ > planes[2][j].z)
 			{
 				if( ( dxvShift.x < 0.0f &&  maxX < planes[2][j].x + dxvShift.x ) || (dxvShift.x > 0.0f &&  minX < planes[2][j].x + dxvShift.x))
@@ -367,6 +376,7 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 				}
 			}
 
+			//z축 체크
 			if (minY < planes[2][j].y && maxY > planes[2][j].y && minX < planes[2][j].x && maxX > planes[2][j].x)
 			{
 				if (minZ < planes[2][j].z + dxvShift.z && maxZ > planes[2][j].z + dxvShift.z)

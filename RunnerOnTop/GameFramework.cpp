@@ -269,11 +269,14 @@ void CGameFramework::BuildObjects()
 	//pAirplanePlyer->Rotate(90.0f, 90.0f, 0.0f);
 	CState *pState = new CState();
 	CAnimationClip *pAnimationClip = new CAnimationClip();
+
 	pAnimationClip->LoadAnimation("idle");
 	pAnimationClip->LoadAnimation("run");
+	pAnimationClip->LoadAnimation("jump");
+
 
 	pState->SetAnimationClip(pAnimationClip);
-
+	pState->SetTimer(&m_GameTimer);
 	pAirplanePlyer->SetState(pState);
 	m_ppPlayers[0] = pAirplanePlyer;
 

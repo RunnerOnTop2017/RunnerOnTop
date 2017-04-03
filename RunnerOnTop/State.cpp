@@ -7,6 +7,8 @@ CState::CState()
 	m_state = STATE_IDLE;
 	frame = 0;
 	frame2 = 0;
+	currentStateName = "idle";
+
 }
 
 
@@ -26,18 +28,30 @@ void CState::ChangeState(STATENUMBER newState)
 	{
 	case STATE_IDLE:
 		m_state = STATE_IDLE;
+		currentStateName.clear();
+		currentStateName = "idle";
+
 		break;
 	case STATE_RUN:
 		if(m_state != STATE_RUN)
 			m_state = STATE_RUN;
+		currentStateName.clear();
+		currentStateName = "run";
+
 		break;
 	case STATE_JUMP:
 		m_state = m_state % 10 + STATE_JUMP;
+		currentStateName.clear();
+		currentStateName = "jump";
 		break;
-
 	}
 	if(prev!= m_state)
 		frame = 0;
+}
+
+void CState::SetTimer(CGameTimer * timer)
+{
+	pTimer = timer;
 }
 
 void CState::SetAnimationClip(CAnimationClip* clip)
@@ -67,6 +81,9 @@ void CState::ProcessInput(UINT uMessage, WPARAM wParam, LPARAM lParam)
 		case 0x57: // W key
 			ChangeState(STATE_IDLE);
 			break;
+		case VK_SPACE:
+			ChangeState(STATE_JUMP);
+			break;
 		}
 
 		break;
@@ -80,37 +97,21 @@ void CState::ProcessInput(UINT uMessage, WPARAM wParam, LPARAM lParam)
 
 D3DXMATRIX * CState::GetAnimation()
 {
-	std::string str ="";
-	switch (m_state)
-	{
-	case STATE_IDLE:
-		str = "idle";
-			break;
-	case STATE_RUN:
-		str = "run";
-		break;
-	}
+	
 	D3DXMATRIX *buf = NULL;
+	if (frame != 0 && m_pAnimationClip->GetCurrentMatirxSize((char *)currentStateName.c_str()) == frame && m_state == STATE_JUMP)
+		ChangeState(STATE_IDLE);
+
 	if (m_state == STATE_RUN)
 	{
-		return m_pAnimationClip->GetBlenAnimation((char *)str.c_str(), "idle", frame++, frame2++, 0.5f, buf);
+		//return m_pAnimationClip->GetBlenAnimation((char *)str.c_str(), "idle", frame++, frame2++, 0.5f, buf);
 	}
-	return m_pAnimationClip->GetAnimation((char *)str.c_str(), frame++, buf);
+	pTimer->GetTimeElapsed();
+	return m_pAnimationClip->GetAnimation((char *)currentStateName.c_str(), frame++, buf);
 	
 }
 
 int CState::GetBoneSize()
 {
-	std::string str = "";
-	switch (m_state)
-	{
-	case STATE_IDLE:
-		str = "idle";
-		break;
-	case STATE_RUN:
-		str = "run";
-		break;
-	}
-
-	return m_pAnimationClip->GetBoneSize((char*)str.c_str());
+	return m_pAnimationClip->GetBoneSize((char*)currentStateName.c_str());
 }

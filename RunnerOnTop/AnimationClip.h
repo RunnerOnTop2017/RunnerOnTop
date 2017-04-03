@@ -32,7 +32,7 @@ class CAnimationClip
 private:
 	std::map<std::string, CAnimation*> DATA;
 	D3DXMATRIX* m_pblendedMatrix;
-
+	
 public:
 	CAnimationClip();
 	~CAnimationClip();
@@ -47,4 +47,6 @@ public:
 
 	// 블랜딩된 애니메이션을 얻어올 수 있다.  
 	D3DXMATRIX* GetBlenAnimation(char* name_a, char* name_b, int frame_a, int frame_b, float ratio, D3DXMATRIX* buf);
+
+	int GetCurrentMatirxSize(char * name);
 };

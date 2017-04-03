@@ -14,6 +14,8 @@ class CState
 	STATENUMBER m_state;
 	CAnimationClip * m_pAnimationClip;
 	CGameTimer * pTimer;
+	std::string currentStateName;
+	float time;
 	int frame;
 	int frame2;
 public:
@@ -21,7 +23,7 @@ public:
 	~CState();
 	STATENUMBER GetState();
 	void ChangeState(STATENUMBER newState);
-
+	void SetTimer(CGameTimer * timer);
 	void SetAnimationClip(CAnimationClip* clip);
 
 	void ProcessInput(UINT uMessage, WPARAM wParam, LPARAM lParam);

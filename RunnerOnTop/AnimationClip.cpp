@@ -117,8 +117,7 @@ bool CAnimationClip::LoadAnimation(char * name)
 
 D3DXMATRIX* CAnimationClip::GetAnimation(char * name, int frame, D3DXMATRIX * buf)
 {
-	return DATA.find(name)->second->GetMatrixByFrame(frame);
-	//return true;
+ 	return DATA.find(name)->second->GetMatrixByFrame(frame);
 }
 
 int CAnimationClip::GetBoneSize(char * name)
@@ -143,4 +142,9 @@ D3DXMATRIX* CAnimationClip::GetBlenAnimation(char * name_a, char * name_b, int f
 	}
 	
 	return m_pblendedMatrix;
+}
+
+int CAnimationClip::GetCurrentMatirxSize(char * name)
+{
+	return DATA.find(name)->second->GetFrameSize();
 }
