@@ -275,3 +275,12 @@ public:
 	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext);
 };
 
+class CFloorMesh : public CMeshTextured
+{
+public:
+	CFloorMesh(ID3D11Device *pd3dDevice, float fWidth = 2.0f, float fHeight = 2.0f, float fDepth = 2.0f);
+	virtual ~CFloorMesh();
+
+	virtual void SetRasterizerState(ID3D11Device *pd3dDevice);
+	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext);
+};

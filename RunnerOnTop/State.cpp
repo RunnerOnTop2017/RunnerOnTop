@@ -83,6 +83,9 @@ void CState::ProcessInput(UINT uMessage, WPARAM wParam, LPARAM lParam)
 		case 0x57: // W key
 			ChangeState(STATE_RUN);
 			break;
+		case VK_SPACE:
+			ChangeState(STATE_JUMP);
+			break;
 		}
 		break;
 
@@ -93,9 +96,7 @@ void CState::ProcessInput(UINT uMessage, WPARAM wParam, LPARAM lParam)
 		case 0x57: // W key
 			ChangeState(STATE_IDLE);
 			break;
-		case VK_SPACE:
-			ChangeState(STATE_JUMP);
-			break;
+	
 		}
 		break;
 
@@ -118,8 +119,14 @@ D3DXMATRIX * CState::GetAnimation()
 
 	}
 	time += pTimer->GetTimeElapsed();
-	std::cout << m_prev_state <<std::endl;
-	if (time > TIME_ANIMATE_ELAPSED * 1.5f)
+	std::cout << hashMap.find(m_state)->second <<std::endl;
+	if (STATE_RUNJUMP == m_state && time > TIME_ANIMATE_ELAPSED * 3.0f)
+	{
+		frame += 1;
+		frame2 += 1;
+		time = 0;
+	}
+	else if (time > TIME_ANIMATE_ELAPSED * 1.5f && STATE_RUNJUMP != m_state)
 	{
 		frame2 += 1;
 		frame += 1;

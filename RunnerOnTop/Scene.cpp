@@ -117,9 +117,9 @@ void CScene::BuildLights(ID3D11Device *pd3dDevice)
 	//3°³ÀÇ Á¶¸í(Á¡ ±¤¿ø, ½ºÆÌ ±¤¿ø, ¹æÇâ¼º ±¤¿ø)À» ¼³Á¤ÇÑ´Ù.
 	m_pLights->m_pLights[0].m_bEnable = 1.0f;
 	m_pLights->m_pLights[0].m_nType = DIRECTIONAL_LIGHT;
-	m_pLights->m_pLights[0].m_d3dxcAmbient = D3DXCOLOR(0.8f, 0.8f, 0.8f, 0.5f);
+	m_pLights->m_pLights[0].m_d3dxcAmbient = D3DXCOLOR(0.5f, 0.5f, 0.5f, 0.3f);
 	m_pLights->m_pLights[0].m_d3dxcDiffuse = D3DXCOLOR(0.5f, 0.5f, 0.5f, 0.3f);
-	m_pLights->m_pLights[0].m_d3dxcSpecular = D3DXCOLOR(0.5f, 0.5f, 0.5f, 1.0f);
+	m_pLights->m_pLights[0].m_d3dxcSpecular = D3DXCOLOR(0.5f, 0.5f, 0.5f, 0.0f);
 	m_pLights->m_pLights[0].m_d3dxvDirection = D3DXVECTOR3(0.0f, -1.0f, -1.0f);
 	
 	D3D11_BUFFER_DESC d3dBufferDesc;

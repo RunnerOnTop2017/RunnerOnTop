@@ -630,3 +630,74 @@ void CSkyBoxMesh::Render(ID3D11DeviceContext * pd3dDeviceContext)
 {
 	CMeshTextured::Render(pd3dDeviceContext);
 }
+
+CFloorMesh::CFloorMesh(ID3D11Device * pd3dDevice, float fWidth, float fHeight, float fDepth) : CMeshTextured(pd3dDevice)
+{
+	m_nStride = sizeof(CTexturedNormalVertex);
+	m_nOffset = 0;
+	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+	
+	// 0  1
+	// 2  3
+	m_nVertices = 4;
+	int i = 0;
+	m_pVertices = new CTexturedNormalVertex[4];
+	m_pVertices[i++] = { -10000.0f, 0.0f, 10000.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f }; //0
+	m_pVertices[i++] = { 10000.0f, 0.0f, 10000.0f, 0.0f, 1.0f, 0.0f, 2.0f, 0.0f }; // 1
+	m_pVertices[i++] = { -10000.0f, 0.0f, -10000.0f, 0.0f, 1.0f, 0.0f, 0.0f, 2.0f }; // 2
+	m_pVertices[i++] = { 10000.0f, 0.0f, -10000.0f, 0.0f, 1.0f, 0.0f, 2.0f,2.0f }; // 3
+	
+
+	D3D11_BUFFER_DESC d3dBufferDesc;
+	ZeroMemory(&d3dBufferDesc, sizeof(D3D11_BUFFER_DESC));
+	d3dBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	d3dBufferDesc.ByteWidth = m_nStride * m_nVertices;
+	d3dBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	d3dBufferDesc.CPUAccessFlags = 0;
+	D3D11_SUBRESOURCE_DATA d3dBufferData;
+	ZeroMemory(&d3dBufferData, sizeof(D3D11_SUBRESOURCE_DATA));
+	d3dBufferData.pSysMem = m_pVertices;
+	pd3dDevice->CreateBuffer(&d3dBufferDesc, &d3dBufferData, &m_pd3dVertexBuffer);
+
+	WORD * pIndices = new WORD[6];
+	m_nIndices = 6;
+
+	pIndices[0] = 0;
+	pIndices[1] = 1;
+	pIndices[2] = 2;
+	pIndices[3] = 1;
+	pIndices[4] = 3;
+	pIndices[5] = 2;
+
+
+
+
+	ZeroMemory(&d3dBufferDesc, sizeof(D3D11_BUFFER_DESC));
+	d3dBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	d3dBufferDesc.ByteWidth = sizeof(WORD) * m_nIndices;
+	d3dBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	d3dBufferDesc.CPUAccessFlags = 0;
+	ZeroMemory(&d3dBufferData, sizeof(D3D11_SUBRESOURCE_DATA));
+	d3dBufferData.pSysMem = pIndices;
+	//인덱스 버퍼를 생성한다.
+	pd3dDevice->CreateBuffer(&d3dBufferDesc, &d3dBufferData, &m_pd3dIndexBuffer);
+}
+
+CFloorMesh::~CFloorMesh()
+{
+}
+
+void CFloorMesh::SetRasterizerState(ID3D11Device * pd3dDevice)
+{
+	D3D11_RASTERIZER_DESC d3dRasterizerDesc;
+	ZeroMemory(&d3dRasterizerDesc, sizeof(D3D11_RASTERIZER_DESC));
+	d3dRasterizerDesc.CullMode = D3D11_CULL_NONE;
+	d3dRasterizerDesc.FillMode = D3D11_FILL_SOLID;
+	//d3dRasterizerDesc.DepthClipEnable = true;
+	pd3dDevice->CreateRasterizerState(&d3dRasterizerDesc, &m_pd3dRasterizerState);
+}
+
+void CFloorMesh::Render(ID3D11DeviceContext * pd3dDeviceContext)
+{
+	CMeshTextured::Render(pd3dDeviceContext);
+}

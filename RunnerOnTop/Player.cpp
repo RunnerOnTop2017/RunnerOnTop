@@ -69,7 +69,7 @@ void CPlayer::Move(UINT dwDirection, float fDistance, bool bUpdateVelocity)
 		if (dwDirection & DIR_RIGHT) d3dxvShift += m_d3dxvRight * fDistance;
 		if (dwDirection & DIR_LEFT) d3dxvShift -= m_d3dxvRight * fDistance;
 		//‘Page Up’을 누르면 로컬 y-축 방향으로 이동한다. ‘Page Down’을 누르면 반대 방향으로 이동한다.
-		if (dwDirection & DIR_UP) d3dxvShift += m_d3dxvUp * fDistance;// *20.0f;
+		if ((dwDirection & DIR_UP) && (m_pState->GetState() != STATE_RUNJUMP)) d3dxvShift += m_d3dxvUp * fDistance * 4000.0f;
 		if (dwDirection & DIR_DOWN) d3dxvShift -= m_d3dxvUp * fDistance;
 
 		//플레이어를 현재 위치 벡터에서 d3dxvShift 벡터 만큼 이동한다.
@@ -205,7 +205,7 @@ void CPlayer::Update(float fTimeElapsed)
 	if (nCurrentCameraMode == THIRD_PERSON_CAMERA)
 	{
 		D3DXVECTOR3 look = m_d3dxvPosition;
-		look.y += 40.0f;
+		look.y += 90.0f;
 		m_pCamera->SetLookAt(look);//m_d3dxvPosition);
 	}
 	//카메라의 카메라 변환 행렬을 다시 생성한다.
@@ -298,8 +298,8 @@ void CPlayer::Render(ID3D11DeviceContext *pd3dDeviceContext)
 
 bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 {
-
 	D3DXVECTOR3 dxvShift = m_d3dxvVelocity * fTimeElapsed;
+
 	CTextureShader *pShader = (CTextureShader*)m_pPlayerUpdatedContext;
 	
 	CTexturedNormalVertex *mVertices = pShader->m_ppObjects[0]->m_pMesh->m_pVertices;
@@ -476,7 +476,7 @@ void CAirplanePlayer::ChangeCamera(ID3D11Device *pd3dDevice, DWORD nNewCameraMod
 		SetMaxVelocityY(400.0f);
 		m_pCamera = OnChangeCamera(pd3dDevice, THIRD_PERSON_CAMERA, nCurrentCameraMode);
 		m_pCamera->SetTimeLag(0.25f);
-		m_pCamera->SetOffset(D3DXVECTOR3(0.0f,50.0f, -100.0f));
+		m_pCamera->SetOffset(D3DXVECTOR3(0.0f,150.0f, -300.0f));
 		m_pCamera->GenerateProjectionMatrix(1.00f, 5000.0f, ASPECT_RATIO, 90.0f);
 		break;
 	default:

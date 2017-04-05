@@ -332,26 +332,39 @@ void CTextureShader::BuildObjects(ID3D11Device * pd3dDevice)
 	
 	CMesh *pMeshIlluminatedTextured = new CMeshTextured(pd3dDevice, 12.0f, 12.0f, 12.0f);//CCubeMeshIlluminatedTextured(pd3dDevice, 12.0f, 12.0f, 12.0f);
 
-	int xObjects = 3, yObjects = 3, zObjects = 3, i = 0, nObjectTypes = 2;
-	m_nObjects = 1;//((xObjects * 2) + 1) * ((yObjects * 2) + 1) * ((zObjects * 2) + 1);
+	int i = 0, nObjectTypes = 2;
+	m_nObjects = 2;//((xObjects * 2) + 1) * ((yObjects * 2) + 1) * ((zObjects * 2) + 1);
 	m_ppObjects = new CGameObject*[m_nObjects];
 
-	float fxPitch = 12.0f * 1.7f;
-	float fyPitch = 12.0f * 1.7f;
-	float fzPitch = 12.0f * 1.7f;
-	CGameObject *pRotatingObject = NULL;
 
-	pRotatingObject = new CGameObject();
-	pRotatingObject->SetMesh(pMeshIlluminatedTextured);
-	pRotatingObject->SetMaterial(ppMaterials[0]);
-	pRotatingObject->SetTexture(p_Texture);
+	CGameObject *pObject = NULL;
 
-	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
-	pRotatingObject->Rotate(&D3DXVECTOR3(1.0f, 0.0f, 0.0f), -90.0f);
+	pObject = new CGameObject();
+	pObject->SetMesh(pMeshIlluminatedTextured);
+	pObject->SetMaterial(ppMaterials[0]);
+	pObject->SetTexture(p_Texture);
+
+	pObject->SetPosition(0.0f, 0.0f, 0.0f);
+	pObject->Rotate(&D3DXVECTOR3(1.0f, 0.0f, 0.0f), -90.0f);
 	//pRotatingObject->
-	pRotatingObject->Scale(0.4f);
-	m_ppObjects[i++] = pRotatingObject;
+	pObject->Scale(0.4f);
+	m_ppObjects[i++] = pObject;
 
+	p_Texture = new CTexture(1);
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Maps\\Texture\\floor.png"), NULL, NULL, &pd3dTexture, NULL);
+	p_Texture->SetTexture(0, pd3dTexture, pd3dSamplerState);
+
+	CMesh *pMesh = new CFloorMesh(pd3dDevice);
+	pObject = new CGameObject();
+	pObject->SetMesh(pMesh);
+	pObject->SetMaterial(ppMaterials[0]);
+	pObject->SetTexture(p_Texture);
+
+	pObject->SetPosition(0.0f, 0.0f, 0.0f);
+	//pObject->Rotate(
+	
+	pObject->Scale(1.0f);
+	m_ppObjects[i++] = pObject;
 
 
 	CreateShaderVariables(pd3dDevice);
