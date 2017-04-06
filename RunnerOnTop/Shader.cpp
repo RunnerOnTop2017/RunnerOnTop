@@ -321,7 +321,7 @@ void CTextureShader::BuildObjects(ID3D11Device * pd3dDevice)
 	d3dSamplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
 	d3dSamplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
 	d3dSamplerDesc.MinLOD = 0;
-	d3dSamplerDesc.MaxLOD = 0;
+	d3dSamplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
 	pd3dDevice->CreateSamplerState(&d3dSamplerDesc, &pd3dSamplerState);
 
 	ID3D11ShaderResourceView *pd3dTexture = NULL;

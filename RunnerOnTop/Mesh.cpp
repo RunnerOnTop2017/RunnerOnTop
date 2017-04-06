@@ -643,9 +643,9 @@ CFloorMesh::CFloorMesh(ID3D11Device * pd3dDevice, float fWidth, float fHeight, f
 	int i = 0;
 	m_pVertices = new CTexturedNormalVertex[4];
 	m_pVertices[i++] = { -10000.0f, 0.0f, 10000.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f }; //0
-	m_pVertices[i++] = { 10000.0f, 0.0f, 10000.0f, 0.0f, 1.0f, 0.0f, 2.0f, 0.0f }; // 1
-	m_pVertices[i++] = { -10000.0f, 0.0f, -10000.0f, 0.0f, 1.0f, 0.0f, 0.0f, 2.0f }; // 2
-	m_pVertices[i++] = { 10000.0f, 0.0f, -10000.0f, 0.0f, 1.0f, 0.0f, 2.0f,2.0f }; // 3
+	m_pVertices[i++] = { 10000.0f, 0.0f, 10000.0f, 0.0f, 1.0f, 0.0f, 32.0f, 0.0f }; // 1
+	m_pVertices[i++] = { -10000.0f, 0.0f, -10000.0f, 0.0f, 1.0f, 0.0f, 0.0f, 32.0f }; // 2
+	m_pVertices[i++] = { 10000.0f, 0.0f, -10000.0f, 0.0f, 1.0f, 0.0f, 32.0f,32.0f }; // 3
 	
 
 	D3D11_BUFFER_DESC d3dBufferDesc;
