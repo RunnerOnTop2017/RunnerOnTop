@@ -8,6 +8,24 @@ CAnimation::CAnimation()
 	m_AnimationByFrame = NULL;
 }
 
+CAnimation::CAnimation(char * pname, int bSize, int mSize, std::vector<D3DXMATRIX*> AnimData)
+{
+	bonesize = bSize;
+	m_size = mSize;
+	name = pname;
+	m_pAnimationData = AnimData;
+
+	m_AnimationByFrame = new D3DXMATRIX*[m_size];
+	for (int i = 0; i < m_size; ++i)
+	{
+		m_AnimationByFrame[i] = new D3DXMATRIX[bonesize];
+		for (int j = 0; j < bonesize; ++j)
+		{
+			m_AnimationByFrame[i][j] = m_pAnimationData[j][i];
+		}
+	}
+}
+
 CAnimation::CAnimation(const char * pAnimationName)
 {
 	bonesize = 0;
@@ -111,6 +129,29 @@ bool CAnimationClip::LoadAnimation(char * name)
 	if (ret.second)
 	{
 		ret.first->second = new CAnimation(name);
+	}
+	return true;
+}
+
+bool CAnimationClip::LoadAnimation(char * name, int len)
+{
+	CAnimation anm(name);
+
+	int fSize = anm.GetFrameSize();
+	int bSize = anm.GetBoneSize();
+	D3DXMATRIX** Animation = new D3DXMATRIX*[fSize];
+	for (int i = 0; i < fSize; ++i)
+		Animation[i] = anm.GetMatrixByFrame(i);
+
+	float fTime = 0.0f;
+	float elapse = (float)fSize / float(len);
+	std::vector<D3DXMATRIX*> clip;
+	clip.push_back(Animation[0]);
+	while (fTime < len)
+	{
+		
+
+		fTime += elapse;
 	}
 	return true;
 }

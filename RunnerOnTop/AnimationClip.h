@@ -10,9 +10,9 @@ class CAnimation
 	D3DXMATRIX** m_AnimationByFrame;
 public:
 	CAnimation();
+	CAnimation(char *name, int bSize, int mSize, std::vector<D3DXMATRIX*> AnimData);
 	CAnimation(const char* pAnimationName);
 	CAnimation(const CAnimation& anm);
-	CAnimation(CAnimation&& source) : bonesize(source.bonesize), m_size(source.m_size), name(source.name), m_pAnimationData(source.m_pAnimationData), m_AnimationByFrame(source.m_AnimationByFrame) {}
 	
 	~CAnimation();
 
@@ -39,7 +39,8 @@ public:
 	
 	// 파일로 부터 애니메이션 추가
 	bool LoadAnimation(char *name);
-	
+	// 보간작업 추가
+	bool LoadAnimation(char *name, int len);
 	// 일정 프레임의 애니메이션 행렬을 얻어올 수 있다.
 	D3DXMATRIX* GetAnimation(char* name, int frame, D3DXMATRIX* buf);
 
