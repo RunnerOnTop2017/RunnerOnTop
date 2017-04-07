@@ -272,7 +272,7 @@ void CGameFramework::BuildObjects()
 
 	pAnimationClip->LoadAnimation("idle");
 	pAnimationClip->LoadAnimation("run");
-	pAnimationClip->LoadAnimation("jump");
+	pAnimationClip->LoadAnimation("jump", 40);
 	pAnimationClip->LoadAnimation("jumping");
 
 

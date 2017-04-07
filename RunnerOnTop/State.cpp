@@ -120,7 +120,7 @@ D3DXMATRIX * CState::GetAnimation()
 	}
 	time += pTimer->GetTimeElapsed();
 	std::cout << hashMap.find(m_state)->second <<std::endl;
-	if (STATE_RUNJUMP == m_state && time > TIME_ANIMATE_ELAPSED * 3.0f)
+	if (STATE_RUNJUMP == m_state && time > TIME_ANIMATE_ELAPSED * 1.5f)
 	{
 		frame += 1;
 		frame2 += 1;

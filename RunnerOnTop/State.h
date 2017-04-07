@@ -16,6 +16,7 @@ class CState
 {
 	STATENUMBER m_state;
 	STATENUMBER m_prev_state;
+	STATENUMBER m_next_state;
 	CAnimationClip * m_pAnimationClip;
 	CGameTimer * pTimer;
 	float time;

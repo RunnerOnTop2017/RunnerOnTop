@@ -16,14 +16,19 @@ CAnimation::CAnimation(char * pname, int bSize, int mSize, std::vector<D3DXMATRI
 	m_pAnimationData = AnimData;
 
 	m_AnimationByFrame = new D3DXMATRIX*[m_size];
-	for (int i = 0; i < m_size; ++i)
-	{
-		m_AnimationByFrame[i] = new D3DXMATRIX[bonesize];
-		for (int j = 0; j < bonesize; ++j)
+	//for (int i = 0; i < m_size; ++i)
+	//{
+	//	m_AnimationByFrame[i] = new D3DXMATRIX[bonesize];
+		/*for (int j = 0; j < bonesize; ++j)
 		{
 			m_AnimationByFrame[i][j] = m_pAnimationData[j][i];
+		}*/
+	//}
+
+		for (int j = 0; j < m_pAnimationData.size(); ++j)
+		{
+			m_AnimationByFrame[j] = m_pAnimationData[j];
 		}
-	}
 }
 
 CAnimation::CAnimation(const char * pAnimationName)
@@ -110,6 +115,11 @@ D3DXMATRIX * CAnimation::GetMatrixByFrame(int & frame)
 	return m_AnimationByFrame[frame%m_size];
 }
 
+std::vector<D3DXMATRIX*> CAnimation::GetFullAnimationData()
+{
+	return m_pAnimationData;
+}
+
 
 CAnimationClip::CAnimationClip()
 {
@@ -143,15 +153,35 @@ bool CAnimationClip::LoadAnimation(char * name, int len)
 	for (int i = 0; i < fSize; ++i)
 		Animation[i] = anm.GetMatrixByFrame(i);
 
-	float fTime = 0.0f;
 	float elapse = (float)fSize / float(len);
+	float fTime = elapse;
 	std::vector<D3DXMATRIX*> clip;
 	clip.push_back(Animation[0]);
-	while (fTime < len)
+	int n = 1;
+	for(int k = 0; k<len-1; ++k)
 	{
-		
+
+		if (fTime + elapse >n && n< fSize-1)
+		{
+			++n;
+		}
+
+		float ratio = fTime - (n - 1);
+
+		D3DXMATRIX *matrixByBone = new D3DXMATRIX[bSize];
+
+		for (int i = 0; i < bSize; ++i)
+		{
+			matrixByBone[i] = ((Animation[n-1][i]*(1.0f-ratio)) + (Animation[n][i]*ratio));
+		}
+		clip.push_back(matrixByBone);
 
 		fTime += elapse;
+	}
+	auto ret = DATA.insert({ name, nullptr });
+	if (ret.second)
+	{
+		ret.first->second = new CAnimation(name, bSize, clip.size(), clip);
 	}
 	return true;
 }

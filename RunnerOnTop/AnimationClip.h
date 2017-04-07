@@ -25,6 +25,9 @@ public:
 
 	//Get Matrix
 	D3DXMATRIX* GetMatrixByFrame(int& frame);
+
+	//
+	std::vector<D3DXMATRIX*> GetFullAnimationData();
 };
 
 class CAnimationClip
