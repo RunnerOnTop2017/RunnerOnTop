@@ -261,7 +261,7 @@ void CGameFramework::BuildObjects()
 	//pAirplanePlyer->Scale(0.1f);
 	CCamera *pCamera = pAirplanePlyer->GetCamera();
 	pCamera->SetViewport(m_pd3dDeviceContext, 0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
-	pCamera->GenerateProjectionMatrix(1.01f, 500000.0f, ASPECT_RATIO, 60.0f);
+	pCamera->GenerateProjectionMatrix(1.01f, 500000.0f, ASPECT_RATIO, 45.0f);
 	pCamera->GenerateViewMatrix();
 
 	
@@ -272,6 +272,9 @@ void CGameFramework::BuildObjects()
 
 	pAnimationClip->LoadAnimation("idle");
 	pAnimationClip->LoadAnimation("run");
+	pAnimationClip->LoadAnimation("left");
+	pAnimationClip->LoadAnimation("right");
+	pAnimationClip->LoadAnimation("backward");
 	pAnimationClip->LoadAnimation("jump", 40);
 	pAnimationClip->LoadAnimation("jumping");
 

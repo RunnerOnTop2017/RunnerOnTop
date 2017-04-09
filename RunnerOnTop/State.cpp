@@ -8,6 +8,10 @@ CState::CState()
 	hashMap.insert({ STATE_RUN, "run" });
 	hashMap.insert({ STATE_IDLEJUMP, "jumping" });
 	hashMap.insert({ STATE_RUNJUMP, "jump" });
+	hashMap.insert({ STATE_LEFT, "left" });
+	hashMap.insert({ STATE_RIGHT, "right" });
+	hashMap.insert({ STATE_BACK, "backward" });
+
 	
 	m_prev_state = STATE_IDLE;
 	m_state = STATE_IDLE;
@@ -32,24 +36,29 @@ void CState::ChangeState(STATENUMBER newState)
 	switch (newState)
 	{
 	case STATE_IDLE:
-		m_state = STATE_IDLE;
+		if (m_state == STATE_RUNJUMP)
+		{
+			m_next_state = STATE_IDLE;
+		}
+		else
+			m_state = STATE_IDLE;
 		
-
 		break;
 	case STATE_RUN:
 		if(m_state != STATE_RUN)
 			m_state = STATE_RUN;
-	
-
 		break;
 	case STATE_JUMP:
 		if (m_state == STATE_IDLE)
 		{
 			m_state = STATE_IDLEJUMP;
+			m_next_state = STATE_IDLE;
+
 		}
 		else if (m_state == STATE_RUN)
 		{
 			m_state = STATE_RUNJUMP;
+			m_next_state = STATE_RUN;
 		}
 		break;
 	}
@@ -90,7 +99,6 @@ void CState::ProcessInput(UINT uMessage, WPARAM wParam, LPARAM lParam)
 		break;
 
 	case WM_KEYUP:
-		
 		switch (wParam)
 		{
 		case 0x57: // W key
@@ -110,28 +118,36 @@ void CState::ProcessInput(UINT uMessage, WPARAM wParam, LPARAM lParam)
 D3DXMATRIX * CState::GetAnimation()
 {
 	D3DXMATRIX *buf = NULL;
-	if (frame != 0 && m_pAnimationClip->GetCurrentMatirxSize((char *)hashMap.find(m_state)->second.c_str()) == frame && (m_state == STATE_IDLEJUMP || m_state == STATE_RUNJUMP))
-	{
-		if(STATE_IDLEJUMP == m_state)
-			ChangeState(STATE_IDLE);
-		if (STATE_RUNJUMP == m_state)
-			ChangeState(STATE_RUN);
 
-	}
 	time += pTimer->GetTimeElapsed();
 	std::cout << hashMap.find(m_state)->second <<std::endl;
-	if (STATE_RUNJUMP == m_state && time > TIME_ANIMATE_ELAPSED * 1.5f)
-	{
-		frame += 1;
-		frame2 += 1;
-		time = 0;
-	}
-	else if (time > TIME_ANIMATE_ELAPSED * 1.5f && STATE_RUNJUMP != m_state)
+
+	 if (time > TIME_ANIMATE_ELAPSED * 1.5f)
 	{
 		frame2 += 1;
 		frame += 1;
 		time = 0;
 	}
+	 if ((m_state == STATE_RUNJUMP || m_state == STATE_IDLEJUMP) && m_next_state != m_state)
+	 {
+		 if (frame > m_pAnimationClip->GetCurrentMatirxSize((char*)hashMap.find(m_state)->second.c_str()) * 0.9f)
+		 {
+			 if (ratio >= 1.0f)
+			 {
+				 ratio = 0.0f;
+				 m_state = m_next_state;
+				 frame2 = 0;
+			 }
+			 else
+			 {
+				 ratio += 0.1f;
+				 return  m_pAnimationClip->GetBlendAnimation((char*)hashMap.find(m_state)->second.c_str(), (char*)hashMap.find(m_next_state)->second.c_str(),
+					 frame, frame2, 1.0f - ratio, NULL);
+			 }
+			
+		 }
+	 }
+
 	if (m_prev_state != m_state && m_prev_state!= STATE_RUNJUMP)
 	{
 		if (ratio >= 1.0f)

@@ -4,6 +4,9 @@
 #include "Timer.h"
 #define STATE_IDLE 0
 #define STATE_RUN 1
+#define STATE_LEFT 2
+#define STATE_RIGHT 3
+#define STATE_BACK 99
 #define STATE_JUMP 10
 #define STATE_IDLEJUMP 10
 #define STATE_RUNJUMP 11
@@ -17,6 +20,8 @@ class CState
 	STATENUMBER m_state;
 	STATENUMBER m_prev_state;
 	STATENUMBER m_next_state;
+	STATENUMBER m_sub_state;
+
 	CAnimationClip * m_pAnimationClip;
 	CGameTimer * pTimer;
 	float time;
