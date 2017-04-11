@@ -302,7 +302,7 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 
 	CTextureShader *pShader = (CTextureShader*)m_pPlayerUpdatedContext;
 	
-	CTexturedNormalVertex *mVertices = pShader->m_ppObjects[0]->m_pMesh->m_pVertices;
+	CTexturedNormalVertexUVW *mVertices = pShader->m_ppObjects[0]->m_pMesh->m_pVertices;
 	int nIndex = pShader->m_ppObjects[0]->m_pMesh->m_nVertices;
 
 	D3DXVECTOR3 plane1[4]; // ¾Æ·¡

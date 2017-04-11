@@ -290,7 +290,8 @@ struct VS_TEXTUREDUVW_LIGHTING_INPUT
 {
 	float3 position : POSITION;
 	float3 normal : NORMAL;
-	float3 tex2dcoord : TEXCOORD0;
+	float2 tex2dcoord : TEXCOORD0;
+	int textureNum : TEXNUM;
 };
 
 struct VS_TEXTUREDUVW_LIGHTING_OUTPUT
@@ -298,7 +299,8 @@ struct VS_TEXTUREDUVW_LIGHTING_OUTPUT
 	float4 position : SV_POSITION;
 	float3 positionW : POSITION;
 	float3 normalW : NORMAL;
-	float3 tex2dcoord : TEXCOORD0;
+	float2 tex2dcoord : TEXCOORD0;
+	int textureNum : TEXNUM;
 };
 
 
@@ -381,6 +383,7 @@ VS_TEXTUREDUVW_LIGHTING_OUTPUT VSTexturedUVWLighting(VS_TEXTUREDUVW_LIGHTING_INP
 
 	output.position = mul(float4(input.position, 1.0f), mtxWorldViewProjection);
 	output.tex2dcoord = input.tex2dcoord;
+	output.textureNum = input.textureNum;
 
 	return(output);
 }
@@ -475,42 +478,47 @@ float4 PSTexturedUVWLighting(VS_TEXTUREDUVW_LIGHTING_OUTPUT input) : SV_Target
 	{
 		cIllumination = float4(1.0f, 1.0f, 1.0f, 1.0f);
 	}
-	float4 cColor = { 0.0f, 0.0f, 0.0f, 1.0f };
-	int n = (int)input.tex2dcoord.z;
+	float4 cColor = { 1.0f, 1.0f, 0.0f, 1.0f };
+	int n = input.textureNum;
+
 	if (n == 0)
 	{
-		cColor = gtxtTexture[0].Sample(gSamplerState, float2(input.tex2dcoord.x, input.tex2dcoord.y));
+		cColor = gtxtTexture[0].Sample(gSamplerState, input.tex2dcoord);
 	}
 	else if (n == 1)
 	{
-		cColor = gtxtTexture[1].Sample(gSamplerState, float2(input.tex2dcoord.x, input.tex2dcoord.y));
+		cColor = gtxtTexture[1].Sample(gSamplerState, input.tex2dcoord);
 	}
 	else if (n == 2)
 	{
-		cColor = gtxtTexture[2].Sample(gSamplerState, float2(input.tex2dcoord.x, input.tex2dcoord.y));
+		cColor = gtxtTexture[2].Sample(gSamplerState, input.tex2dcoord);
 	}
 	else if (n == 3)
 	{
-		cColor = gtxtTexture[3].Sample(gSamplerState, float2(input.tex2dcoord.x, input.tex2dcoord.y));
+		cColor = gtxtTexture[3].Sample(gSamplerState, input.tex2dcoord);
 	}
 	else if (n == 4)
 	{
-		cColor = gtxtTexture[4].Sample(gSamplerState, float2(input.tex2dcoord.x, input.tex2dcoord.y));
+		cColor = gtxtTexture[4].Sample(gSamplerState, input.tex2dcoord);
 	}
 	else if (n == 5)
 	{
-		cColor = gtxtTexture[5].Sample(gSamplerState, float2(input.tex2dcoord.x, input.tex2dcoord.y));
+		cColor = gtxtTexture[5].Sample(gSamplerState, input.tex2dcoord);
 	}
 	else if (n == 6)
 	{
-		cColor = gtxtTexture[6].Sample(gSamplerState, float2(input.tex2dcoord.x, input.tex2dcoord.y));
+		cColor = gtxtTexture[6].Sample(gSamplerState, input.tex2dcoord);
 	}
 	else if (n == 7)
 	{
-		cColor = gtxtTexture[7].Sample(gSamplerState, float2(input.tex2dcoord.x, input.tex2dcoord.y));
+		cColor = gtxtTexture[7].Sample(gSamplerState, input.tex2dcoord);
+	}
+	else
+	{
+		cColor = gtxtTexture[0].Sample(gSamplerState, input.tex2dcoord);
 	}
 	//float4 cColor = gtxtTexture[0].Sample(gSamplerState, input.tex2dcoord) * cIllumination;
-	return cColor;
+	return cColor *cIllumination;
 }
 
 

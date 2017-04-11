@@ -278,10 +278,11 @@ void CTextureShader::CreateShader(ID3D11Device * pd3dDevice)
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "TEXCOORD0", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TEXNUM", 0, DXGI_FORMAT_R32_SINT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
 	UINT nElements = ARRAYSIZE(d3dInputLayout);
-	CreateVertexShaderFromFile(pd3dDevice, L"Effect.fx", "VSTexturedLighting", "vs_4_0", &m_pd3dVertexShader, d3dInputLayout, nElements, &m_pd3dVertexLayout);
-	CreatePixelShaderFromFile(pd3dDevice, L"Effect.fx", "PSTexturedLighting", "ps_4_0", &m_pd3dPixelShader);
+	CreateVertexShaderFromFile(pd3dDevice, L"Effect.fx", "VSTexturedUVWLighting", "vs_4_0", &m_pd3dVertexShader, d3dInputLayout, nElements, &m_pd3dVertexLayout);
+	CreatePixelShaderFromFile(pd3dDevice, L"Effect.fx", "PSTexturedUVWLighting", "ps_4_0", &m_pd3dPixelShader);
 }
 
 void CTextureShader::CreateShaderVariables(ID3D11Device * pd3dDevice)
@@ -326,29 +327,32 @@ void CTextureShader::BuildObjects(ID3D11Device * pd3dDevice)
 
 	ID3D11ShaderResourceView *pd3dTexture = NULL;
 
-	CTexture *p_Texture = new CTexture(1);
-	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Maps\\Texture\\map01_s1.png"), NULL, NULL, &pd3dTexture, NULL);
+	CTexture *p_Texture = new CTexture(3);
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Maps\\Texture\\map01_3.png"), NULL, NULL, &pd3dTexture, NULL);
 	p_Texture->SetTexture(0, pd3dTexture, pd3dSamplerState);
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Maps\\Texture\\map01_1.png"), NULL, NULL, &pd3dTexture, NULL);
+	p_Texture->SetTexture(1, pd3dTexture, pd3dSamplerState);
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Maps\\Texture\\map01_2.png"), NULL, NULL, &pd3dTexture, NULL);
+	p_Texture->SetTexture(2, pd3dTexture, pd3dSamplerState);
 	
 	CMesh *pMeshIlluminatedTextured = new CMeshTextured(pd3dDevice, 12.0f, 12.0f, 12.0f);//CCubeMeshIlluminatedTextured(pd3dDevice, 12.0f, 12.0f, 12.0f);
 
 	int i = 0, nObjectTypes = 2;
 	m_nObjects = 2;//((xObjects * 2) + 1) * ((yObjects * 2) + 1) * ((zObjects * 2) + 1);
 	m_ppObjects = new CGameObject*[m_nObjects];
-
-
 	CGameObject *pObject = NULL;
-
 	pObject = new CGameObject();
 	pObject->SetMesh(pMeshIlluminatedTextured);
 	pObject->SetMaterial(ppMaterials[0]);
 	pObject->SetTexture(p_Texture);
 
 	pObject->SetPosition(0.0f, 0.0f, 0.0f);
-	pObject->Rotate(&D3DXVECTOR3(1.0f, 0.0f, 0.0f), -90.0f);
+	//pObject->Rotate(&D3DXVECTOR3(1.0f, 0.0f, 0.0f), -90.0f);
 	//pRotatingObject->
-	pObject->Scale(0.1f);
+	pObject->Scale(100.0f);
 	m_ppObjects[i++] = pObject;
+
+
 
 	p_Texture = new CTexture(1);
 	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Maps\\Texture\\floor.png"), NULL, NULL, &pd3dTexture, NULL);
@@ -363,7 +367,7 @@ void CTextureShader::BuildObjects(ID3D11Device * pd3dDevice)
 	pObject->SetPosition(0.0f, 0.0f, 0.0f);
 	//pObject->Rotate(
 	
-	pObject->Scale(1.0f);
+	pObject->Scale(0.2f);
 	m_ppObjects[i++] = pObject;
 
 

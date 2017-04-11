@@ -95,6 +95,7 @@ void CState::ProcessInput(UINT uMessage, WPARAM wParam, LPARAM lParam)
 		case VK_SPACE:
 			ChangeState(STATE_JUMP);
 			break;
+		
 		}
 		break;
 

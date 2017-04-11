@@ -86,12 +86,15 @@ class CTexturedNormalVertexUVW
 public:
 	D3DXVECTOR3 m_d3dxvPosition;
 	D3DXVECTOR3 m_d3dxvNormal;
-	D3DXVECTOR3 m_d3dxvTexCoordUVW;
+	D3DXVECTOR2 m_d3dxvTexCoord;
+	int textureN;
 
 	CTexturedNormalVertexUVW() {}
+	CTexturedNormalVertexUVW(float x, float y, float z, float nx, float ny, float nz, float u, float v, int w) {
+		m_d3dxvPosition = D3DXVECTOR3(x, y, z); m_d3dxvNormal = D3DXVECTOR3(nx, ny, nz); m_d3dxvTexCoord = D3DXVECTOR2(u, v);  textureN = w;
+	}
 	~CTexturedNormalVertexUVW() {}
 };
-
 class CSkinnedVertex
 {
 public:
@@ -169,7 +172,7 @@ protected:
 	//정점 데이터가 어떤 프리미티브를 표현하고 있는 가를 나타내는 멤버변수를 선언한다.
 	D3D11_PRIMITIVE_TOPOLOGY m_d3dPrimitiveTopology;
 public:
-	CTexturedNormalVertex *m_pVertices;
+	CTexturedNormalVertexUVW *m_pVertices;
 	UINT m_nVertices;		//개수
 	UINT m_nIndices;
 public:

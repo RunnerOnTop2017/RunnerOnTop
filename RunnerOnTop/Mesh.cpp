@@ -306,15 +306,15 @@ void CMeshIlluminated::Render(ID3D11DeviceContext *pd3dImmediateDeviceContext)
 CMeshTextured::CMeshTextured(ID3D11Device *pd3dDevice, float fWidth, float fHeight, float fDepth) : CMeshIlluminated(pd3dDevice)
 {
 	//m_nVertices;
-	m_nStride = sizeof(CTexturedNormalVertex);
+	m_nStride = sizeof(CTexturedNormalVertexUVW);
 	m_nOffset = 0;
 	m_d3dPrimitiveTopology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
-	FILE *fp = fopen("Data\\Maps\\maps1.arc", "rb");
+	FILE *fp = fopen("Data\\Maps\\map01.src", "rb");
 	int size;
 	fread((char*)&size, sizeof(int), 1, fp);
-	m_pVertices = new CTexturedNormalVertex[size];
-	fread((char*)m_pVertices, sizeof(CTexturedNormalVertex), size, fp);
+	m_pVertices = new CTexturedNormalVertexUVW[size];
+	fread((char*)m_pVertices, sizeof(CTexturedNormalVertexUVW), size, fp);
 	fclose(fp);
 
 	m_nVertices = size;
@@ -370,19 +370,6 @@ CCharacterMesh::CCharacterMesh(ID3D11Device *pd3dDevice, float fWidth, float fHe
 	fclose(fp);
 
 	m_nIndices = indexSize;
-
-	fp = fopen("Data\\Animation\\run.anm", "rb");
-	int BoneSIze, matrixSize;
-	fread((char*)&BoneSIze, sizeof(int), 1, fp);
-	fread((char*)&matrixSize, sizeof(int), 1, fp);
-	for (int i = 0; i < BoneSIze; ++i)
-	{
-		D3DXMATRIX* mMatrix = new D3DXMATRIX[matrixSize];
-		fread((char*)mMatrix, sizeof(D3DXMATRIX), matrixSize, fp);
-		mBoneData.push_back(mMatrix);
-	}
-	AnimSize = matrixSize;
-	fclose(fp);
 
 	D3D11_BUFFER_DESC d3dBufferDesc;
 	ZeroMemory(&d3dBufferDesc, sizeof(D3D11_BUFFER_DESC));
@@ -587,12 +574,12 @@ CSkyBoxMesh::CSkyBoxMesh(ID3D11Device * pd3dDevice, float fWidth, float fHeight,
 	m_nStride = sizeof(CTexturedNormalVertex);
 	m_nOffset = 0;
 	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-
+	CTexturedNormalVertex *Vertices;
 	FILE *fp = fopen("Data\\Maps\\skyMesh.arc", "rb");
 	int size;
 	fread((char*)&size, sizeof(int), 1, fp);
-	m_pVertices = new CTexturedNormalVertex[size];
-	fread((char*)m_pVertices, sizeof(CTexturedNormalVertex), size, fp);
+	Vertices = new CTexturedNormalVertex[size];
+	fread((char*)Vertices, sizeof(CTexturedNormalVertex), size, fp);
 	fclose(fp);
 
 	m_nVertices = size;
@@ -606,7 +593,7 @@ CSkyBoxMesh::CSkyBoxMesh(ID3D11Device * pd3dDevice, float fWidth, float fHeight,
 	d3dBufferDesc.CPUAccessFlags = 0;
 	D3D11_SUBRESOURCE_DATA d3dBufferData;
 	ZeroMemory(&d3dBufferData, sizeof(D3D11_SUBRESOURCE_DATA));
-	d3dBufferData.pSysMem = m_pVertices;
+	d3dBufferData.pSysMem = Vertices;
 	pd3dDevice->CreateBuffer(&d3dBufferDesc, &d3dBufferData, &m_pd3dVertexBuffer);
 
 	SetRasterizerState(pd3dDevice);
@@ -633,7 +620,7 @@ void CSkyBoxMesh::Render(ID3D11DeviceContext * pd3dDeviceContext)
 
 CFloorMesh::CFloorMesh(ID3D11Device * pd3dDevice, float fWidth, float fHeight, float fDepth) : CMeshTextured(pd3dDevice)
 {
-	m_nStride = sizeof(CTexturedNormalVertex);
+	m_nStride = sizeof(CTexturedNormalVertexUVW);
 	m_nOffset = 0;
 	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 	
@@ -641,11 +628,11 @@ CFloorMesh::CFloorMesh(ID3D11Device * pd3dDevice, float fWidth, float fHeight, f
 	// 2  3
 	m_nVertices = 4;
 	int i = 0;
-	m_pVertices = new CTexturedNormalVertex[4];
-	m_pVertices[i++] = { -10000.0f, 0.0f, 10000.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f }; //0
-	m_pVertices[i++] = { 10000.0f, 0.0f, 10000.0f, 0.0f, 1.0f, 0.0f, 64.0f, 0.0f }; // 1
-	m_pVertices[i++] = { -10000.0f, 0.0f, -10000.0f, 0.0f, 1.0f, 0.0f, 0.0f, 64.0f }; // 2
-	m_pVertices[i++] = { 10000.0f, 0.0f, -10000.0f, 0.0f, 1.0f, 0.0f, 64.0f,64.0f }; // 3
+	m_pVertices = new CTexturedNormalVertexUVW[4];
+	m_pVertices[i++] = { -10000.0f, 0.0f, 10000.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0 }; //0
+	m_pVertices[i++] = { 10000.0f, 0.0f, 10000.0f, 0.0f, 1.0f, 0.0f, 64.0f, 0.0f, 0 }; // 1
+	m_pVertices[i++] = { -10000.0f, 0.0f, -10000.0f, 0.0f, 1.0f, 0.0f, 0.0f, 64.0f, 0 }; // 2
+	m_pVertices[i++] = { 10000.0f, 0.0f, -10000.0f, 0.0f, 1.0f, 0.0f, 64.0f,64.0f, 0 }; // 3
 	
 
 	D3D11_BUFFER_DESC d3dBufferDesc;
