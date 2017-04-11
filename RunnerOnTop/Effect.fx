@@ -290,7 +290,7 @@ struct VS_TEXTUREDUVW_LIGHTING_INPUT
 {
 	float3 position : POSITION;
 	float3 normal : NORMAL;
-	float2 tex2dcoord : TEXCOORD0;
+	float2 tex2dcoord : TEXCOORD;
 	int textureNum : TEXNUM;
 };
 
@@ -382,6 +382,7 @@ VS_TEXTUREDUVW_LIGHTING_OUTPUT VSTexturedUVWLighting(VS_TEXTUREDUVW_LIGHTING_INP
 
 
 	output.position = mul(float4(input.position, 1.0f), mtxWorldViewProjection);
+
 	output.tex2dcoord = input.tex2dcoord;
 	output.textureNum = input.textureNum;
 
