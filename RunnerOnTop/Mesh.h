@@ -152,6 +152,7 @@ protected:
 	//정점 데이터를 저장하기 위한 정점 버퍼 인터페이스 포인터
 	ID3D11Buffer *m_pd3dVertexBuffer;
 	ID3D11RasterizerState *m_pd3dRasterizerState;
+	ID3D11BlendState *m_pd3dBlendState;
 
 	//정점 버퍼의 정점 개수, 정점의 바이트 수, 정점 데이터가 정점 버퍼의 어디에서부터
 	//시작하는가를 나타내는 변수를 선언한다.

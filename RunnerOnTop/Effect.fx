@@ -591,10 +591,10 @@ float4 PSTexturedUVWLightingAlpha(VS_TEXTUREDUVW_LIGHTING_OUTPUT input) : SV_Tar
 	}
 //float4 cColor = gtxtTexture[0].Sample(gSamplerState, input.tex2dcoord) * cIllumination;
 
-	float alpha = 0.0f;// cColor * sm;// +sm.y + sm.z;
-	//alpha = alpha / 3.0f;
-	cColor[3] = 0.0f;
-	cColor = saturate(cColor);
+	float alpha = sm.x +sm.y + sm.z;
+	alpha = alpha / 3.0f;
+	cColor.a = alpha;
+	//cColor = saturate(cColor);
 	//return alpha;
 	return cColor;// *cIllumination;
 }

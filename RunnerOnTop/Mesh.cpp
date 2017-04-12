@@ -5,6 +5,7 @@
 
 
 CMesh::CMesh() {
+	m_pd3dBlendState = NULL;
 	m_pd3dRasterizerState = NULL;
 	m_pd3dIndexBuffer = NULL;
 	m_nIndices = 0;
@@ -19,7 +20,7 @@ CMesh::CMesh(ID3D11Device *pd3dDevice)
 	m_d3dPrimitiveTopology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 	m_nReferences = 1;
 	m_pd3dRasterizerState = NULL;
-
+	m_pd3dBlendState = NULL;
 	m_pd3dIndexBuffer = NULL;
 	m_nIndices = 0;
 	m_nStartIndex = 0;
@@ -55,6 +56,7 @@ void CMesh::Render(ID3D11DeviceContext *pd3dDeviceContext)
 
 	pd3dDeviceContext->IASetPrimitiveTopology(m_d3dPrimitiveTopology);
 	//래스터라이저 상태를 디바이스 컨텍스트에 설정한다.
+	if (m_pd3dBlendState) pd3dDeviceContext->OMSetBlendState(m_pd3dBlendState, NULL, 0xffffff);
 	if (m_pd3dRasterizerState) pd3dDeviceContext->RSSetState(m_pd3dRasterizerState);
 
 	if (m_pd3dIndexBuffer)
@@ -717,6 +719,19 @@ CItemMesh::CItemMesh(ID3D11Device * pd3dDevice, const char * filename) : CMeshTe
 	ZeroMemory(&d3dBufferData, sizeof(D3D11_SUBRESOURCE_DATA));
 	d3dBufferData.pSysMem = m_pVertices;
 	pd3dDevice->CreateBuffer(&d3dBufferDesc, &d3dBufferData, &m_pd3dVertexBuffer);
+
+	D3D11_BLEND_DESC d3dBlendDesc;
+	ZeroMemory(&d3dBlendDesc, sizeof(D3D11_BLEND_DESC));
+
+	d3dBlendDesc.RenderTarget[0].BlendEnable = TRUE;
+	d3dBlendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
+	d3dBlendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+	d3dBlendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+	d3dBlendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+	d3dBlendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
+	d3dBlendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+	d3dBlendDesc.RenderTarget[0].RenderTargetWriteMask = 0x0f;
+	pd3dDevice->CreateBlendState(&d3dBlendDesc, &m_pd3dBlendState);
 
 	SetRasterizerState(pd3dDevice);
 }

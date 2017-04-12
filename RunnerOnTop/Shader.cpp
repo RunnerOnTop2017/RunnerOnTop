@@ -764,7 +764,7 @@ void CItemShader::BuildObjects(ID3D11Device * pd3dDevice)
 	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Object\\texture\\fence_alpha.png"), NULL, NULL, &pd3dTexture, NULL);
 	p_Texture->SetTexture(0, pd3dTexture, pd3dSamplerState);
 	pObject->SetAlphaMap(p_Texture);
-
+	
 
 	pObject->Scale(2.0f);
 	m_ppObjects[0] = pObject;
@@ -779,5 +779,7 @@ void CItemShader::ReleaseObjects()
 
 void CItemShader::Render(ID3D11DeviceContext * pd3dDeviceContext, CCamera * pCamera)
 {
+	
 	CTextureShader::Render(pd3dDeviceContext, pCamera);
+	
 }
