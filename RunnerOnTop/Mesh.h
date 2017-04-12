@@ -287,3 +287,13 @@ public:
 	virtual void SetRasterizerState(ID3D11Device *pd3dDevice);
 	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext);
 };
+
+class CItemMesh : public CMeshTextured
+{
+public:
+	CItemMesh(ID3D11Device *pd3dDevice, const char * filename);
+	virtual ~CItemMesh();
+
+	virtual void SetRasterizerState(ID3D11Device *pd3dDevice);
+	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext);
+};

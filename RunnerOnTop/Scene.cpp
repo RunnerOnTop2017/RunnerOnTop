@@ -20,12 +20,16 @@ CScene::~CScene()
 
 void CScene::BuildObjects(ID3D11Device *pd3dDevice)
 {
-	m_nShaders = 1;
+	m_nShaders = 2;
 	m_ppShaders = new CShader*[m_nShaders];
 
 	m_ppShaders[0] = new CTextureShader();
 	m_ppShaders[0]->CreateShader(pd3dDevice);
 	m_ppShaders[0]->BuildObjects(pd3dDevice);
+
+	m_ppShaders[1] = new CItemShader();
+	m_ppShaders[1]->CreateShader(pd3dDevice);
+	m_ppShaders[1]->BuildObjects(pd3dDevice);
 	
 
 	m_pSkybox = new CSkyBoxShader();

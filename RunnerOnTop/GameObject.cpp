@@ -9,6 +9,7 @@ CGameObject::CGameObject()
 	m_pMaterial = NULL;
 	m_pTexture = NULL;
 	m_pBump = NULL;
+	m_pAlpha = NULL;
 	transform = NULL;
 	framenumber = 0;
 	m_pState = NULL;
@@ -156,6 +157,13 @@ void CGameObject::SetBump(CTexture * pBump)
 	if (m_pBump) m_pBump->AddRef();
 }
 
+void CGameObject::SetAlphaMap(CTexture * pAlpha)
+{
+	if (m_pAlpha) m_pAlpha->Release();
+	m_pAlpha = pAlpha;
+	if (m_pAlpha) m_pAlpha->AddRef();
+}
+
 
 
 
@@ -240,4 +248,3 @@ void CTexture::SetTexture(int nIndex, ID3D11ShaderResourceView *pd3dsrvTexture, 
 	if (m_ppd3dsrvTextures[nIndex]) m_ppd3dsrvTextures[nIndex]->AddRef();
 	if (m_ppd3dSamplerStates[nIndex]) m_ppd3dSamplerStates[nIndex]->AddRef();
 }
-

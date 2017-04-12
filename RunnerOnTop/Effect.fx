@@ -247,8 +247,11 @@ cbuffer cbSkinned : register(b2)
 
 Texture2D gtxtTexture[9] : register(t0); // 텍스쳐
 Texture2D gtxBump[9] : register(t9); // 범프맵
+Texture2D gtxtAlpha[9] : register(t9); // 알파맵
 SamplerState gSamplerState : register(s0); // 텍스쳐 샘플러
 SamplerState gSamplerState_NORMAL : register(s1); // 범프 샘플러
+SamplerState gSamplerState_Alpha : register(s2); // 알파 샘플러
+
 
 //=============================================
 // 구조체
@@ -302,6 +305,8 @@ struct VS_TEXTUREDUVW_LIGHTING_OUTPUT
 	float2 tex2dcoord : TEXCOORD0;
 	int textureNum : TEXNUM;
 };
+
+
 
 
 // Animate
@@ -388,6 +393,10 @@ VS_TEXTUREDUVW_LIGHTING_OUTPUT VSTexturedUVWLighting(VS_TEXTUREDUVW_LIGHTING_INP
 
 	return(output);
 }
+
+
+
+
 
 SkinnedVertexOut SkinnedVS(SkinnedVertexIn vin)
 {
@@ -520,6 +529,74 @@ float4 PSTexturedUVWLighting(VS_TEXTUREDUVW_LIGHTING_OUTPUT input) : SV_Target
 	}
 	//float4 cColor = gtxtTexture[0].Sample(gSamplerState, input.tex2dcoord) * cIllumination;
 	return cColor *cIllumination;
+}
+
+//Texture UVW Alpha Vertex Shader
+float4 PSTexturedUVWLightingAlpha(VS_TEXTUREDUVW_LIGHTING_OUTPUT input) : SV_Target
+{
+	input.normalW = normalize(input.normalW);
+	float4 cIllumination = Lighting(input.positionW, input.normalW);
+	if (input.normalW.x == 0.0f && input.normalW.y == 0.0f && input.normalW.z == 0.0f)
+	{
+		cIllumination = float4(1.0f, 1.0f, 1.0f, 1.0f);
+	}
+	float4 cColor = { 1.0f, 1.0f, 0.0f, 1.0f };
+	int n = input.textureNum;
+	float4 sm = float4(1.0f, 1.0f, 1.0f, 1.0f);
+	
+	if (n == 0)
+	{
+		cColor = gtxtTexture[0].Sample(gSamplerState, input.tex2dcoord);
+		sm = gtxtAlpha[0].Sample(gSamplerState, input.tex2dcoord);
+	}
+	else if (n == 1)
+	{
+		cColor = gtxtTexture[1].Sample(gSamplerState, input.tex2dcoord);
+		sm = gtxtAlpha[1].Sample(gSamplerState, input.tex2dcoord);
+	}
+	else if (n == 2)
+	{
+		cColor = gtxtTexture[2].Sample(gSamplerState, input.tex2dcoord);
+		sm = gtxtAlpha[2].Sample(gSamplerState, input.tex2dcoord);
+	}
+	else if (n == 3)
+	{
+		cColor = gtxtTexture[3].Sample(gSamplerState, input.tex2dcoord);
+		sm = gtxtAlpha[3].Sample(gSamplerState, input.tex2dcoord);
+	}
+	else if (n == 4)
+	{
+		cColor = gtxtTexture[4].Sample(gSamplerState, input.tex2dcoord);
+		sm = gtxtAlpha[4].Sample(gSamplerState, input.tex2dcoord);
+	}
+	else if (n == 5)
+	{
+		cColor = gtxtTexture[5].Sample(gSamplerState, input.tex2dcoord);
+		sm = gtxtAlpha[5].Sample(gSamplerState, input.tex2dcoord);
+	}
+	else if (n == 6)
+	{
+		cColor = gtxtTexture[6].Sample(gSamplerState, input.tex2dcoord);
+		sm = gtxtAlpha[6].Sample(gSamplerState, input.tex2dcoord);
+	}
+	else if (n == 7)
+	{
+		cColor = gtxtTexture[7].Sample(gSamplerState, input.tex2dcoord);
+		sm = gtxtAlpha[7].Sample(gSamplerState, input.tex2dcoord);
+	}
+	else
+	{
+		cColor = gtxtTexture[0].Sample(gSamplerState, input.tex2dcoord);
+		sm = gtxtAlpha[0].Sample(gSamplerState, input.tex2dcoord);
+	}
+//float4 cColor = gtxtTexture[0].Sample(gSamplerState, input.tex2dcoord) * cIllumination;
+
+	float alpha = 0.0f;// cColor * sm;// +sm.y + sm.z;
+	//alpha = alpha / 3.0f;
+	cColor[3] = 0.0f;
+	cColor = saturate(cColor);
+	//return alpha;
+	return cColor;// *cIllumination;
 }
 
 

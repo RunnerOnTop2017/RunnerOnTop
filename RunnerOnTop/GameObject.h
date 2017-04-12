@@ -114,6 +114,8 @@ public:
 	CTexture *m_pBump;
 	void SetBump(CTexture *pBump);
 
+	CTexture *m_pAlpha;
+	void SetAlphaMap(CTexture *pAlpha);
 };
 
 class CRotatingObject : public CGameObject
@@ -132,6 +134,8 @@ private:
 	float m_fRotationSpeed;
 	D3DXVECTOR3 m_d3dxvRotationAxis;
 };
+
+
 
 
 
