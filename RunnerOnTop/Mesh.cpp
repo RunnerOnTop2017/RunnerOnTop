@@ -57,6 +57,7 @@ void CMesh::Render(ID3D11DeviceContext *pd3dDeviceContext)
 	pd3dDeviceContext->IASetPrimitiveTopology(m_d3dPrimitiveTopology);
 	//래스터라이저 상태를 디바이스 컨텍스트에 설정한다.
 	if (m_pd3dBlendState) pd3dDeviceContext->OMSetBlendState(m_pd3dBlendState, NULL, 0xffffff);
+	
 	if (m_pd3dRasterizerState) pd3dDeviceContext->RSSetState(m_pd3dRasterizerState);
 
 	if (m_pd3dIndexBuffer)
@@ -730,7 +731,8 @@ CItemMesh::CItemMesh(ID3D11Device * pd3dDevice, const char * filename) : CMeshTe
 	d3dBlendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
 	d3dBlendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
 	d3dBlendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
-	d3dBlendDesc.RenderTarget[0].RenderTargetWriteMask = 0x0f;
+	d3dBlendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+
 	pd3dDevice->CreateBlendState(&d3dBlendDesc, &m_pd3dBlendState);
 
 	SetRasterizerState(pd3dDevice);

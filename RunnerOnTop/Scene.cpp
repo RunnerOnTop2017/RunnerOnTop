@@ -100,16 +100,17 @@ void CScene::Render(ID3D11DeviceContext*pd3dDeviceContext, CCamera *pCamera)
 
 		UpdateLights(pd3dDeviceContext);
 	}
+	if (m_pSkybox)
+	{
+		m_pSkybox->Render(pd3dDeviceContext, pCamera);
+	}
 
 	for (int i = 0; i < m_nShaders; i++)
 	{
 		m_ppShaders[i]->Render(pd3dDeviceContext, pCamera);
 	}
 
-	if (m_pSkybox)
-	{
-		m_pSkybox->Render(pd3dDeviceContext, pCamera);
-	}
+
 }
 void CScene::BuildLights(ID3D11Device *pd3dDevice)
 {

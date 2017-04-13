@@ -384,11 +384,12 @@ void CGameFramework::FrameAdvance()
 			pCamera = m_ppPlayers[i]->GetCamera();
 			m_ppPlayers[i]->SetPlayerUpdatedContext(m_pScene->m_ppShaders[0]);
 		}
+		//3인칭 카메라일 때 플레이어를 렌더링한다.
+		for (int j = 0; j < m_nPlayers; j++) if (m_ppPlayers[j]) m_ppPlayers[j]->Render(m_pd3dDeviceContext);
 		
 		if (m_pScene) m_pScene->Render(m_pd3dDeviceContext, pCamera);
 		
-		//3인칭 카메라일 때 플레이어를 렌더링한다.
-		for (int j = 0; j < m_nPlayers; j++) if (m_ppPlayers[j]) m_ppPlayers[j]->Render(m_pd3dDeviceContext);
+		
 	}
 
 	m_pDXGISwapChain->Present(0, 0);
