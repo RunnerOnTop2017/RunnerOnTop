@@ -2,6 +2,7 @@
 #include"stdafx.h"
 #include"AnimationClip.h"
 #include "Timer.h"
+#define STATE_NULL -1
 #define STATE_IDLE 0
 #define STATE_RUN 1
 #define STATE_LEFT 2
@@ -10,6 +11,7 @@
 #define STATE_JUMP 10
 #define STATE_IDLEJUMP 10
 #define STATE_RUNJUMP 11
+#define STATE_SLIDE 101
 #define STATENUMBER int
 
 #define TIME_ANIMATE_ELAPSED 1.0f/60.0f

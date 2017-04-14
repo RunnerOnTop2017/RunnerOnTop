@@ -277,6 +277,7 @@ void CGameFramework::BuildObjects()
 	pAnimationClip->LoadAnimation("backward");
 	pAnimationClip->LoadAnimation("jump", 40);
 	pAnimationClip->LoadAnimation("jumping");
+	pAnimationClip->LoadAnimation("slide");
 
 
 

@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "State.h"
-
+#
 
 CState::CState()
 {
@@ -11,10 +11,11 @@ CState::CState()
 	hashMap.insert({ STATE_LEFT, "left" });
 	hashMap.insert({ STATE_RIGHT, "right" });
 	hashMap.insert({ STATE_BACK, "backward" });
-
+	hashMap.insert({ STATE_SLIDE, "slide" });
 	
 	m_prev_state = STATE_IDLE;
 	m_state = STATE_IDLE;
+	m_next_state = STATE_NULL;
 	frame = 0;
 	frame2 = 0;
 	ratio = 0.0f;
@@ -61,7 +62,46 @@ void CState::ChangeState(STATENUMBER newState)
 			m_next_state = STATE_RUN;
 		}
 		break;
+	case STATE_BACK:
+		if (m_state == STATE_IDLE)
+		{
+			m_state = STATE_BACK;
+			m_prev_state = STATE_IDLE;
+		}
+		break;
+	case STATE_LEFT:
+		if (m_state == STATE_IDLE)
+		{
+			m_state = STATE_LEFT;
+			m_prev_state = STATE_IDLE;
+		}
+		else if (m_state == STATE_RIGHT)
+		{
+			m_state = STATE_LEFT;
+			m_prev_state = STATE_RIGHT;
+		}
+		break;
+	case STATE_RIGHT:
+		if (m_state == STATE_IDLE)
+		{
+			m_state = STATE_RIGHT;
+			m_prev_state = STATE_IDLE;
+		}
+		else if (m_state == STATE_LEFT)
+		{
+			m_state = STATE_RIGHT;
+			m_prev_state = STATE_LEFT;
+		}
+		break;
+	case STATE_SLIDE:
+		if (m_state == STATE_RUN)
+		{
+			m_state = STATE_SLIDE;
+			m_prev_state = STATE_RUN;
+		}
+		break;
 	}
+
 	if (prev != m_state)
 	{
 		frame2 = frame;
@@ -89,23 +129,42 @@ void CState::ProcessInput(UINT uMessage, WPARAM wParam, LPARAM lParam)
 		
 		switch (wParam)
 		{
-		case 0x57: // W key
+		case VK_KEYW: // W key
 			ChangeState(STATE_RUN);
 			break;
 		case VK_SPACE:
 			ChangeState(STATE_JUMP);
 			break;
-		
+		case VK_KEYS:
+			ChangeState(STATE_BACK);
+			break;
+		case VK_KEYA:
+			ChangeState(STATE_LEFT);
+			break;
+		case VK_KEYD:
+			ChangeState(STATE_RIGHT);
+			break;
+		case VK_KEYE:
+			ChangeState(STATE_SLIDE);
+			break;
 		}
 		break;
 
 	case WM_KEYUP:
 		switch (wParam)
 		{
-		case 0x57: // W key
+		case VK_KEYW: // W key
 			ChangeState(STATE_IDLE);
 			break;
-	
+		case VK_KEYS:
+			ChangeState(STATE_IDLE);
+			break;
+		case VK_KEYA:
+			ChangeState(STATE_IDLE);
+			break;
+		case VK_KEYD:
+			ChangeState(STATE_IDLE);
+			break;
 		}
 		break;
 

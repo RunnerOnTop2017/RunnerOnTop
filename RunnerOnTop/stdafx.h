@@ -43,3 +43,8 @@
 #define PS_SLOT_TEXTURE		0x00
 #define PS_SLOT_BUMP		0x09
 #define PS_SLOT_SAMPLER_STATE		0x00
+#define VK_KEYW 0x57
+#define VK_KEYS 0x53
+#define VK_KEYA 0x41
+#define VK_KEYD 0x44
+#define VK_KEYE 0x45
