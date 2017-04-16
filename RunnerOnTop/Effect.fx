@@ -245,6 +245,11 @@ cbuffer cbSkinned : register(b2)
 	matrix gBoneTransforms[96];
 };
 
+cbuffer cbAlphaBlend : register(b3)
+{
+	bool isAlphaBlend;
+};
+
 Texture2D gtxtTexture[9] : register(t0); // ÅØ½ºÃÄ
 Texture2D gtxBump[9] : register(t9); // ¹üÇÁ¸Ê
 Texture2D gtxtAlpha[9] : register(t9); // ¾ËÆÄ¸Ê
@@ -523,6 +528,10 @@ float4 PSTexturedUVWLighting(VS_TEXTUREDUVW_LIGHTING_OUTPUT input) : SV_Target
 	{
 		cColor = gtxtTexture[7].Sample(gSamplerState, input.tex2dcoord);
 	}
+	else if (n == 8)
+	{
+		cColor = gtxtTexture[8].Sample(gSamplerState, input.tex2dcoord);
+	}
 	else
 	{
 		cColor = gtxtTexture[0].Sample(gSamplerState, input.tex2dcoord);
@@ -542,7 +551,7 @@ float4 PSTexturedUVWLightingAlpha(VS_TEXTUREDUVW_LIGHTING_OUTPUT input) : SV_Tar
 	}
 	float4 cColor = { 1.0f, 1.0f, 0.0f, 1.0f };
 	int n = input.textureNum;
-	float4 sm = float4(1.0f, 1.0f, 1.0f, 1.0f);
+	float4 sm = float4(0.0f, 0.0f, 0.0f, 0.0f);
 	
 	if (n == 0)
 	{
@@ -590,13 +599,16 @@ float4 PSTexturedUVWLightingAlpha(VS_TEXTUREDUVW_LIGHTING_OUTPUT input) : SV_Tar
 		sm = gtxtAlpha[0].Sample(gSamplerState, input.tex2dcoord);
 	}
 //float4 cColor = gtxtTexture[0].Sample(gSamplerState, input.tex2dcoord) * cIllumination;
-
+	if(sm.a == 0.0f)
+	{
+		return cColor;
+	}
+		
 	float alpha = sm.x +sm.y + sm.z;
 	alpha = alpha / 3.0f;
 	cColor.a = alpha;
-	//cColor = saturate(cColor);
-	//return alpha;
-	return cColor;// *cIllumination;
+	
+	return cColor;
 }
 
 

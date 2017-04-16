@@ -41,7 +41,18 @@ void CState::ChangeState(STATENUMBER newState)
 		{
 			m_next_state = STATE_IDLE;
 		}
-		else
+		else if (m_state == STATE_LEFT || m_state == STATE_RIGHT)
+		{
+			if( (m_prev_state == STATE_LEFT && m_state == STATE_RIGHT) || (m_prev_state == STATE_RIGHT && m_state == STATE_LEFT))
+				break;
+			else
+			{
+				m_prev_state = m_state;
+				m_state = STATE_IDLE;
+			}
+		}
+
+		else 
 			m_state = STATE_IDLE;
 		
 		break;
@@ -188,6 +199,13 @@ D3DXMATRIX * CState::GetAnimation()
 		frame += 1;
 		time = 0;
 	}
+
+	 if (m_state == STATE_RUN)
+	 {
+		 return  m_pAnimationClip->GetBlendAnimation((char*)hashMap.find(m_state)->second.c_str(), (char*)hashMap.find(STATE_LEFT)->second.c_str(),
+			 frame, frame2, 0.5f, NULL);
+	 }
+
 	 if ((m_state == STATE_RUNJUMP || m_state == STATE_IDLEJUMP) && m_next_state != m_state)
 	 {
 		 if (frame > m_pAnimationClip->GetCurrentMatirxSize((char*)hashMap.find(m_state)->second.c_str()) * 0.9f)

@@ -292,7 +292,7 @@ public:
 class CItemMesh : public CMeshTextured
 {
 public:
-	CItemMesh(ID3D11Device *pd3dDevice, const char * filename);
+	CItemMesh(ID3D11Device *pd3dDevice, const char * filename, bool alphaBlend = false);
 	virtual ~CItemMesh();
 
 	virtual void SetRasterizerState(ID3D11Device *pd3dDevice);

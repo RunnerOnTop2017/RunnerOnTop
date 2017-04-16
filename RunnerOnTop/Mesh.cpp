@@ -692,7 +692,7 @@ void CFloorMesh::Render(ID3D11DeviceContext * pd3dDeviceContext)
 	CMeshTextured::Render(pd3dDeviceContext);
 }
 
-CItemMesh::CItemMesh(ID3D11Device * pd3dDevice, const char * filename) : CMeshTextured(pd3dDevice)
+CItemMesh::CItemMesh(ID3D11Device * pd3dDevice, const char * filename, bool alphaBlend) : CMeshTextured(pd3dDevice)
 {
 	m_nStride = sizeof(CTexturedNormalVertexUVW);
 	m_nOffset = 0;
@@ -721,19 +721,23 @@ CItemMesh::CItemMesh(ID3D11Device * pd3dDevice, const char * filename) : CMeshTe
 	d3dBufferData.pSysMem = m_pVertices;
 	pd3dDevice->CreateBuffer(&d3dBufferDesc, &d3dBufferData, &m_pd3dVertexBuffer);
 
-	D3D11_BLEND_DESC d3dBlendDesc;
-	ZeroMemory(&d3dBlendDesc, sizeof(D3D11_BLEND_DESC));
+	if (alphaBlend)
+	{
+		D3D11_BLEND_DESC d3dBlendDesc;
+		ZeroMemory(&d3dBlendDesc, sizeof(D3D11_BLEND_DESC));
 
-	d3dBlendDesc.RenderTarget[0].BlendEnable = TRUE;
-	d3dBlendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
-	d3dBlendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
-	d3dBlendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
-	d3dBlendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
-	d3dBlendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
-	d3dBlendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
-	d3dBlendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+		d3dBlendDesc.RenderTarget[0].BlendEnable = TRUE;
+		d3dBlendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
+		d3dBlendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+		d3dBlendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+		d3dBlendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+		d3dBlendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
+		d3dBlendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+		d3dBlendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
 
-	pd3dDevice->CreateBlendState(&d3dBlendDesc, &m_pd3dBlendState);
+		pd3dDevice->CreateBlendState(&d3dBlendDesc, &m_pd3dBlendState);
+	}
+	
 
 	SetRasterizerState(pd3dDevice);
 }
