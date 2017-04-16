@@ -13,6 +13,7 @@ CGameObject::CGameObject()
 	transform = NULL;
 	framenumber = 0;
 	m_pState = NULL;
+	fAngeYaw = fAngePitch = fAngeRoll = 0.0f;
 }
 
 CGameObject::~CGameObject()
@@ -120,6 +121,10 @@ void CGameObject::Rotate(float fPitch, float fYaw, float fRoll)
 void CGameObject::Rotate(D3DXVECTOR3 *pd3dxvAxis, float fAngle)
 {
 	D3DXMATRIX mtxRotate;
+	if (pd3dxvAxis->x == 1.0f) fAngePitch += fAngle;
+	if (pd3dxvAxis->y == 1.0f) fAngeRoll += fAngle;
+	if (pd3dxvAxis->z == 1.0f) fAngeYaw += fAngle;
+
 	D3DXMatrixRotationAxis(&mtxRotate, pd3dxvAxis, (float)D3DXToRadian(fAngle));
 	m_d3dxmtxWorld = mtxRotate * m_d3dxmtxWorld;
 }

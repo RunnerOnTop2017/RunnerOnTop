@@ -51,7 +51,16 @@ void CState::ChangeState(STATENUMBER newState)
 				m_state = STATE_IDLE;
 			}
 		}
-
+		else if (m_state == STATE_RUN)
+		{
+			if (m_sub_state == STATE_LEFT || m_sub_state == STATE_RIGHT)
+			{
+				m_state = STATE_RUN;
+				m_sub_state = STATE_NULL;
+			}
+			else
+				m_state = STATE_IDLE;
+		}
 		else 
 			m_state = STATE_IDLE;
 		
@@ -91,6 +100,10 @@ void CState::ChangeState(STATENUMBER newState)
 			m_state = STATE_LEFT;
 			m_prev_state = STATE_RIGHT;
 		}
+		else if (m_state == STATE_RUN)
+		{
+			m_sub_state = STATE_LEFT;
+		}
 		break;
 	case STATE_RIGHT:
 		if (m_state == STATE_IDLE)
@@ -102,6 +115,10 @@ void CState::ChangeState(STATENUMBER newState)
 		{
 			m_state = STATE_RIGHT;
 			m_prev_state = STATE_LEFT;
+		}
+		else if (m_state == STATE_RUN)
+		{
+			m_sub_state = STATE_RIGHT;
 		}
 		break;
 	case STATE_SLIDE:
@@ -202,8 +219,12 @@ D3DXMATRIX * CState::GetAnimation()
 
 	 if (m_state == STATE_RUN)
 	 {
-		 return  m_pAnimationClip->GetBlendAnimation((char*)hashMap.find(m_state)->second.c_str(), (char*)hashMap.find(STATE_LEFT)->second.c_str(),
-			 frame, frame2, 0.5f, NULL);
+		 if(m_sub_state == STATE_LEFT)
+			 return  m_pAnimationClip->GetBlendAnimation((char*)hashMap.find(m_state)->second.c_str(), (char*)hashMap.find(STATE_LEFT)->second.c_str(),
+				 frame, frame2, 0.5f, NULL);
+		 else if(m_sub_state == STATE_RIGHT)
+			 return  m_pAnimationClip->GetBlendAnimation((char*)hashMap.find(m_state)->second.c_str(), (char*)hashMap.find(STATE_RIGHT)->second.c_str(),
+				 frame, frame2, 0.5f, NULL);
 	 }
 
 	 if ((m_state == STATE_RUNJUMP || m_state == STATE_IDLEJUMP) && m_next_state != m_state)

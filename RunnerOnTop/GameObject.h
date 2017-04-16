@@ -86,6 +86,9 @@ public:
 	//로컬 x-축, y-축, z-축 방향으로 회전한다.
 	virtual void Rotate(float fPitch = 10.0f, float fYaw = 10.0f, float fRoll = 10.0f);
 	virtual void Rotate(D3DXVECTOR3 *pd3dxvAxis, float fAngle);
+	float fAngeYaw;
+	float fAngePitch;
+	float fAngeRoll;
 
 
 	virtual void Scale(float scaleSize)

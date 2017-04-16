@@ -925,3 +925,145 @@ void CItemShader_Alpha::Render(ID3D11DeviceContext * pd3dDeviceContext, CCamera 
 	CTextureShader::Render(pd3dDeviceContext, pCamera);
 
 }
+
+
+CItemShader_Door::CItemShader_Door()
+{
+}
+
+CItemShader_Door::~CItemShader_Door()
+{
+}
+
+void CItemShader_Door::CreateShader(ID3D11Device * pd3dDevice)
+{
+
+	CShader::CreateShader(pd3dDevice);
+	D3D11_INPUT_ELEMENT_DESC d3dInputLayout[] =
+	{
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TEXNUM", 0, DXGI_FORMAT_R32_SINT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	};
+	UINT nElements = ARRAYSIZE(d3dInputLayout);
+	CreateVertexShaderFromFile(pd3dDevice, L"Effect.fx", "VSTexturedUVWLightingDoor", "vs_4_0", &m_pd3dVertexShader, d3dInputLayout, nElements, &m_pd3dVertexLayout);
+	CreatePixelShaderFromFile(pd3dDevice, L"Effect.fx", "PSTexturedUVWLighting", "ps_4_0", &m_pd3dPixelShader);
+}
+
+void CItemShader_Door::CreateShaderVariables(ID3D11Device * pd3dDevice)
+{
+	CTextureShader::CreateShaderVariables(pd3dDevice);
+
+}
+
+void CItemShader_Door::UpdateShaderVariables(ID3D11DeviceContext * pd3dDeviceContext, D3DXMATRIX * pd3dxmtxWorld)
+{
+	CTextureShader::UpdateShaderVariables(pd3dDeviceContext, pd3dxmtxWorld);
+
+}
+
+void CItemShader_Door::UpdateShaderVariables(ID3D11DeviceContext * pd3dDeviceContext, MATERIAL * pMaterial)
+{
+	CTextureShader::UpdateShaderVariables(pd3dDeviceContext, pMaterial);
+
+}
+
+void CItemShader_Door::UpdateShaderVariables(ID3D11DeviceContext * pd3dDeviceContext, CTexture * pTexture)
+{
+	CTextureShader::UpdateShaderVariables(pd3dDeviceContext, pTexture);
+
+}
+
+void CItemShader_Door::BuildObjects(ID3D11Device * pd3dDevice)
+{
+
+	CMaterial **ppMaterials = new CMaterial*[1];
+	ppMaterials[0] = new CMaterial();
+	ppMaterials[0]->m_Material.m_d3dxcDiffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
+	ppMaterials[0]->m_Material.m_d3dxcAmbient = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
+	ppMaterials[0]->m_Material.m_d3dxcSpecular = D3DXCOLOR(0.5f, 0.5f, 0.5f, 1.0f);
+	ppMaterials[0]->m_Material.m_d3dxcEmissive = D3DXCOLOR(0.0f, 0.0f, 0.0f, 1.0f);
+
+	ID3D11SamplerState *pd3dSamplerState = NULL;
+	D3D11_SAMPLER_DESC d3dSamplerDesc;
+	ZeroMemory(&d3dSamplerDesc, sizeof(D3D11_SAMPLER_DESC));
+	d3dSamplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	d3dSamplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	d3dSamplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	d3dSamplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	d3dSamplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+	d3dSamplerDesc.MinLOD = 0;
+	d3dSamplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+	pd3dDevice->CreateSamplerState(&d3dSamplerDesc, &pd3dSamplerState);
+
+	ID3D11ShaderResourceView *pd3dTexture = NULL;
+
+
+	m_nObjects = 1;
+	m_ppObjects = new CGameObject*[m_nObjects];
+	doorDir = new bool[m_nObjects];
+	for (int i = 0; i < m_nObjects; ++i)
+	{
+		doorDir[i] = true;
+	}
+	CGameObject *pObject = NULL;
+
+
+
+
+	CTexture*  p_Texture = new CTexture(1);
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Object\\Texture\\pipe_1.jpg"), NULL, NULL, &pd3dTexture, NULL);
+	p_Texture->SetTexture(0, pd3dTexture, pd3dSamplerState);
+
+	CMesh *pMesh = new CItemMesh(pd3dDevice, "door.src", true);
+
+
+	pObject = new CGameObject();
+	pObject->SetMesh(pMesh);
+	pObject->SetMaterial(ppMaterials[0]);
+	pObject->SetTexture(p_Texture);
+	pObject->SetPosition(300.0f, 3260.0f, 3100.0f);
+	pObject->Rotate(&D3DXVECTOR3(1.0f, 0.0f, 0.0f), -90.0f);
+	pObject->Scale(0.5f);
+
+	m_ppObjects[0] = pObject;
+
+	CreateShaderVariables(pd3dDevice);
+	delete[] ppMaterials;
+}
+
+void CItemShader_Door::ReleaseObjects()
+{
+	CTextureShader::ReleaseObjects();
+}
+
+void CItemShader_Door::Render(ID3D11DeviceContext * pd3dDeviceContext, CCamera * pCamera)
+{
+
+	if (m_ppObjects[0]->fAngeYaw <= -90.0f)
+	{
+		doorDir[0] = false;
+	}
+	else if (m_ppObjects[0]->fAngeYaw >= 0.0f)
+	{
+		doorDir[0] = true;
+	}
+
+	if (doorDir[0])
+	{
+		m_ppObjects[0]->MoveStrafe(25.0f);
+		m_ppObjects[0]->Rotate(&D3DXVECTOR3(0.0f, 0.0f, 1.0f), -5.0f);
+		m_ppObjects[0]->MoveStrafe(-25.0f);
+	}
+	else
+	{
+		m_ppObjects[0]->MoveStrafe(25.0f);
+		m_ppObjects[0]->Rotate(&D3DXVECTOR3(0.0f, 0.0f, 1.0f), 5.0f);
+		m_ppObjects[0]->MoveStrafe(-25.0f);
+	}
+	
+
+	CTextureShader::Render(pd3dDeviceContext, pCamera);
+
+}

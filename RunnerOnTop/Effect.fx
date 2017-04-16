@@ -399,6 +399,30 @@ VS_TEXTUREDUVW_LIGHTING_OUTPUT VSTexturedUVWLighting(VS_TEXTUREDUVW_LIGHTING_INP
 	return(output);
 }
 
+VS_TEXTUREDUVW_LIGHTING_OUTPUT VSTexturedUVWLightingDoor(VS_TEXTUREDUVW_LIGHTING_INPUT input)
+{
+	VS_TEXTUREDUVW_LIGHTING_OUTPUT output = (VS_TEXTUREDUVW_LIGHTING_OUTPUT)0;
+
+	output.normalW = mul(input.normal, (float3x3)gmtxWorld);
+	output.positionW = mul((float4)(input.position, 1.0f), gmtxWorld).xyz;
+	//output.positionW += float3(gmtxWorld._41, gmtxWorld._42, gmtxWorld._43);
+
+	float3 posL = float3(0.0f, 0.0f, 0.0f);
+	posL = mul(float4(input.position, 1.0f), gBoneTransforms[0]).xyz;
+
+
+	matrix mtxWorldViewProjection = mul(gmtxWorld, gmtxView);
+	mtxWorldViewProjection = mul(mtxWorldViewProjection, gmtxProjection);
+
+
+	output.position = mul(float4(input.position, 1.0f), mtxWorldViewProjection);
+
+	output.tex2dcoord = input.tex2dcoord;
+	output.textureNum = input.textureNum;
+
+	return(output);
+}
+
 
 
 
