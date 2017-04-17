@@ -78,7 +78,7 @@ void CState::ChangeState(STATENUMBER newState, unsigned int keyBuf)
 		}
 		else if (m_state > STATE_INTERACTION)
 		{
-
+			m_next_state = STATE_IDLE;
 		}
 		else 
 			m_state = STATE_IDLE;
@@ -143,6 +143,7 @@ void CState::ChangeState(STATENUMBER newState, unsigned int keyBuf)
 	case STATE_SLIDE:
 		if (m_state == STATE_RUN)
 		{
+			m_next_state = m_state;
 			m_state = STATE_SLIDE;
 			m_prev_state = STATE_RUN;
 		}
@@ -274,7 +275,20 @@ D3DXMATRIX * CState::GetAnimation()
 	 {
 		 if (frame > m_pAnimationClip->GetCurrentMatirxSize((char*)hashMap.find(m_state)->second.c_str()) - 11)
 		 {
-
+			 if (ratio >= 1.0f)
+			 {
+				 frame = frame2;
+				 ratio = 0.0f;
+				 m_state = m_next_state;
+				 frame2 = 0;
+				 m_next_state = STATE_NULL;
+			 }
+			 else
+			 {
+				 ratio += 0.1f;
+				 return  m_pAnimationClip->GetBlendAnimation((char*)hashMap.find(m_state)->second.c_str(), (char*)hashMap.find(m_next_state)->second.c_str(),
+					 frame, frame2, 1.0f - ratio, NULL);
+			 }
 		 }
 	 }
 
@@ -285,8 +299,6 @@ D3DXMATRIX * CState::GetAnimation()
 		 if (m_state == STATE_IDLEJUMP)
 		 {
 			stand = m_pAnimationClip->GetCurrentMatirxSize((char*)hashMap.find(m_state)->second.c_str()) - 11;
-			std::cout << "Stand is " << stand << std::endl;
-
 		 }
 		 else
 		 {

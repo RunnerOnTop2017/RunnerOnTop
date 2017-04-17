@@ -59,6 +59,10 @@ void CPlayer::Move(UINT dwDirection, float fDistance, bool bUpdateVelocity)
 	{
 		
 		D3DXVECTOR3 d3dxvShift = D3DXVECTOR3(0, 0, 0);
+		if (m_pState->GetState() == STATE_SLIDE)
+		{
+			d3dxvShift += m_d3dxvLook * fDistance*1.2f;
+		}
 		//화살표 키 ‘↑’를 누르면 로컬 z-축 방향으로 이동(전진)한다. ‘↓’를 누르면 반대 방향으로 이동한다.
 		if (dwDirection & DIR_FORWARD && (m_pState->GetState() == STATE_RUN || m_pState->GetState() == STATE_RUNJUMP))
 		{

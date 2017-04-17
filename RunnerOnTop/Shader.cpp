@@ -898,7 +898,7 @@ void CItemShader_Alpha::BuildObjects(ID3D11Device * pd3dDevice)
 
 
 	CTexture*  p_Texture = new CTexture(1);
-	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Object\\Texture\\fence_1.png"), NULL, NULL, &pd3dTexture, NULL);
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Object\\Texture\\fence_2.png"), NULL, NULL, &pd3dTexture, NULL);
 	p_Texture->SetTexture(0, pd3dTexture, pd3dSamplerState);
 
 	CMesh *pMesh = new CItemMesh(pd3dDevice, "fence.src", true);
@@ -908,10 +908,10 @@ void CItemShader_Alpha::BuildObjects(ID3D11Device * pd3dDevice)
 	pObject->SetMesh(pMesh);
 	pObject->SetMaterial(ppMaterials[0]);
 	pObject->SetTexture(p_Texture);
-	pObject->SetPosition(300.0f, 3260.0f, 3500.0f);
+	pObject->SetPosition(300.0f, 3270.0f, 3500.0f);
 	pObject->Rotate(&D3DXVECTOR3(1.0f, 0.0f, 0.0f), -90.0f);
 	p_Texture = new CTexture(1);
-	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Object\\texture\\fence_alpha.png"), NULL, NULL, &pd3dTexture, NULL);
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Object\\texture\\fence_2_alpha.png"), NULL, NULL, &pd3dTexture, NULL);
 	p_Texture->SetTexture(0, pd3dTexture, pd3dSamplerState);
 	pObject->SetAlphaMap(p_Texture);
 
