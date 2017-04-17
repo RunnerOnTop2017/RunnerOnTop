@@ -215,6 +215,29 @@ D3DXMATRIX* CAnimationClip::GetBlendAnimation(char * name_a, char * name_b, int 
 	return m_pblendedMatrix;
 }
 
+D3DXMATRIX * CAnimationClip::GetBlendAnimation(char * name, int frame_a, D3DXMATRIX * other, float ratio)
+{
+	int size = DATA.find(name)->second->GetBoneSize();
+	D3DXMATRIX *tmp2 = new D3DXMATRIX[size];
+	memcpy(tmp2, other, sizeof(D3DXMATRIX)*size);
+	
+
+	if (m_pblendedMatrix)
+	{
+		delete m_pblendedMatrix;
+	}
+	
+	m_pblendedMatrix = new D3DXMATRIX[size];
+	D3DXMATRIX *tmp1 = DATA.find(name)->second->GetMatrixByFrame(frame_a);
+	
+	for (int i = 0; i < size; ++i)
+	{
+		m_pblendedMatrix[i] = (tmp1[i] * ratio) + (tmp2[i] * (1.0f - ratio));
+	}
+	delete tmp2;
+	return m_pblendedMatrix;
+}
+
 int CAnimationClip::GetCurrentMatirxSize(char * name)
 {
 	return DATA.find(name)->second->GetFrameSize();

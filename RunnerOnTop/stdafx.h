@@ -48,3 +48,14 @@
 #define VK_KEYA 0x41
 #define VK_KEYD 0x44
 #define VK_KEYE 0x45
+
+#define OBJECT_DOOR 0
+#define OBJECT_LADDER 1
+#define OBJECT_FENCE 2
+#define OBJECT_PIPE 3
+#define OBJECT_CONDITIONER 4
+#define OBJECT_MAP1 10
+#define OBJECT_MAP2 11
+
+#define WM_INTERACT WM_USER+1
+#define CHANGE_POS_SLIDE 0

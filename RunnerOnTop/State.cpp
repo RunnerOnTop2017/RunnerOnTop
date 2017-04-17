@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "State.h"
-#
+
 
 CState::CState()
 {
@@ -33,15 +33,19 @@ STATENUMBER CState::GetState()
 
 void CState::ChangeState(STATENUMBER newState, unsigned int keyBuf)
 {
+	if (m_state < STATE_INTERACTION)
+	{
+
+	}
 	STATENUMBER prev = m_state;
 	switch (newState)
 	{
-	case STATE_IDLE:
-		if (m_state == STATE_RUNJUMP)
+	case STATE_IDLE: //IDLE로 변경하려 할때
+		if (m_state == STATE_RUNJUMP) // 현재상태가 RunJump인가
 		{
 			m_next_state = STATE_IDLE;
 		}
-		else if (m_state == STATE_LEFT || m_state == STATE_RIGHT)
+		else if (m_state == STATE_LEFT || m_state == STATE_RIGHT) // 좌우이동중인가
 		{
 			if( (m_prev_state == STATE_LEFT && m_state == STATE_RIGHT) || (m_prev_state == STATE_RIGHT && m_state == STATE_LEFT))
 				break;
@@ -51,20 +55,17 @@ void CState::ChangeState(STATENUMBER newState, unsigned int keyBuf)
 				m_state = STATE_IDLE;
 			}
 		}
-		else if (m_state == STATE_RUN)
+		else if (m_state == STATE_RUN) //현재상태가 달리는중인가
 		{
-			if (m_sub_state == STATE_LEFT || m_sub_state == STATE_RIGHT)
+			if (m_sub_state == STATE_LEFT || m_sub_state == STATE_RIGHT) // 좌우이동이 섞여있는가
 			{
-				if (keyBuf == VK_KEYW)
+				if (keyBuf == VK_KEYW) // W키를 떼면
 				{
-					m_state = m_sub_state;
-					m_sub_state = STATE_NULL;
+					m_next_state = m_sub_state;
 				}
-				else
+				else if(keyBuf == VK_KEYA || keyBuf == VK_KEYD)
 				{
-					m_state = STATE_RUN;
-					m_sub_state = STATE_NULL;
-
+					m_next_state = STATE_RUN;
 				}
 			}
 			else
@@ -163,7 +164,6 @@ void CState::ProcessInput(UINT uMessage, WPARAM wParam, LPARAM lParam)
 	switch (uMessage)
 	{
 	case WM_KEYDOWN:
-		
 		switch (wParam)
 		{
 		case VK_KEYW: // W key
@@ -226,8 +226,32 @@ D3DXMATRIX * CState::GetAnimation()
 		time = 0;
 	}
 
+	 // 달리는중
 	 if (m_state == STATE_RUN)
 	 {
+		 if (m_sub_state == STATE_LEFT || m_sub_state == STATE_RIGHT)
+		 {
+			 if (m_next_state == STATE_LEFT || m_next_state == STATE_RIGHT)
+			 {
+				 D3DXMATRIX* other = m_pAnimationClip->GetBlendAnimation((char*)hashMap.find(m_state)->second.c_str(), (char*)hashMap.find(m_sub_state)->second.c_str(),
+					 frame, frame2, 0.5f, NULL);
+				 
+				 other = m_pAnimationClip->GetBlendAnimation((char*)hashMap.find(m_next_state)->second.c_str(), frame, other, 0.5f);
+				 m_state = m_next_state;
+				 m_next_state = STATE_NULL;
+				 m_sub_state = STATE_NULL;
+			 }
+			 else if (m_next_state == STATE_RUN)
+			 {
+				 D3DXMATRIX* other = m_pAnimationClip->GetBlendAnimation((char*)hashMap.find(m_state)->second.c_str(), (char*)hashMap.find(m_sub_state)->second.c_str(),
+					 frame, frame2, 0.5f, NULL);
+
+				 other = m_pAnimationClip->GetBlendAnimation((char*)hashMap.find(m_next_state)->second.c_str(), frame, other, 0.5f);
+				 m_state = m_next_state;
+				 m_next_state = STATE_NULL;
+				 m_sub_state = STATE_NULL;
+			 }
+		 }
 		 if(m_sub_state == STATE_LEFT)
 			 return  m_pAnimationClip->GetBlendAnimation((char*)hashMap.find(m_state)->second.c_str(), (char*)hashMap.find(STATE_LEFT)->second.c_str(),
 				 frame, frame2, 0.5f, NULL);
@@ -236,15 +260,30 @@ D3DXMATRIX * CState::GetAnimation()
 				 frame, frame2, 0.5f, NULL);
 	 }
 
+	 // 점프중일때 애니메이션 끝나갈때 블랜딩
 	 if ((m_state == STATE_RUNJUMP || m_state == STATE_IDLEJUMP) && m_next_state != m_state)
 	 {
-		 if (frame > m_pAnimationClip->GetCurrentMatirxSize((char*)hashMap.find(m_state)->second.c_str()) * 0.9f)
+		 float stand;
+		 if (m_state == STATE_IDLEJUMP)
+		 {
+			stand = m_pAnimationClip->GetCurrentMatirxSize((char*)hashMap.find(m_state)->second.c_str()) - 11;
+			std::cout << "Stand is " << stand << std::endl;
+
+		 }
+		 else
+		 {
+			 stand = m_pAnimationClip->GetCurrentMatirxSize((char*)hashMap.find(m_state)->second.c_str()) - 11;// *0.9f;
+		 }
+		 if (frame >= stand)
 		 {
 			 if (ratio >= 1.0f)
 			 {
+				 frame =  frame2;
 				 ratio = 0.0f;
 				 m_state = m_next_state;
 				 frame2 = 0;
+				 m_next_state = STATE_NULL;
+				 
 			 }
 			 else
 			 {
@@ -256,21 +295,26 @@ D3DXMATRIX * CState::GetAnimation()
 		 }
 	 }
 
+	
+	 // 애니메이션 전환시 뒷부분 블렌딩(단 이전 상태가 RunJump가 아닐경우)
 	if (m_prev_state != m_state && m_prev_state!= STATE_RUNJUMP)
 	{
 		if (ratio >= 1.0f)
 		{
+			//frame = frame2;
 			ratio = 0.0f;
 			m_prev_state = m_state;
 			frame2 = 0;
 		}
 		else
 		{
-			ratio += 0.05f;
+			ratio += 0.1f;
 			return m_pAnimationClip->GetBlendAnimation((char*)hashMap.find(m_state)->second.c_str(), (char*)hashMap.find(m_prev_state)->second.c_str(),
 				frame, frame2, ratio, NULL);
 		}
 	}
+
+	//애니메이션 반환
 	return m_pAnimationClip->GetAnimation((char *)hashMap.find(m_state)->second.c_str(), frame, buf);	
 }
 

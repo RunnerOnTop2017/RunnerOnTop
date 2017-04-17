@@ -51,6 +51,7 @@ public:
 
 	// 블랜딩된 애니메이션을 얻어올 수 있다.  
 	D3DXMATRIX* GetBlendAnimation(char* name_a, char* name_b, int frame_a, int frame_b, float ratio, D3DXMATRIX* buf);
+	D3DXMATRIX* GetBlendAnimation(char* name, int frame_a, D3DXMATRIX* other, float ratio);
 
 	int GetCurrentMatirxSize(char * name);
 };

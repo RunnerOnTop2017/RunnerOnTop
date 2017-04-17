@@ -69,7 +69,7 @@ void CPlayer::Move(UINT dwDirection, float fDistance, bool bUpdateVelocity)
 		if (dwDirection & DIR_RIGHT) d3dxvShift += m_d3dxvRight * fDistance;
 		if (dwDirection & DIR_LEFT) d3dxvShift -= m_d3dxvRight * fDistance;
 		//‘Page Up’을 누르면 로컬 y-축 방향으로 이동한다. ‘Page Down’을 누르면 반대 방향으로 이동한다.
-		if ((dwDirection & DIR_UP) && (m_pState->GetState() != STATE_RUNJUMP)) d3dxvShift += m_d3dxvUp * fDistance * 4000.0f;
+		//if ((dwDirection & DIR_UP) && (m_pState->GetState() != STATE_RUNJUMP)) d3dxvShift += m_d3dxvUp * fDistance * 4000.0f;
 		if (dwDirection & DIR_DOWN) d3dxvShift -= m_d3dxvUp * fDistance;
 
 		//플레이어를 현재 위치 벡터에서 d3dxvShift 벡터 만큼 이동한다.
@@ -286,14 +286,11 @@ void CPlayer::Render(ID3D11DeviceContext *pd3dDeviceContext)
 {
 	if (m_pShader)
 	{
-		//m_pShader->UpdateShaderVariables(pd3dDeviceContext, &m_d3dxmtxWorld);
-		//m_pShader->UpdateShaderVariables(pd3dDeviceContext, m_pShader->GetGameObject(0)->m_pTexture);
-		//m_pShader->UpdateShaderVariables(pd3dDeviceContext)
+		
 		m_pShader->m_ppObjects[0]->m_d3dxmtxWorld = m_d3dxmtxWorld;
 
 		m_pShader->Render(pd3dDeviceContext);
 	}
-	//if (m_pMesh) m_pMesh->Render(pd3dDeviceContext);
 }
 
 bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
@@ -399,7 +396,7 @@ CAirplanePlayer::CAirplanePlayer(ID3D11Device *pd3dDevice)
 {
 	//비행기 메쉬를 생성한다.
 	CMesh *pAirplaneMesh = new CCharacterMesh(pd3dDevice);
-	CCubeMesh *Collision = new CCubeMesh(pd3dDevice);
+	CCubeMesh *Collision = new CCubeMesh(pd3dDevice, -10.0f, 10.0f, 0.0f, 60.0f, -10.0f, 10.0f);
 	SetMesh(pAirplaneMesh);
 	pCollision = Collision;
 	//플레이어(비행기) 메쉬를 렌더링할 때 사용할 쉐이더를 생성한다.
