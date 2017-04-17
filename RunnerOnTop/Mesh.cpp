@@ -440,7 +440,7 @@ CCubeMesh::CCubeMesh(ID3D11Device *pd3dDevice, float minX , float maxX, float mi
 	d3dBufferData.pSysMem = pVertices;
 	pd3dDevice->CreateBuffer(&d3dBufferDesc, &d3dBufferData, &m_pd3dVertexBuffer);
 
-
+	// 밑면			윗면
 	//  2	3		6	7
 	//  0	1		4	5
 

@@ -36,6 +36,7 @@ public:
 	CState();
 	~CState();
 	STATENUMBER GetState();
+	STATENUMBER GetSubState();
 	void ChangeState(STATENUMBER newState,unsigned int keyBuf = 0);
 	void SetTimer(CGameTimer * timer);
 	void SetAnimationClip(CAnimationClip* clip);

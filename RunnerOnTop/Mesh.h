@@ -209,8 +209,8 @@ public:
 
 class CCubeMesh : public CMesh
 {
-	CDiffuseNormalVertex pVertices[8];
 public:
+	CDiffuseNormalVertex pVertices[8];
 	CCubeMesh(ID3D11Device *pd3dDevice, float minX =-1.0f, float maxX = 1.0f, float minY = -1.0f, float maxY = 1.0f, float minZ = -1.0f, float maxZ=1.0f);
 	~CCubeMesh();
 	virtual void CreateRasterizerState(ID3D11Device *pd3dDevice);

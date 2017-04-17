@@ -248,18 +248,27 @@ void CDiffusedShader::UpdateShaderVariables(ID3D11DeviceContext *pd3dDeviceConte
 
 void CDiffusedShader::BuildObjects(ID3D11Device *pd3dDevice)
 {
-	CMesh *pCubeMesh = new CCubeMesh(pd3dDevice, -10.0f, 10.0f, 0.0f, 60.0f, -10.0f, 10.0f);// , 12.0f, 12.0f, 12.0f, D3DCOLOR_XRGB(0, 0, 128));
-
-	m_nObjects = 1;
+	CMesh *pCubeMesh = new CCubeMesh(pd3dDevice, -50.0f, 600.0f, 3180.0f, 3275.0f, 3000.0f, 3610.0f);// , 12.0f, 12.0f, 12.0f, D3DCOLOR_XRGB(0, 0, 128));
+	
+	m_nObjects = 2;
 	m_ppObjects = new CGameObject*[m_nObjects];
 
 	CGameObject *pRotatingObject = new CGameObject();
 	
-				pRotatingObject->SetMesh(pCubeMesh);
-				pRotatingObject->SetPosition(300.0f, 3300.0f, 3300.0f);
-				//pRotatingObject->SetRotationAxis(D3DXVECTOR3(0.0f, 1.0f, 0.0f));
-				//pRotatingObject->SetRotationSpeed(1.0f*(i % 10));
-				m_ppObjects[0] = pRotatingObject;
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+			
+	m_ppObjects[0] = pRotatingObject;
+
+
+	pCubeMesh = new CCubeMesh(pd3dDevice, 280.0f, 320.0f, 3275.0f, 3350.0f, 3480.0f, 3520.0f); // x길이가 40 y길이가 75 z길이가 40
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+
+
+	m_ppObjects[1] = pRotatingObject;
 		
 	CreateShaderVariables(pd3dDevice);
 }

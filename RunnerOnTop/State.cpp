@@ -31,6 +31,11 @@ STATENUMBER CState::GetState()
 	return m_state;
 }
 
+STATENUMBER CState::GetSubState()
+{
+	return m_sub_state;
+}
+
 void CState::ChangeState(STATENUMBER newState, unsigned int keyBuf)
 {
 	if (m_state < STATE_INTERACTION)
@@ -70,6 +75,10 @@ void CState::ChangeState(STATENUMBER newState, unsigned int keyBuf)
 			}
 			else
 				m_state = STATE_IDLE;
+		}
+		else if (m_state > STATE_INTERACTION)
+		{
+
 		}
 		else 
 			m_state = STATE_IDLE;
@@ -258,6 +267,15 @@ D3DXMATRIX * CState::GetAnimation()
 		 else if(m_sub_state == STATE_RIGHT)
 			 return  m_pAnimationClip->GetBlendAnimation((char*)hashMap.find(m_state)->second.c_str(), (char*)hashMap.find(STATE_RIGHT)->second.c_str(),
 				 frame, frame2, 0.5f, NULL);
+	 }
+
+	 //상호작용중일때
+	 if (m_state > STATE_INTERACTION)
+	 {
+		 if (frame > m_pAnimationClip->GetCurrentMatirxSize((char*)hashMap.find(m_state)->second.c_str()) - 11)
+		 {
+
+		 }
 	 }
 
 	 // 점프중일때 애니메이션 끝나갈때 블랜딩

@@ -57,17 +57,18 @@ void CPlayer::Move(UINT dwDirection, float fDistance, bool bUpdateVelocity)
 {
 	if (dwDirection)
 	{
+		
 		D3DXVECTOR3 d3dxvShift = D3DXVECTOR3(0, 0, 0);
 		//화살표 키 ‘↑’를 누르면 로컬 z-축 방향으로 이동(전진)한다. ‘↓’를 누르면 반대 방향으로 이동한다.
-		if (dwDirection & DIR_FORWARD)
+		if (dwDirection & DIR_FORWARD && (m_pState->GetState() == STATE_RUN || m_pState->GetState() == STATE_RUNJUMP))
 		{
 			d3dxvShift += m_d3dxvLook * fDistance;
 			//MoveForward(fDistance);
 		}
-		if (dwDirection & DIR_BACKWARD) d3dxvShift -= m_d3dxvLook * fDistance;
+		if (dwDirection & DIR_BACKWARD && m_pState->GetState() == STATE_BACK) d3dxvShift -= m_d3dxvLook * fDistance;
 		//화살표 키 ‘→’를 누르면 로컬 x-축 방향으로 이동한다. ‘←’를 누르면 반대 방향으로 이동한다.
-		if (dwDirection & DIR_RIGHT) d3dxvShift += m_d3dxvRight * fDistance;
-		if (dwDirection & DIR_LEFT) d3dxvShift -= m_d3dxvRight * fDistance;
+		if (dwDirection & DIR_RIGHT && (m_pState->GetState() == STATE_RIGHT || m_pState->GetSubState() == STATE_RIGHT) )d3dxvShift += m_d3dxvRight * fDistance;
+		if (dwDirection & DIR_LEFT && (m_pState->GetState() == STATE_LEFT || m_pState->GetSubState() == STATE_LEFT)) d3dxvShift -= m_d3dxvRight * fDistance;
 		//‘Page Up’을 누르면 로컬 y-축 방향으로 이동한다. ‘Page Down’을 누르면 반대 방향으로 이동한다.
 		//if ((dwDirection & DIR_UP) && (m_pState->GetState() != STATE_RUNJUMP)) d3dxvShift += m_d3dxvUp * fDistance * 4000.0f;
 		if (dwDirection & DIR_DOWN) d3dxvShift -= m_d3dxvUp * fDistance;
@@ -295,95 +296,75 @@ void CPlayer::Render(ID3D11DeviceContext *pd3dDeviceContext)
 
 bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 {
+	// 이동 거리
 	D3DXVECTOR3 dxvShift = m_d3dxvVelocity * fTimeElapsed;
 
-	CTextureShader *pShader = (CTextureShader*)m_pPlayerUpdatedContext;
-	
-	CTexturedNormalVertexUVW *mVertices = pShader->m_ppObjects[0]->m_pMesh->m_pVertices;
-	int nIndex = pShader->m_ppObjects[0]->m_pMesh->m_nVertices;
+	//캐릭터 xyz min,max 구하기;
+	CDiffuseNormalVertex * cVertex = pCollision->pVertices;
+	D3DXVECTOR4 cPosition[8];
 
-	D3DXVECTOR3 plane1[4]; // 아래
-	D3DXVECTOR3 plane2[4]; // left,right
-	D3DXVECTOR3 plane3[4]; // front back
-
-	pCollision->GetBottom(plane1);
-	
-	if (dxvShift.z > 0) pCollision->GetFront(plane3);
-	else pCollision->GetBack(plane3);
-
-	if (dxvShift.x > 0) pCollision->GetLeft(plane3);
-	else pCollision->GetRight(plane3);
-
-	D3DXVECTOR4 planes[3][4];
-
-	// 캐릭터 좌표 월드좌표로 변경
-	for (int i = 0; i < 4; ++i)
+	for (int i = 0; i < 8; ++i)
 	{
-		D3DXVec3Transform(&planes[0][i], &plane1[i], &m_d3dxmtxWorld);
-		D3DXVec3Transform(&planes[1][i], &plane2[i], &m_d3dxmtxWorld);
-		D3DXVec3Transform(&planes[2][i], &plane3[i], &m_d3dxmtxWorld);
-
+		D3DXVec3Transform(&cPosition[i], &cVertex[i].m_d3dxvPosition, &m_d3dxmtxWorld);
 	}
 
-	for (int i = 0; i < nIndex; i += 3)
+	float minX = cPosition[0].x, minY = cPosition[0].y, minZ = cPosition[0].z;
+	float maxX = cPosition[0].x, maxY = cPosition[0].y, maxZ = cPosition[0].z;
+
+	for (int i = 1; i < 8; ++i)
 	{
-		
-		D3DXVECTOR4 p[3];
+		if (cPosition[i].x > maxX) maxX = cPosition[i].x;
+		if (cPosition[i].x < minX) minX = cPosition[i].x;
+		if (cPosition[i].y > maxY) maxY = cPosition[i].y;
+		if (cPosition[i].y < minY) minY = cPosition[i].y;
+		if (cPosition[i].z > maxZ) maxZ = cPosition[i].y;
+		if (cPosition[i].z < minZ) minZ = cPosition[i].y;
+	}
 
-		//각 정점 월드 좌표로 변환
-		D3DXVec3Transform(&p[0], &mVertices[i].m_d3dxvPosition, &pShader->m_ppObjects[0]->m_d3dxmtxWorld);
-		D3DXVec3Transform(&p[1], &mVertices[i + 1].m_d3dxvPosition, &pShader->m_ppObjects[0]->m_d3dxmtxWorld);
-		D3DXVec3Transform(&p[2], &mVertices[i + 2].m_d3dxvPosition, &pShader->m_ppObjects[0]->m_d3dxmtxWorld);
+	CDiffusedShader *pShader = (CDiffusedShader*)m_pPlayerUpdatedContext;
+	
+	int nObjects = pShader->m_nObjects;
+	for (int i = 0; i < nObjects; ++i)
+	{
+		CDiffuseNormalVertex *mVertices = ((CCubeMesh*)pShader->m_ppObjects[i]->m_pMesh)->pVertices; //(8개)
 
-		//x, y, z, 최고 최저값 찾기
-		float minX = p[0].x, maxX = p[0].x;
-		float minY = p[0].y, maxY = p[0].y;
-		float minZ = p[0].z, maxZ = p[0].z;
+		float boundminX = mVertices[0].m_d3dxvPosition.x;
+		float boundmaxX = mVertices[1].m_d3dxvPosition.x;
+		float boundminY = mVertices[0].m_d3dxvPosition.y;
+		float boundmaxY = mVertices[4].m_d3dxvPosition.y;
+		float boundminZ = mVertices[0].m_d3dxvPosition.z;
+		float boundmaxZ = mVertices[2].m_d3dxvPosition.z;
 
-		for (int j = 1; j < 3; ++j)
+
+
+		if (maxX <= boundmaxX && maxX >= boundminX && maxZ <= boundmaxZ &&maxZ >= boundminZ)
 		{
-			if (minX > p[j].x) minX = p[j].x;
-			if (minY > p[j].y) minY = p[j].y;
-			if (minZ > p[j].z) minZ = p[j].z;
-
-			if (maxX < p[j].x) maxX = p[j].x;
-			if (maxY < p[j].y) maxY = p[j].y;
-			if (maxZ < p[j].z) maxZ = p[j].z;
+			if (minY <= boundmaxY)
+			{
+				m_d3dxvVelocity.y = 0.0f;
+			}
 		}
 
+		
+
+	}
+	
+
+	
 		// 충돌 체크
 
-		for (int j = 0; j < 4; ++j)
-		{
-			// 바닥과 y축 체크
-			if (minX <= planes[0][j].x && maxX >= planes[0][j].x && minZ <= planes[0][j].z && maxZ >= planes[0][j].z)
-			{
-				if (maxY >= planes[0][j].y + dxvShift.y)
-				{
-					m_d3dxvVelocity.y = 0.0f;
-				}
-			}
+		//for (int j = 0; j < 4; ++j)
+		//{
+		//	// 바닥과 y축 체크
+		//	if (minX <= planes[0][j].x && maxX >= planes[0][j].x && minZ <= planes[0][j].z && maxZ >= planes[0][j].z)
+		//	{
+		//		if (maxY >= planes[0][j].y + dxvShift.y)
+		//		{
+		//			m_d3dxvVelocity.y = 0.0f;
+		//		}
+		//	}
 
-			//x축 체크
-			if (minY < planes[2][j].y && maxY > planes[2][j].y && minZ < planes[2][j].z && maxZ > planes[2][j].z)
-			{
-				if( ( dxvShift.x < 0.0f &&  maxX < planes[2][j].x + dxvShift.x ) || (dxvShift.x > 0.0f &&  minX < planes[2][j].x + dxvShift.x))
-				{
-					m_d3dxvVelocity.x = 0.0f;
-				}
-			}
-
-			//z축 체크
-			if (minY < planes[2][j].y && maxY > planes[2][j].y && minX < planes[2][j].x && maxX > planes[2][j].x)
-			{
-				if (minZ < planes[2][j].z + dxvShift.z && maxZ > planes[2][j].z + dxvShift.z)
-				{
-					m_d3dxvVelocity.z = 0.0f;
-				}
-			}
-
-		}
-	}
+		//}
 	return true;
 }
 
@@ -396,7 +377,7 @@ CAirplanePlayer::CAirplanePlayer(ID3D11Device *pd3dDevice)
 {
 	//비행기 메쉬를 생성한다.
 	CMesh *pAirplaneMesh = new CCharacterMesh(pd3dDevice);
-	CCubeMesh *Collision = new CCubeMesh(pd3dDevice, -10.0f, 10.0f, 0.0f, 60.0f, -10.0f, 10.0f);
+	CCubeMesh *Collision = new CCubeMesh(pd3dDevice, -20.0f, 20.0f, 0.0f, 75.0f, -20.0f, 20.0f);
 	SetMesh(pAirplaneMesh);
 	pCollision = Collision;
 	//플레이어(비행기) 메쉬를 렌더링할 때 사용할 쉐이더를 생성한다.

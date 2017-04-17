@@ -23,27 +23,32 @@ void CScene::BuildObjects(ID3D11Device *pd3dDevice)
 	m_nShaders = 5;
 	m_ppShaders = new CShader*[m_nShaders];
 
+	// 맵
 	m_ppShaders[0] = new CTextureShader();
 	m_ppShaders[0]->CreateShader(pd3dDevice);
 	m_ppShaders[0]->BuildObjects(pd3dDevice);
 
-
+	//기타 아이템
 	m_ppShaders[1] = new CItemShader();
 	m_ppShaders[1]->CreateShader(pd3dDevice);
 	m_ppShaders[1]->BuildObjects(pd3dDevice);
 
+	// 문
 	m_ppShaders[2] = new CItemShader_Door();
 	m_ppShaders[2]->CreateShader(pd3dDevice);
 	m_ppShaders[2]->BuildObjects(pd3dDevice);
 
+	// 바운딩박스
 	m_ppShaders[3] = new CDiffusedShader();
 	m_ppShaders[3]->CreateShader(pd3dDevice);
 	m_ppShaders[3]->BuildObjects(pd3dDevice);
 
+	// 마지막 알파맵
 	m_ppShaders[4] = new CItemShader_Alpha();
 	m_ppShaders[4]->CreateShader(pd3dDevice);
 	m_ppShaders[4]->BuildObjects(pd3dDevice);
 
+	//스카이박스
 	m_pSkybox = new CSkyBoxShader();
 	m_pSkybox->CreateShader(pd3dDevice);
 	m_pSkybox->BuildObjects(pd3dDevice);
