@@ -493,7 +493,8 @@ float4 PSLightingColor(VS_DIFFUSED_COLOR_OUTPUT input) : SV_Target
 {
 	input.normalW = normalize(input.normalW);
 	float4 cIllumination = Lighting(input.positionW, input.normalW);
-	return( input.color * cIllumination);
+	return input.color;
+		//( input.color * cIllumination);
 }
 
 float4 PSTexturedLighting(VS_TEXTURED_LIGHTING_OUTPUT input) : SV_Target

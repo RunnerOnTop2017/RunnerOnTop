@@ -20,12 +20,13 @@ CScene::~CScene()
 
 void CScene::BuildObjects(ID3D11Device *pd3dDevice)
 {
-	m_nShaders = 4;
+	m_nShaders = 5;
 	m_ppShaders = new CShader*[m_nShaders];
 
 	m_ppShaders[0] = new CTextureShader();
 	m_ppShaders[0]->CreateShader(pd3dDevice);
 	m_ppShaders[0]->BuildObjects(pd3dDevice);
+
 
 	m_ppShaders[1] = new CItemShader();
 	m_ppShaders[1]->CreateShader(pd3dDevice);
@@ -34,11 +35,14 @@ void CScene::BuildObjects(ID3D11Device *pd3dDevice)
 	m_ppShaders[2] = new CItemShader_Door();
 	m_ppShaders[2]->CreateShader(pd3dDevice);
 	m_ppShaders[2]->BuildObjects(pd3dDevice);
-	
-	m_ppShaders[3] = new CItemShader_Alpha();
+
+	m_ppShaders[3] = new CDiffusedShader();
 	m_ppShaders[3]->CreateShader(pd3dDevice);
 	m_ppShaders[3]->BuildObjects(pd3dDevice);
 
+	m_ppShaders[4] = new CItemShader_Alpha();
+	m_ppShaders[4]->CreateShader(pd3dDevice);
+	m_ppShaders[4]->BuildObjects(pd3dDevice);
 
 	m_pSkybox = new CSkyBoxShader();
 	m_pSkybox->CreateShader(pd3dDevice);

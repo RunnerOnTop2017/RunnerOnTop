@@ -35,7 +35,7 @@ public:
 	CState();
 	~CState();
 	STATENUMBER GetState();
-	void ChangeState(STATENUMBER newState);
+	void ChangeState(STATENUMBER newState,unsigned int keyBuf = 0);
 	void SetTimer(CGameTimer * timer);
 	void SetAnimationClip(CAnimationClip* clip);
 
@@ -43,6 +43,5 @@ public:
 
 	D3DXMATRIX* GetAnimation();
 	int GetBoneSize();
-	std::string StateNumberToString(STATENUMBER s);
 };
 

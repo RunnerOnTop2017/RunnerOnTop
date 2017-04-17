@@ -31,7 +31,7 @@ STATENUMBER CState::GetState()
 	return m_state;
 }
 
-void CState::ChangeState(STATENUMBER newState)
+void CState::ChangeState(STATENUMBER newState, unsigned int keyBuf)
 {
 	STATENUMBER prev = m_state;
 	switch (newState)
@@ -55,8 +55,17 @@ void CState::ChangeState(STATENUMBER newState)
 		{
 			if (m_sub_state == STATE_LEFT || m_sub_state == STATE_RIGHT)
 			{
-				m_state = STATE_RUN;
-				m_sub_state = STATE_NULL;
+				if (keyBuf == VK_KEYW)
+				{
+					m_state = m_sub_state;
+					m_sub_state = STATE_NULL;
+				}
+				else
+				{
+					m_state = STATE_RUN;
+					m_sub_state = STATE_NULL;
+
+				}
 			}
 			else
 				m_state = STATE_IDLE;
@@ -182,16 +191,16 @@ void CState::ProcessInput(UINT uMessage, WPARAM wParam, LPARAM lParam)
 		switch (wParam)
 		{
 		case VK_KEYW: // W key
-			ChangeState(STATE_IDLE);
+			ChangeState(STATE_IDLE, VK_KEYW);
 			break;
 		case VK_KEYS:
 			ChangeState(STATE_IDLE);
 			break;
 		case VK_KEYA:
-			ChangeState(STATE_IDLE);
+			ChangeState(STATE_IDLE, VK_KEYA);
 			break;
 		case VK_KEYD:
-			ChangeState(STATE_IDLE);
+			ChangeState(STATE_IDLE, VK_KEYD);
 			break;
 		}
 		break;
@@ -268,9 +277,4 @@ D3DXMATRIX * CState::GetAnimation()
 int CState::GetBoneSize()
 {
 	return m_pAnimationClip->GetBoneSize((char *)hashMap.find(m_state)->second.c_str());
-}
-
-std::string CState::StateNumberToString(STATENUMBER s)
-{
-	return std::string();
 }

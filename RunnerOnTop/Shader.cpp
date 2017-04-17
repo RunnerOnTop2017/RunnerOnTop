@@ -248,7 +248,7 @@ void CDiffusedShader::UpdateShaderVariables(ID3D11DeviceContext *pd3dDeviceConte
 
 void CDiffusedShader::BuildObjects(ID3D11Device *pd3dDevice)
 {
-	CMesh *pCubeMesh = new CCubeMesh(pd3dDevice);// , 12.0f, 12.0f, 12.0f, D3DCOLOR_XRGB(0, 0, 128));
+	CMesh *pCubeMesh = new CCubeMesh(pd3dDevice, -10.0f, 10.0f, 0.0f, 60.0f, -10.0f, 10.0f);// , 12.0f, 12.0f, 12.0f, D3DCOLOR_XRGB(0, 0, 128));
 
 	m_nObjects = 1;
 	m_ppObjects = new CGameObject*[m_nObjects];
@@ -256,7 +256,7 @@ void CDiffusedShader::BuildObjects(ID3D11Device *pd3dDevice)
 	CGameObject *pRotatingObject = new CGameObject();
 	
 				pRotatingObject->SetMesh(pCubeMesh);
-				pRotatingObject->SetPosition(0.0f, 140.0f, 0.0f);
+				pRotatingObject->SetPosition(300.0f, 3300.0f, 3300.0f);
 				//pRotatingObject->SetRotationAxis(D3DXVECTOR3(0.0f, 1.0f, 0.0f));
 				//pRotatingObject->SetRotationSpeed(1.0f*(i % 10));
 				m_ppObjects[0] = pRotatingObject;
