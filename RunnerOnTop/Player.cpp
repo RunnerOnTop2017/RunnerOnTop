@@ -298,6 +298,8 @@ void CPlayer::Render(ID3D11DeviceContext *pd3dDeviceContext)
 	}
 }
 
+#define _WITH_DEBUG
+
 bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 {
 	// 이동 거리
@@ -321,14 +323,15 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 		if (cPosition[i].x < minX) minX = cPosition[i].x;
 		if (cPosition[i].y > maxY) maxY = cPosition[i].y;
 		if (cPosition[i].y < minY) minY = cPosition[i].y;
-		if (cPosition[i].z > maxZ) maxZ = cPosition[i].y;
-		if (cPosition[i].z < minZ) minZ = cPosition[i].y;
+		if (cPosition[i].z > maxZ) maxZ = cPosition[i].z;
+		if (cPosition[i].z < minZ) minZ = cPosition[i].z;
 	}
 
 	CDiffusedShader *pShader = (CDiffusedShader*)m_pPlayerUpdatedContext;
 	
 	int nObjects = pShader->m_nObjects;
-	for (int i = 0; i < nObjects; ++i)
+	// 바닥 충돌 체크
+	for (int i = 0; i < 5; ++i)
 	{
 		CDiffuseNormalVertex *mVertices = ((CCubeMesh*)pShader->m_ppObjects[i]->m_pMesh)->pVertices; //(8개)
 
@@ -339,36 +342,38 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 		float boundminZ = mVertices[0].m_d3dxvPosition.z;
 		float boundmaxZ = mVertices[2].m_d3dxvPosition.z;
 
-
-
-		if (maxX <= boundmaxX && maxX >= boundminX && maxZ <= boundmaxZ &&maxZ >= boundminZ)
-		{
-			if (minY <= boundmaxY)
-			{
+		// 낮은 건물로 이동할 때 y축 충돌이 제대로 되지 않음
+		if (boundminX < minX && maxX < boundmaxX &&
+			boundminZ < minZ && maxZ < boundmaxZ) {
+			if (maxY > boundminY && minY < boundmaxY)
 				m_d3dxvVelocity.y = 0.0f;
-			}
 		}
-
-		
-
 	}
-	
 
-	
-		// 충돌 체크
+	// 건물 충돌체크
+	for (int i = 5; i < nObjects; ++i)
+	{
+		CDiffuseNormalVertex *mVertices = ((CCubeMesh*)pShader->m_ppObjects[i]->m_pMesh)->pVertices; //(8개)
 
-		//for (int j = 0; j < 4; ++j)
-		//{
-		//	// 바닥과 y축 체크
-		//	if (minX <= planes[0][j].x && maxX >= planes[0][j].x && minZ <= planes[0][j].z && maxZ >= planes[0][j].z)
-		//	{
-		//		if (maxY >= planes[0][j].y + dxvShift.y)
-		//		{
-		//			m_d3dxvVelocity.y = 0.0f;
-		//		}
-		//	}
+		float boundminX = mVertices[0].m_d3dxvPosition.x;
+		float boundmaxX = mVertices[1].m_d3dxvPosition.x;
+		float boundminY = mVertices[0].m_d3dxvPosition.y;
+		float boundmaxY = mVertices[4].m_d3dxvPosition.y;
+		float boundminZ = mVertices[0].m_d3dxvPosition.z;
+		float boundmaxZ = mVertices[2].m_d3dxvPosition.z;
 
-		//}
+		// 뒤로 돌아갈 수 있어야 함
+		if (maxX > boundminX && minX < boundmaxX &&
+			maxY > boundminY && minY < boundmaxY &&
+			maxZ > boundminZ && minZ < boundmaxZ) {
+#ifdef _WITH_DEBUG
+			OutputDebugString(L"Collision\n");
+#else
+				m_d3dxvVelocity.x = 0.0f;
+				m_d3dxvVelocity.z = 0.0f;
+#endif
+		}
+	}
 	return true;
 }
 
@@ -381,7 +386,7 @@ CAirplanePlayer::CAirplanePlayer(ID3D11Device *pd3dDevice)
 {
 	//비행기 메쉬를 생성한다.
 	CMesh *pAirplaneMesh = new CCharacterMesh(pd3dDevice);
-	CCubeMesh *Collision = new CCubeMesh(pd3dDevice, -20.0f, 20.0f, 0.0f, 75.0f, -20.0f, 20.0f);
+	CCubeMesh *Collision = new CCubeMesh(pd3dDevice, -15.0f, 15.0f, 0.0f, 75.0f, -15.0f, 15.0f);
 	SetMesh(pAirplaneMesh);
 	pCollision = Collision;
 	//플레이어(비행기) 메쉬를 렌더링할 때 사용할 쉐이더를 생성한다.

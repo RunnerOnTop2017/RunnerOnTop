@@ -248,28 +248,58 @@ void CDiffusedShader::UpdateShaderVariables(ID3D11DeviceContext *pd3dDeviceConte
 
 void CDiffusedShader::BuildObjects(ID3D11Device *pd3dDevice)
 {
-	CMesh *pCubeMesh = new CCubeMesh(pd3dDevice, -50.0f, 600.0f, 3180.0f, 3275.0f, 3000.0f, 3610.0f);// , 12.0f, 12.0f, 12.0f, D3DCOLOR_XRGB(0, 0, 128));
-	
-	m_nObjects = 2;
+	CMesh *pCubeMesh = new CCubeMesh(pd3dDevice, -2000.0f, 2000.0f, 3000.0f, 3080.0f, 0.0f, 3800.0f);
+
+	m_nObjects = 6;
 	m_ppObjects = new CGameObject*[m_nObjects];
 
 	CGameObject *pRotatingObject = new CGameObject();
-	
+
 	pRotatingObject->SetMesh(pCubeMesh);
 	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
-			
+
 	m_ppObjects[0] = pRotatingObject;
 
-
-	pCubeMesh = new CCubeMesh(pd3dDevice, 280.0f, 320.0f, 3275.0f, 3350.0f, 3480.0f, 3520.0f); // x길이가 40 y길이가 75 z길이가 40
+	pCubeMesh = new CCubeMesh(pd3dDevice, -55.0f, 590.0f, 3050.0f, 3275.0f, 2980.0f, 3605.0f);
 	pRotatingObject = new CGameObject();
 
 	pRotatingObject->SetMesh(pCubeMesh);
 	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
 
-
 	m_ppObjects[1] = pRotatingObject;
-		
+
+	pCubeMesh = new CCubeMesh(pd3dDevice, 190.0f, 605.0f, 3050.0f, 3275.0f, 2660.0f, 2980.0f); //2960.0f
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+
+	m_ppObjects[2] = pRotatingObject;
+
+	pCubeMesh = new CCubeMesh(pd3dDevice, -55.0f, 595.0f, 3050.0f, 3275.0f, 1705.0f, 2660.0f); //2645.0f
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+
+	m_ppObjects[3] = pRotatingObject;
+
+	pCubeMesh = new CCubeMesh(pd3dDevice, 210.0f, 850.0f, 3040.0f, 3265.0f, 1435.0f, 1705.0f); //2645.0f
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+
+	m_ppObjects[4] = pRotatingObject;
+
+	pCubeMesh = new CCubeMesh(pd3dDevice, -35.0f, 130.0f, 3275.0f, 3320.0f, 3330.0f, 3410.0f); //2645.0f
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+
+	m_ppObjects[5] = pRotatingObject;
+
 	CreateShaderVariables(pd3dDevice);
 }
 
