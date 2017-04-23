@@ -13,6 +13,8 @@ CGameObject::CGameObject()
 	transform = NULL;
 	framenumber = 0;
 	m_pState = NULL;
+	ref = NULL;
+	bInteracted = false;
 	fAngeYaw = fAngePitch = fAngeRoll = 0.0f;
 }
 

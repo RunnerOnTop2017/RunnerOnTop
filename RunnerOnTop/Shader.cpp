@@ -248,12 +248,12 @@ void CDiffusedShader::UpdateShaderVariables(ID3D11DeviceContext *pd3dDeviceConte
 
 void CDiffusedShader::BuildObjects(ID3D11Device *pd3dDevice)
 {
-	CMesh *pCubeMesh = new CCubeMesh(pd3dDevice, -2000.0f, 2000.0f, 3000.0f, 3080.0f, 0.0f, 3800.0f);
-
-	m_nObjects = 6;
+	
+	m_nObjects = 7;
 	m_ppObjects = new CGameObject*[m_nObjects];
 
 	CGameObject *pRotatingObject = new CGameObject();
+	CMesh *pCubeMesh = new CCubeMesh(pd3dDevice, -2000.0f, 2000.0f, 3000.0f, 3080.0f, 0.0f, 3800.0f);
 
 	pRotatingObject->SetMesh(pCubeMesh);
 	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
@@ -299,6 +299,17 @@ void CDiffusedShader::BuildObjects(ID3D11Device *pd3dDevice)
 	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
 
 	m_ppObjects[5] = pRotatingObject;
+
+
+	pCubeMesh = new CCubeMesh(pd3dDevice, 270.0f, 330.0f, 3275.0f, 3360.0f, 3100.0f, 3110.0f, DOOR); //2645.0f
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+
+	m_ppObjects[6] = pRotatingObject;
+
+
 
 	CreateShaderVariables(pd3dDevice);
 }
@@ -1041,11 +1052,7 @@ void CItemShader_Door::BuildObjects(ID3D11Device * pd3dDevice)
 
 	m_nObjects = 1;
 	m_ppObjects = new CGameObject*[m_nObjects];
-	doorDir = new bool[m_nObjects];
-	for (int i = 0; i < m_nObjects; ++i)
-	{
-		doorDir[i] = true;
-	}
+	
 	CGameObject *pObject = NULL;
 
 
@@ -1079,30 +1086,12 @@ void CItemShader_Door::ReleaseObjects()
 
 void CItemShader_Door::Render(ID3D11DeviceContext * pd3dDeviceContext, CCamera * pCamera)
 {
-
-	if (m_ppObjects[0]->fAngeYaw <= -90.0f)
+	if (m_ppObjects[0]->bInteracted && m_ppObjects[0]->fAngeYaw >= -90.0f)
 	{
-		doorDir[0] = false;
-	}
-	else if (m_ppObjects[0]->fAngeYaw >= 0.0f)
-	{
-		doorDir[0] = true;
-	}
-
-	if (doorDir[0])
-	{
-		m_ppObjects[0]->MoveStrafe(25.0f);
+		m_ppObjects[0]->MoveStrafe(30.0f);
 		m_ppObjects[0]->Rotate(&D3DXVECTOR3(0.0f, 0.0f, 1.0f), -5.0f);
-		m_ppObjects[0]->MoveStrafe(-25.0f);
+		m_ppObjects[0]->MoveStrafe(-30.0f);
 	}
-	else
-	{
-		m_ppObjects[0]->MoveStrafe(25.0f);
-		m_ppObjects[0]->Rotate(&D3DXVECTOR3(0.0f, 0.0f, 1.0f), 5.0f);
-		m_ppObjects[0]->MoveStrafe(-25.0f);
-	}
-	
-
 	CTextureShader::Render(pd3dDeviceContext, pCamera);
 
 }

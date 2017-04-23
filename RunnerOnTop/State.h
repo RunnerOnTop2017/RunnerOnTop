@@ -36,6 +36,7 @@ public:
 	CState();
 	~CState();
 	STATENUMBER GetState();
+	void SetState(STATENUMBER state);
 	STATENUMBER GetSubState();
 	void ChangeState(STATENUMBER newState,unsigned int keyBuf = 0);
 	void SetTimer(CGameTimer * timer);

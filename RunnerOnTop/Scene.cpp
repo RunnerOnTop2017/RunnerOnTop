@@ -52,6 +52,8 @@ void CScene::BuildObjects(ID3D11Device *pd3dDevice)
 	m_pSkybox = new CSkyBoxShader();
 	m_pSkybox->CreateShader(pd3dDevice);
 	m_pSkybox->BuildObjects(pd3dDevice);
+
+	m_ppShaders[3]->m_ppObjects[6]->ref = m_ppShaders[2]->m_ppObjects[0];
 	
 	BuildLights(pd3dDevice);
 }

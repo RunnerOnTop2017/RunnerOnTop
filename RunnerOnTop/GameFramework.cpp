@@ -319,12 +319,13 @@ void CGameFramework::ProcessInput()
 		/*키보드의 상태 정보를 반환한다. 화살표 키(‘→’, ‘←’, ‘↑’, ‘↓’)를 누르면 플레이어를 오른쪽/왼쪽(로컬 x-축), 앞/뒤(로컬 z-축)로 이동한다. ‘Page Up’과 ‘Page Down’ 키를 누르면 플레이어를 위/아래(로컬 y-축)로 이동한다.*/
 		if (GetKeyboardState(pKeyBuffer))
 		{
-			if (pKeyBuffer[VK_UP] & 0xF0 || pKeyBuffer[VkKeyScan('w')] & 0xF0) dwDirection |= DIR_FORWARD;
+			if (pKeyBuffer[VK_UP] & 0xF0 || pKeyBuffer[VkKeyScan('w')] & 0xF0 || m_ppPlayers[0]->m_pState->GetState() == STATE_SLIDE) dwDirection |= DIR_FORWARD;
 			if (pKeyBuffer[VK_DOWN] & 0xF0 || pKeyBuffer[VkKeyScan('s')] & 0xF0) dwDirection |= DIR_BACKWARD;
 			if (pKeyBuffer[VK_LEFT] & 0xF0 || pKeyBuffer[VkKeyScan('a')] & 0xF0) dwDirection |= DIR_LEFT;
 			if (pKeyBuffer[VK_RIGHT] & 0xF0 || pKeyBuffer[VkKeyScan('d')] & 0xF0) dwDirection |= DIR_RIGHT;
 			if (pKeyBuffer[VK_SPACE] & 0xF0 || pKeyBuffer[VkKeyScan('r')] & 0xF0) dwDirection |= DIR_UP;
 			if (pKeyBuffer[VK_NEXT] & 0xF0 || pKeyBuffer[VkKeyScan('f')] & 0xF0) dwDirection |= DIR_DOWN;
+			if (pKeyBuffer[VkKeyScan('e')] & 0xF0) m_ppPlayers[0]->bInteraction = true;
 		}
 		float cxDelta = 0.0f, cyDelta = 0.0f;
 		POINT ptCursorPos;
@@ -343,7 +344,7 @@ void CGameFramework::ProcessInput()
 		//플레이어를 이동하거나(dwDirection) 회전한다(cxDelta 또는 cyDelta).
 		if ((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f))
 		{
-			if (cxDelta || cyDelta)
+			if( (cxDelta || cyDelta ) && m_ppPlayers[0]->m_pState->GetState() != STATE_SLIDE)
 			{
 				/*cxDelta는 y-축의 회전을 나타내고 cyDelta는 x-축의 회전을 나타낸다. 오른쪽 마우스 버튼이 눌려진 경우 cxDelta는 z-축의 회전을 나타낸다.*/
 				if (pKeyBuffer[VK_RBUTTON] & 0xF0)

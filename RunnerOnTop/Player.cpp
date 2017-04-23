@@ -20,7 +20,7 @@ CPlayer::CPlayer()
 	m_fPitch = 0.0f;
 	m_fRoll = 0.0f;
 	m_fYaw = 0.0f;
-
+	bInteraction = false;
 	m_pPlayerUpdatedContext = NULL;
 	m_pCameraUpdatedContext = NULL;
 
@@ -63,19 +63,23 @@ void CPlayer::Move(UINT dwDirection, float fDistance, bool bUpdateVelocity)
 		{
 			d3dxvShift += m_d3dxvLook * fDistance*1.2f;
 		}
-		//화살표 키 ‘↑’를 누르면 로컬 z-축 방향으로 이동(전진)한다. ‘↓’를 누르면 반대 방향으로 이동한다.
-		if (dwDirection & DIR_FORWARD && (m_pState->GetState() == STATE_RUN || m_pState->GetState() == STATE_RUNJUMP))
+		else
 		{
-			d3dxvShift += m_d3dxvLook * fDistance;
-			//MoveForward(fDistance);
+			//화살표 키 ‘↑’를 누르면 로컬 z-축 방향으로 이동(전진)한다. ‘↓’를 누르면 반대 방향으로 이동한다.
+			if (dwDirection & DIR_FORWARD && (m_pState->GetState() == STATE_RUN || m_pState->GetState() == STATE_RUNJUMP))
+			{
+				d3dxvShift += m_d3dxvLook * fDistance;
+				//MoveForward(fDistance);
+			}
+			if (dwDirection & DIR_BACKWARD && m_pState->GetState() == STATE_BACK) d3dxvShift -= m_d3dxvLook * fDistance;
+			//화살표 키 ‘→’를 누르면 로컬 x-축 방향으로 이동한다. ‘←’를 누르면 반대 방향으로 이동한다.
+			if (dwDirection & DIR_RIGHT && (m_pState->GetState() == STATE_RIGHT || m_pState->GetSubState() == STATE_RIGHT))d3dxvShift += m_d3dxvRight * fDistance;
+			if (dwDirection & DIR_LEFT && (m_pState->GetState() == STATE_LEFT || m_pState->GetSubState() == STATE_LEFT)) d3dxvShift -= m_d3dxvRight * fDistance;
+			//‘Page Up’을 누르면 로컬 y-축 방향으로 이동한다. ‘Page Down’을 누르면 반대 방향으로 이동한다.
+			//if ((dwDirection & DIR_UP) && (m_pState->GetState() != STATE_RUNJUMP)) d3dxvShift += m_d3dxvUp * fDistance * 4000.0f;
+			if (dwDirection & DIR_DOWN) d3dxvShift -= m_d3dxvUp * fDistance;
 		}
-		if (dwDirection & DIR_BACKWARD && m_pState->GetState() == STATE_BACK) d3dxvShift -= m_d3dxvLook * fDistance;
-		//화살표 키 ‘→’를 누르면 로컬 x-축 방향으로 이동한다. ‘←’를 누르면 반대 방향으로 이동한다.
-		if (dwDirection & DIR_RIGHT && (m_pState->GetState() == STATE_RIGHT || m_pState->GetSubState() == STATE_RIGHT) )d3dxvShift += m_d3dxvRight * fDistance;
-		if (dwDirection & DIR_LEFT && (m_pState->GetState() == STATE_LEFT || m_pState->GetSubState() == STATE_LEFT)) d3dxvShift -= m_d3dxvRight * fDistance;
-		//‘Page Up’을 누르면 로컬 y-축 방향으로 이동한다. ‘Page Down’을 누르면 반대 방향으로 이동한다.
-		//if ((dwDirection & DIR_UP) && (m_pState->GetState() != STATE_RUNJUMP)) d3dxvShift += m_d3dxvUp * fDistance * 4000.0f;
-		if (dwDirection & DIR_DOWN) d3dxvShift -= m_d3dxvUp * fDistance;
+		
 
 		//플레이어를 현재 위치 벡터에서 d3dxvShift 벡터 만큼 이동한다.
 		Move(d3dxvShift, bUpdateVelocity);
@@ -327,6 +331,13 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 		if (cPosition[i].z < minZ) minZ = cPosition[i].z;
 	}
 
+	maxX += dxvShift.x;
+	minX += dxvShift.x;
+	maxY += dxvShift.y;
+	minY += dxvShift.y;
+	maxZ += dxvShift.z;
+	minZ += dxvShift.z;
+
 	CDiffusedShader *pShader = (CDiffusedShader*)m_pPlayerUpdatedContext;
 	
 	int nObjects = pShader->m_nObjects;
@@ -350,6 +361,11 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 		}
 	}
 
+	if (m_pState->GetState() == STATE_RUNJUMP)
+	{
+		m_d3dxvVelocity.y = 0.0f;
+	}
+
 	// 건물 충돌체크
 	for (int i = 5; i < nObjects; ++i)
 	{
@@ -363,11 +379,18 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 		float boundmaxZ = mVertices[2].m_d3dxvPosition.z;
 
 		// 뒤로 돌아갈 수 있어야 함
-		if (maxX > boundminX && minX < boundmaxX &&
-			maxY > boundminY && minY < boundmaxY &&
+		if (maxX > boundminX && minX < boundmaxX && maxY > boundminY && minY < boundmaxY &&
 			maxZ > boundminZ && minZ < boundmaxZ) {
 #ifdef _WITH_DEBUG
 			OutputDebugString(L"Collision\n");
+			m_d3dxvVelocity.x = 0.0f;
+			m_d3dxvVelocity.z = 0.0f;
+
+			if (((CCubeMesh*)pShader->m_ppObjects[i]->m_pMesh)->m_tag == DOOR && bInteraction)
+			{
+				pShader->m_ppObjects[i]->ref->bInteracted = true;
+			}
+			bInteraction = false;
 #else
 				m_d3dxvVelocity.x = 0.0f;
 				m_d3dxvVelocity.z = 0.0f;

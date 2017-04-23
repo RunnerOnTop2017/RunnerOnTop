@@ -90,6 +90,11 @@ public:
 	float fAngePitch;
 	float fAngeRoll;
 
+	//아이템에 사용됨 유저가 작용했는지 여부
+	bool bInteracted;
+
+	//충돌체크용 쉐이더에서 충돌체크박스가 가르키는 원본데이터
+	CGameObject* ref;
 
 	virtual void Scale(float scaleSize)
 	{

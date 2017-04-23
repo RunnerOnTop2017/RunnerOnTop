@@ -5,6 +5,7 @@
 #include "Bone.h"
 #define RANDOM_COLOR D3DXCOLOR((rand() * 0xFFFFFF) / RAND_MAX)
 
+enum OBJECTTAG{ MAP, DOOR, CONDITIONER, FENCE ,PIPE };
 
 class CVertex
 {
@@ -210,8 +211,9 @@ public:
 class CCubeMesh : public CMesh
 {
 public:
+	OBJECTTAG m_tag;
 	CDiffuseNormalVertex pVertices[8];
-	CCubeMesh(ID3D11Device *pd3dDevice, float minX =-1.0f, float maxX = 1.0f, float minY = -1.0f, float maxY = 1.0f, float minZ = -1.0f, float maxZ=1.0f);
+	CCubeMesh(ID3D11Device *pd3dDevice, float minX =-1.0f, float maxX = 1.0f, float minY = -1.0f, float maxY = 1.0f, float minZ = -1.0f, float maxZ=1.0f, OBJECTTAG tag = MAP);
 	~CCubeMesh();
 	virtual void CreateRasterizerState(ID3D11Device *pd3dDevice);
 	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext);

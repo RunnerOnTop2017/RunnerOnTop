@@ -410,7 +410,7 @@ void CCharacterMesh::Render(ID3D11DeviceContext *pd3dDeviceContext)
 	CMesh::Render(pd3dDeviceContext);
 }
 
-CCubeMesh::CCubeMesh(ID3D11Device *pd3dDevice, float minX , float maxX, float minY, float maxY, float minZ, float maxZ)
+CCubeMesh::CCubeMesh(ID3D11Device *pd3dDevice, float minX , float maxX, float minY, float maxY, float minZ, float maxZ, OBJECTTAG tag)
 {
 	m_nStride = sizeof(CDiffuseNormalVertex);
 	m_nOffset = 0;
@@ -418,15 +418,25 @@ CCubeMesh::CCubeMesh(ID3D11Device *pd3dDevice, float minX , float maxX, float mi
 	
 	//CDiffuseNormalVertex pVertices[8];
 	m_nVertices = 8;
+	D3DXCOLOR mColor;
+	m_tag = tag;
+	if (tag == MAP)
+	{
+		mColor = D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f);
+	}
+	else
+	{
+		mColor = D3DXCOLOR(1.0f, 1.0f, 0.0f, 1.0f);
+	}
 	
-	pVertices[0] = CDiffuseNormalVertex(D3DXVECTOR3(minX, minY, minZ), D3DXVECTOR3(0.0f,0.0f,0.0f), D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f));
-	pVertices[1] = CDiffuseNormalVertex(D3DXVECTOR3(maxX, minY, minZ), D3DXVECTOR3(0.0f, 0.0f, 0.0f), D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f));
-	pVertices[2] = CDiffuseNormalVertex(D3DXVECTOR3(minX, minY, maxZ), D3DXVECTOR3(0.0f, 0.0f, 0.0f), D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f));
-	pVertices[3] = CDiffuseNormalVertex(D3DXVECTOR3(maxX, minY, maxZ), D3DXVECTOR3(0.0f, 0.0f, 0.0f), D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f));
-	pVertices[4] = CDiffuseNormalVertex(D3DXVECTOR3(minX, maxY, minZ), D3DXVECTOR3(0.0f, 0.0f, 0.0f), D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f));
-	pVertices[5] = CDiffuseNormalVertex(D3DXVECTOR3(maxX, maxY, minZ), D3DXVECTOR3(0.0f, 0.0f, 0.0f), D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f));
-	pVertices[6] = CDiffuseNormalVertex(D3DXVECTOR3(minX, maxY, maxZ), D3DXVECTOR3(0.0f, 0.0f, 0.0f), D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f));
-	pVertices[7] = CDiffuseNormalVertex(D3DXVECTOR3(maxX, maxY, maxZ), D3DXVECTOR3(0.0f, 0.0f, 0.0f), D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f));
+	pVertices[0] = CDiffuseNormalVertex(D3DXVECTOR3(minX, minY, minZ), D3DXVECTOR3(0.0f,0.0f,0.0f), mColor);
+	pVertices[1] = CDiffuseNormalVertex(D3DXVECTOR3(maxX, minY, minZ), D3DXVECTOR3(0.0f, 0.0f, 0.0f), mColor);
+	pVertices[2] = CDiffuseNormalVertex(D3DXVECTOR3(minX, minY, maxZ), D3DXVECTOR3(0.0f, 0.0f, 0.0f), mColor);
+	pVertices[3] = CDiffuseNormalVertex(D3DXVECTOR3(maxX, minY, maxZ), D3DXVECTOR3(0.0f, 0.0f, 0.0f), mColor);
+	pVertices[4] = CDiffuseNormalVertex(D3DXVECTOR3(minX, maxY, minZ), D3DXVECTOR3(0.0f, 0.0f, 0.0f), mColor);
+	pVertices[5] = CDiffuseNormalVertex(D3DXVECTOR3(maxX, maxY, minZ), D3DXVECTOR3(0.0f, 0.0f, 0.0f), mColor);
+	pVertices[6] = CDiffuseNormalVertex(D3DXVECTOR3(minX, maxY, maxZ), D3DXVECTOR3(0.0f, 0.0f, 0.0f), mColor);
+	pVertices[7] = CDiffuseNormalVertex(D3DXVECTOR3(maxX, maxY, maxZ), D3DXVECTOR3(0.0f, 0.0f, 0.0f), mColor);
 	
 
 	D3D11_BUFFER_DESC d3dBufferDesc;
