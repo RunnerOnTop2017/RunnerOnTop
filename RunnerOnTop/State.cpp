@@ -12,6 +12,8 @@ CState::CState()
 	hashMap.insert({ STATE_RIGHT, "right" });
 	hashMap.insert({ STATE_BACK, "backward" });
 	hashMap.insert({ STATE_SLIDE, "slide" });
+	hashMap.insert({ STATE_KICK, "kicking" });
+
 	
 	m_prev_state = STATE_IDLE;
 	m_state = STATE_IDLE;

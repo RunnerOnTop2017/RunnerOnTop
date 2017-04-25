@@ -31,7 +31,10 @@
 #include <math.h>
 #include <mmsystem.h>
 #include <d3d9types.h>
+
+
 #include <xnamath.h>
+
 
 #define FRAME_BUFFER_WIDTH	1280
 #define FRAME_BUFFER_HEIGHT	720
@@ -59,3 +62,7 @@
 
 #define WM_INTERACT WM_USER+1
 #define CHANGE_POS_SLIDE 0
+
+
+// 첫번째 박스의 max. min, 두번째 박스의 max, min을 인자로 받아 충돌하면 true 아니면 false. 인자로 받은 x,y,z,에 x축과 y축 z축 에 대한 충돌세부사항이 저장된다.
+bool CollisionCheck(D3DXVECTOR3& max1, D3DXVECTOR3& min1, D3DXVECTOR3& max2, D3DXVECTOR3& min2, D3DXVECTOR3& shift, bool& x, bool& y, bool& z);

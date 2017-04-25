@@ -278,6 +278,7 @@ void CGameFramework::BuildObjects()
 	pAnimationClip->LoadAnimation("jump", 40);
 	pAnimationClip->LoadAnimation("jumping");
 	pAnimationClip->LoadAnimation("slide");
+	pAnimationClip->LoadAnimation("kicking");
 
 
 
