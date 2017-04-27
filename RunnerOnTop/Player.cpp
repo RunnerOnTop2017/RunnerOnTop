@@ -32,9 +32,9 @@ CPlayer::~CPlayer()
 	if (m_pCamera) delete m_pCamera;
 }
 
-/*플레이어의 위치와 회전축으로부터 월드 변환 행렬을 생성하는 함수이다. 
-플레이어의 Right 벡터가 월드 변환 행렬의 첫 번째 행 벡터, 
-Up 벡터가 두 번째 행 벡터, 
+/*플레이어의 위치와 회전축으로부터 월드 변환 행렬을 생성하는 함수이다.
+플레이어의 Right 벡터가 월드 변환 행렬의 첫 번째 행 벡터,
+Up 벡터가 두 번째 행 벡터,
 Look 벡터가 세 번째 행 벡터, 플레이어의 위치 벡터가 네 번째 행 벡터가 된다.*/
 void CPlayer::RegenerateWorldMatrix()
 {
@@ -57,7 +57,7 @@ void CPlayer::Move(UINT dwDirection, float fDistance, bool bUpdateVelocity)
 {
 	if (dwDirection)
 	{
-		
+
 		D3DXVECTOR3 d3dxvShift = D3DXVECTOR3(0, 0, 0);
 		if (m_pState->GetState() == STATE_SLIDE)
 		{
@@ -79,7 +79,7 @@ void CPlayer::Move(UINT dwDirection, float fDistance, bool bUpdateVelocity)
 			//if ((dwDirection & DIR_UP) && (m_pState->GetState() != STATE_RUNJUMP)) d3dxvShift += m_d3dxvUp * fDistance * 4000.0f;
 			if (dwDirection & DIR_DOWN) d3dxvShift -= m_d3dxvUp * fDistance;
 		}
-		
+
 
 		//플레이어를 현재 위치 벡터에서 d3dxvShift 벡터 만큼 이동한다.
 		Move(d3dxvShift, bUpdateVelocity);
@@ -99,7 +99,7 @@ void CPlayer::Move(const D3DXVECTOR3& d3dxvShift, bool bUpdateVelocity)
 
 		D3DXVECTOR3 d3dxvPosition = m_d3dxvPosition + d3dxvShift;
 		m_d3dxvPosition = d3dxvPosition;
-		
+
 		RegenerateWorldMatrix();
 		//D3DXMatrixTranslation(&m_d3dxmtxWorld, d3dxvPosition.x, d3dxvPosition.y, d3dxvPosition.z);
 
@@ -266,7 +266,7 @@ CCamera *CPlayer::OnChangeCamera(ID3D11Device *pd3dDevice, DWORD nNewCameraMode,
 		m_d3dxvUp = m_pCamera->GetUpVector();
 		m_d3dxvLook = m_pCamera->GetLookVector();
 	}
-	
+
 	if (pNewCamera)
 	{
 		//기존 카메라가 없으면 새로운 카메라를 위한 쉐이더 변수를 생성한다.
@@ -295,7 +295,7 @@ void CPlayer::Render(ID3D11DeviceContext *pd3dDeviceContext)
 {
 	if (m_pShader)
 	{
-		
+
 		m_pShader->m_ppObjects[0]->m_d3dxmtxWorld = m_d3dxmtxWorld;
 
 		m_pShader->Render(pd3dDeviceContext);
@@ -315,8 +315,6 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 	D3DXVECTOR4 m_Pos;
 	D3DXVECTOR3 d3dxv_cPosition = GetPosition();
 
-
-	
 	D3DXVec3Transform(&m_Pos, &d3dxv_cPosition, &m_d3dxmtxWorld);
 	d3dxv_cPosition = { m_Pos.x, m_Pos.y, m_Pos.z };
 
@@ -337,16 +335,16 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 		if (cPosition[i].z > maxZ) maxZ = cPosition[i].z;
 		if (cPosition[i].z < minZ) minZ = cPosition[i].z;
 	}
-	
+
 	D3DXVECTOR3 d3dxv_cMax = { maxX, maxY, maxZ };
 	D3DXVECTOR3 d3dxv_cMin = { minX, minY, minZ };
 
 
 	CDiffusedShader *pShader = (CDiffusedShader*)m_pPlayerUpdatedContext;
-	 
+
 	int nObjects = pShader->m_nObjects;
 	// 바닥 충돌 체크
-	for (int i = 0; i < 5; ++i)
+	for (int i = 0; i < 15; ++i)
 	{
 		CDiffuseNormalVertex *mVertices = ((CCubeMesh*)pShader->m_ppObjects[i]->m_pMesh)->pVertices; //(8개)
 
@@ -354,7 +352,7 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 		D3DXVECTOR3 d3dxvMin = { mVertices[0].m_d3dxvPosition.x , mVertices[0].m_d3dxvPosition.y,  mVertices[0].m_d3dxvPosition.z };
 		bool x, y, z;
 		CollisionCheck(d3dxv_cMax, d3dxv_cMin, d3dxvMax, d3dxvMin, dxvShift, x, y, z);
-	
+
 		if (x == true)
 			m_d3dxvVelocity.x = 0.0f;
 
@@ -363,19 +361,6 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 
 		if (z == true)
 			m_d3dxvVelocity.z = 0.0f;
-		
-		//float boundminX = mVertices[0].m_d3dxvPosition.x;
-		//float boundmaxX = mVertices[1].m_d3dxvPosition.x;
-		//float boundminY = mVertices[0].m_d3dxvPosition.y;
-		//float boundmaxY = mVertices[4].m_d3dxvPosition.y;
-		//float boundminZ = mVertices[0].m_d3dxvPosition.z;
-		//float boundmaxZ = mVertices[2].m_d3dxvPosition.z;
-		//// 낮은 건물로 이동할 때 y축 충돌이 제대로 되지 않음
-		//if (boundminX < minX && maxX < boundmaxX &&
-		//	boundminZ < minZ && maxZ < boundmaxZ) {
-		//	if (maxY > boundminY && minY < boundmaxY)
-		//		m_d3dxvVelocity.y = 0.0f;
-		//}
 	}
 
 	if (m_pState->GetState() == STATE_RUNJUMP)
@@ -384,39 +369,12 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 	}
 
 	// 건물 충돌체크
-	for (int i = 5; i < nObjects; ++i)
+	for (int i = 15; i < nObjects; ++i)
 	{
 		CDiffuseNormalVertex *mVertices = ((CCubeMesh*)pShader->m_ppObjects[i]->m_pMesh)->pVertices; //(8개)
 		D3DXVECTOR3 d3dxvMax = { mVertices[1].m_d3dxvPosition.x , mVertices[4].m_d3dxvPosition.y, mVertices[2].m_d3dxvPosition.z };
 		D3DXVECTOR3 d3dxvMin = { mVertices[0].m_d3dxvPosition.x , mVertices[0].m_d3dxvPosition.y,  mVertices[0].m_d3dxvPosition.z };
 		bool x, y, z;
-
-
-		//float boundminX = mVertices[0].m_d3dxvPosition.x;
-		//float boundmaxX = mVertices[1].m_d3dxvPosition.x;
-		//float boundminY = mVertices[0].m_d3dxvPosition.y;
-		//float boundmaxY = mVertices[4].m_d3dxvPosition.y;
-		//float boundminZ = mVertices[0].m_d3dxvPosition.z;
-		//float boundmaxZ = mVertices[2].m_d3dxvPosition.z;
-
-//		// 뒤로 돌아갈 수 있어야 함
-//		if (maxX > boundminX && minX < boundmaxX && maxY > boundminY && minY < boundmaxY &&
-//			maxZ > boundminZ && minZ < boundmaxZ) {
-//#ifdef _WITH_DEBUG
-//			OutputDebugString(L"Collision\n");
-//			m_d3dxvVelocity.x = 0.0f;
-//			m_d3dxvVelocity.z = 0.0f;
-//
-//			if (((CCubeMesh*)pShader->m_ppObjects[i]->m_pMesh)->m_tag == DOOR && bInteraction)
-//			{
-//				pShader->m_ppObjects[i]->ref->bInteracted = true;
-//			}
-//			bInteraction = false;
-//#else
-//				m_d3dxvVelocity.x = 0.0f;
-//				m_d3dxvVelocity.z = 0.0f;
-//#endif
-//		}
 
 		if (true == CollisionCheck(d3dxv_cMax, d3dxv_cMin, d3dxvMax, d3dxvMin, dxvShift, x, y, z))
 		{
@@ -433,10 +391,7 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 			{
 				pShader->m_ppObjects[i]->ref->bInteracted = true;
 			}
-
 		}
-
-		
 	}
 	return true;
 }
@@ -527,7 +482,7 @@ void CAirplanePlayer::ChangeCamera(ID3D11Device *pd3dDevice, DWORD nNewCameraMod
 		SetMaxVelocityY(400.0f);
 		m_pCamera = OnChangeCamera(pd3dDevice, THIRD_PERSON_CAMERA, nCurrentCameraMode);
 		m_pCamera->SetTimeLag(0.25f);
-		m_pCamera->SetOffset(D3DXVECTOR3(0.0f,150.0f, -300.0f));
+		m_pCamera->SetOffset(D3DXVECTOR3(0.0f, 150.0f, -300.0f));
 		m_pCamera->GenerateProjectionMatrix(1.00f, 5000.0f, ASPECT_RATIO, 90.0f);
 		break;
 	default:
