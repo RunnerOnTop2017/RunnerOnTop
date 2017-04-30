@@ -11,9 +11,12 @@
 #define STATE_JUMP 10
 #define STATE_IDLEJUMP 10
 #define STATE_RUNJUMP 11
+#define STATE_FALLBACK 21
+#define STATE_STANDUP 22
 #define STATE_INTERACTION 100
 #define STATE_SLIDE 101
 #define STATE_KICK 102
+#define STATE_SMASH 102
 #define STATENUMBER int
 
 #define TIME_ANIMATE_ELAPSED 1.0f/60.0f
@@ -38,6 +41,8 @@ public:
 	~CState();
 	STATENUMBER GetState();
 	void SetState(STATENUMBER state);
+	void SetSubState(STATENUMBER state);
+
 	STATENUMBER GetSubState();
 	void ChangeState(STATENUMBER newState,unsigned int keyBuf = 0);
 	void SetTimer(CGameTimer * timer);

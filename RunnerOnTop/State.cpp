@@ -12,7 +12,10 @@ CState::CState()
 	hashMap.insert({ STATE_RIGHT, "right" });
 	hashMap.insert({ STATE_BACK, "backward" });
 	hashMap.insert({ STATE_SLIDE, "slide" });
-	hashMap.insert({ STATE_KICK, "kicking" });
+	hashMap.insert({ STATE_KICK, "smash" });
+	hashMap.insert({ STATE_STANDUP, "standup" });
+	hashMap.insert({ STATE_FALLBACK, "fallback" });
+
 
 	
 	m_prev_state = STATE_IDLE;
@@ -38,8 +41,22 @@ void CState::SetState(STATENUMBER state)
 	m_prev_state = m_state;
 
 	m_next_state = m_state;
-
+	std::cout << hashMap.find(m_next_state)->second << std::endl;
 	m_state = state;
+
+	if (m_prev_state != m_state)
+	{
+		frame2 = frame;
+		frame = 0;
+		//m_prev_state = prev;
+	}
+}
+
+void CState::SetSubState(STATENUMBER state)
+{
+	m_sub_state = state;
+	frame2 = 0;
+
 }
 
 STATENUMBER CState::GetSubState()
@@ -202,8 +219,8 @@ void CState::ProcessInput(UINT uMessage, WPARAM wParam, LPARAM lParam)
 		case VK_KEYD:
 			ChangeState(STATE_RIGHT);
 			break;
-		case VK_KEYE:
-			ChangeState(STATE_SLIDE);
+	/*	case VK_KEYE:
+			ChangeState(STATE_SLIDE);*/
 			break;
 		}
 		break;
@@ -238,14 +255,48 @@ D3DXMATRIX * CState::GetAnimation()
 	D3DXMATRIX *buf = NULL;
 
 	time += pTimer->GetTimeElapsed();
-	std::cout << hashMap.find(m_state)->second <<std::endl;
-
+	
 	 if (time > TIME_ANIMATE_ELAPSED * 1.5f)
 	{
 		frame2 += 1;
 		frame += 1;
 		time = 0;
 	}
+	 std::cout << frame2 << std::endl;
+
+	 //상호작용중일때
+	 if (m_sub_state > STATE_INTERACTION)
+	 {
+		 if (m_pAnimationClip->GetCurrentMatirxSize((char*)hashMap.find(m_sub_state)->second.c_str()) <= frame2)
+		 {
+			 m_sub_state = STATE_NULL;
+		 }
+		 else
+		 {
+			 return  m_pAnimationClip->GetBlendAnimation((char*)hashMap.find(m_state)->second.c_str(), (char*)hashMap.find(m_sub_state)->second.c_str(),
+				 frame, frame2, 0.6f, NULL);
+		}
+		 
+		 /* if (frame > m_pAnimationClip->GetCurrentMatirxSize((char*)hashMap.find(m_state)->second.c_str()) - 11)
+		 {
+		 if (ratio >= 1.0f)
+		 {
+		 std::cout << hashMap.find(m_next_state)->second << std::endl;
+
+		 frame = frame2;
+		 ratio = 0.0f;
+		 m_state = m_next_state;
+		 frame2 = 0;
+		 m_next_state = STATE_NULL;
+		 }
+		 else
+		 {
+		 ratio += 0.1f;
+		 return  m_pAnimationClip->GetBlendAnimation((char*)hashMap.find(m_state)->second.c_str(), (char*)hashMap.find(m_next_state)->second.c_str(),
+		 frame, frame2, 0.5f, NULL);
+		 }
+		 }*/
+	 }
 
 	 // 달리는중
 	 if (m_state == STATE_RUN)
@@ -281,27 +332,7 @@ D3DXMATRIX * CState::GetAnimation()
 				 frame, frame2, 0.5f, NULL);
 	 }
 
-	 //상호작용중일때
-	 if (m_state > STATE_INTERACTION)
-	 {
-		 if (frame > m_pAnimationClip->GetCurrentMatirxSize((char*)hashMap.find(m_state)->second.c_str()) - 11)
-		 {
-			 if (ratio >= 1.0f)
-			 {
-				 frame = frame2;
-				 ratio = 0.0f;
-				 m_state = m_next_state;
-				 frame2 = 0;
-				 m_next_state = STATE_NULL;
-			 }
-			 else
-			 {
-				 ratio += 0.1f;
-				 return  m_pAnimationClip->GetBlendAnimation((char*)hashMap.find(m_state)->second.c_str(), (char*)hashMap.find(m_next_state)->second.c_str(),
-					 frame, frame2, 1.0f - ratio, NULL);
-			 }
-		 }
-	 }
+	
 
 	 // 점프중일때 애니메이션 끝나갈때 블랜딩
 	 if ((m_state == STATE_RUNJUMP || m_state == STATE_IDLEJUMP) && m_next_state != m_state)

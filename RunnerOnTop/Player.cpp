@@ -378,19 +378,30 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 
 		if (true == CollisionCheck(d3dxv_cMax, d3dxv_cMin, d3dxvMax, d3dxvMin, dxvShift, x, y, z))
 		{
-			if (x == true)
-				m_d3dxvVelocity.x *= -1.0f;
-
-			if (y == true)
-				m_d3dxvVelocity.y *= -1.0f;
-
-			if (z == true)
-				m_d3dxvVelocity.z *= -1.0f;
 
 			if (((CCubeMesh*)pShader->m_ppObjects[i]->m_pMesh)->m_tag == DOOR && bInteraction)
 			{
-				pShader->m_ppObjects[i]->ref->bInteracted = true;
+				if (pShader->m_ppObjects[i]->ref->bInteracted == false)
+				{
+					m_pState->SetSubState(STATE_KICK);
+					pShader->m_ppObjects[i]->ref->bInteracted = true;
+				}
+				
 			}
+			else
+			{
+				if (x == true)
+					m_d3dxvVelocity.x *= -1.0f;
+
+				if (y == true)
+					m_d3dxvVelocity.y *= -1.0f;
+
+				if (z == true)
+					m_d3dxvVelocity.z *= -1.0f;
+			}
+			
+
+		
 		}
 	}
 	return true;
