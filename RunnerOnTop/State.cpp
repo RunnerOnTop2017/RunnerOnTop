@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "State.h"
-
-
+#include "Bone.h"
+#include "Player.h"
 CState::CState()
 {
 	hashMap.insert({ STATE_IDLE,"idle" });
@@ -41,7 +41,7 @@ void CState::SetState(STATENUMBER state)
 	m_prev_state = m_state;
 
 	m_next_state = m_state;
-	std::cout << hashMap.find(m_next_state)->second << std::endl;
+	
 	m_state = state;
 
 	if (m_prev_state != m_state)
@@ -59,6 +59,11 @@ void CState::SetSubState(STATENUMBER state)
 
 }
 
+void CState::SetPlayer(CPlayer * player)
+{
+	m_pPlayer = player;
+}
+
 STATENUMBER CState::GetSubState()
 {
 	return m_sub_state;
@@ -74,7 +79,11 @@ void CState::ChangeState(STATENUMBER newState, unsigned int keyBuf)
 	switch (newState)
 	{
 	case STATE_IDLE: //IDLE로 변경하려 할때
-		if (m_state == STATE_RUNJUMP) // 현재상태가 RunJump인가
+		if (m_state == STATE_FALLBACK)
+		{
+			m_next_state = STATE_IDLE;
+		}
+		else if (m_state == STATE_RUNJUMP) // 현재상태가 RunJump인가
 		{
 			m_next_state = STATE_IDLE;
 		}
@@ -113,7 +122,11 @@ void CState::ChangeState(STATENUMBER newState, unsigned int keyBuf)
 		
 		break;
 	case STATE_RUN:
-		if(m_state != STATE_RUN)
+		if (m_state == STATE_FALLBACK)
+		{
+			m_next_state = STATE_RUN;
+		}
+		else if(m_state != STATE_RUN)
 			m_state = STATE_RUN;
 		break;
 	case STATE_JUMP:
@@ -262,20 +275,30 @@ D3DXMATRIX * CState::GetAnimation()
 		frame += 1;
 		time = 0;
 	}
-	 std::cout << frame2 << std::endl;
+	// std::cout << frame2 << std::endl;
 
 	 //상호작용중일때
 	 if (m_sub_state > STATE_INTERACTION)
 	 {
-		 if (m_pAnimationClip->GetCurrentMatirxSize((char*)hashMap.find(m_sub_state)->second.c_str()) <= frame2)
+		 if (m_sub_state == STATE_KICK)
 		 {
-			 m_sub_state = STATE_NULL;
+			 if (m_pAnimationClip->GetCurrentMatirxSize((char*)hashMap.find(m_sub_state)->second.c_str()) <= frame2)
+			 {
+				 m_sub_state = STATE_NULL;
+				 m_pPlayer->EndAnimation = true;
+			 }
+			 else
+			 {
+				 bool a[65];
+				 float f[65];
+				 float ratio = 0.3f;
+				 GetBodyUpper(a, f, ratio);
+				 return  m_pAnimationClip->GetBlendAnimation((char*)hashMap.find(m_state)->second.c_str(), (char*)hashMap.find(m_sub_state)->second.c_str(),
+					 frame, frame2, f, a);
+			 } 
+
 		 }
-		 else
-		 {
-			 return  m_pAnimationClip->GetBlendAnimation((char*)hashMap.find(m_state)->second.c_str(), (char*)hashMap.find(m_sub_state)->second.c_str(),
-				 frame, frame2, 0.6f, NULL);
-		}
+		
 		 
 		 /* if (frame > m_pAnimationClip->GetCurrentMatirxSize((char*)hashMap.find(m_state)->second.c_str()) - 11)
 		 {
@@ -333,6 +356,26 @@ D3DXMATRIX * CState::GetAnimation()
 	 }
 
 	
+	 if (m_state == STATE_FALLBACK)
+	 {
+		 if (frame > m_pAnimationClip->GetCurrentMatirxSize((char*)hashMap.find(m_state)->second.c_str()) - 11)
+		 {
+			 if (ratio >= 1.0f)
+			 {
+				 //frame = frame2;
+				 ratio = 0.0f;
+				 m_prev_state = m_state;
+				 frame2 = 0;
+				 m_state = m_next_state;
+			 }
+			 else
+			 {
+				 ratio += 0.1f;
+				 return m_pAnimationClip->GetBlendAnimation((char*)hashMap.find(m_state)->second.c_str(), (char*)hashMap.find(m_prev_state)->second.c_str(),
+					 frame, frame2, ratio, NULL);
+			 }
+		 }
+	 }
 
 	 // 점프중일때 애니메이션 끝나갈때 블랜딩
 	 if ((m_state == STATE_RUNJUMP || m_state == STATE_IDLEJUMP) && m_next_state != m_state)

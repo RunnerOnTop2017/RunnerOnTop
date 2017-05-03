@@ -2,6 +2,7 @@
 #include"stdafx.h"
 #include"AnimationClip.h"
 #include "Timer.h"
+
 #define STATE_NULL -1
 #define STATE_IDLE 0
 #define STATE_RUN 1
@@ -21,6 +22,7 @@
 
 #define TIME_ANIMATE_ELAPSED 1.0f/60.0f
 
+class CPlayer;
 
 class CState
 {
@@ -28,7 +30,7 @@ class CState
 	STATENUMBER m_prev_state;
 	STATENUMBER m_next_state;
 	STATENUMBER m_sub_state;
-
+	CPlayer *m_pPlayer;
 	CAnimationClip * m_pAnimationClip;
 	CGameTimer * pTimer;
 	float time;
@@ -42,6 +44,7 @@ public:
 	STATENUMBER GetState();
 	void SetState(STATENUMBER state);
 	void SetSubState(STATENUMBER state);
+	void SetPlayer(CPlayer *player);
 
 	STATENUMBER GetSubState();
 	void ChangeState(STATENUMBER newState,unsigned int keyBuf = 0);

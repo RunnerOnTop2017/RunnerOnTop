@@ -21,9 +21,10 @@ CPlayer::CPlayer()
 	m_fRoll = 0.0f;
 	m_fYaw = 0.0f;
 	bInteraction = false;
+	EndAnimation = false;
 	m_pPlayerUpdatedContext = NULL;
 	m_pCameraUpdatedContext = NULL;
-
+	
 	m_pShader = NULL;
 }
 
@@ -306,6 +307,11 @@ void CPlayer::Render(ID3D11DeviceContext *pd3dDeviceContext)
 
 bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 {
+	if (bInteraction)
+		std::cout << "True" << std::endl;
+	else
+		std::cout << "False" << std::endl;
+
 	// 이동 거리
 	D3DXVECTOR3 dxvShift = m_d3dxvVelocity *fTimeElapsed;
 
@@ -368,6 +374,7 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 		m_d3dxvVelocity.y = 0.0f;
 	}
 
+
 	// 건물 충돌체크
 	for (int i = 15; i < nObjects; ++i)
 	{
@@ -379,12 +386,25 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 		if (true == CollisionCheck(d3dxv_cMax, d3dxv_cMin, d3dxvMax, d3dxvMin, dxvShift, x, y, z))
 		{
 
-			if (((CCubeMesh*)pShader->m_ppObjects[i]->m_pMesh)->m_tag == DOOR && bInteraction)
+			if (((CCubeMesh*)pShader->m_ppObjects[i]->m_pMesh)->m_tag == DOOR)
 			{
-				if (pShader->m_ppObjects[i]->ref->bInteracted == false)
+				
+				if (bInteraction)
 				{
-					m_pState->SetSubState(STATE_KICK);
-					pShader->m_ppObjects[i]->ref->bInteracted = true;
+					if (pShader->m_ppObjects[i]->ref->bInteracted == false)
+					{
+						m_pState->SetSubState(STATE_KICK);
+						Interacted_OBJ = pShader->m_ppObjects[i];
+						//pShader->m_ppObjects[i]->ref->bInteracted = true;
+					}
+				}
+				else if(!bInteraction && Interacted_OBJ == NULL)
+				{
+					if (pShader->m_ppObjects[i]->ref->bInteracted == false)
+					{
+						m_pState->SetState(STATE_FALLBACK);
+						pShader->m_ppObjects[i]->ref->bInteracted = true;
+					}
 				}
 				
 			}
@@ -403,6 +423,12 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 
 		
 		}
+	}
+	if (EndAnimation)
+	{
+		Interacted_OBJ->ref->bInteracted = true;
+		Interacted_OBJ = NULL;
+		EndAnimation = false;
 	}
 	return true;
 }

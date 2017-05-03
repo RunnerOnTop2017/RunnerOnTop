@@ -107,6 +107,9 @@
     <ClCompile Include="xnaCollision.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="bone.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="RunnerOnTop.rc">
