@@ -249,7 +249,7 @@ void CDiffusedShader::UpdateShaderVariables(ID3D11DeviceContext *pd3dDeviceConte
 void CDiffusedShader::BuildObjects(ID3D11Device *pd3dDevice)
 {
 	
-	m_nObjects = 17;
+	m_nObjects = 18;
 	m_ppObjects = new CGameObject*[m_nObjects];
 
 	CGameObject *pRotatingObject = new CGameObject();
@@ -380,6 +380,8 @@ void CDiffusedShader::BuildObjects(ID3D11Device *pd3dDevice)
 
 	m_ppObjects[15] = pRotatingObject;
 
+
+	// 첫번째 문 인터랙트 영역
 	pCubeMesh = new CCubeMesh(pd3dDevice, 270.0f, 330.0f, 3275.0f, 3360.0f, 3140.0f, 3180.0f, DOOR);
 	pRotatingObject = new CGameObject();
 
@@ -387,6 +389,16 @@ void CDiffusedShader::BuildObjects(ID3D11Device *pd3dDevice)
 	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
 
 	m_ppObjects[16] = pRotatingObject;
+
+	//컨디셔너 인터랙트 영역
+	pCubeMesh = new CCubeMesh(pd3dDevice, 180, 600.0f, 3275.0f, 3360.0f, 2400.0f, 2600.0f, CONDITIONER);
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+
+	m_ppObjects[17] = pRotatingObject;
+
 
 	CreateShaderVariables(pd3dDevice);
 }
@@ -653,8 +665,6 @@ void CAnimateShader::BuildObjects(ID3D11Device *pd3dDevice)
 	pBump->SetTexture(4, pd3dTexture, pd3dSamplerState);
 	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Character\\police1\\Police1_Moustache_Normal.png"), NULL, NULL, &pd3dTexture, NULL);
 	pBump->SetTexture(5, pd3dTexture, pd3dSamplerState);
-
-	std::cout << "ResourceSize is " << sizeof(D3D11_SHADER_RESOURCE_VIEW_DESC) << std::endl;
 
 	CMesh *pMeshIlluminatedTextured = new CCharacterMesh(pd3dDevice, 12.0f, 12.0f, 12.0f);//CCubeMeshIlluminatedTextured(pd3dDevice, 12.0f, 12.0f, 12.0f);
 
@@ -1007,13 +1017,10 @@ void CItemShader_Alpha::BuildObjects(ID3D11Device * pd3dDevice)
 	ID3D11ShaderResourceView *pd3dTexture = NULL;
 
 
-	m_nObjects = 1;
+	m_nObjects = 5;
 	m_ppObjects = new CGameObject*[m_nObjects];
 
 	CGameObject *pObject = NULL;
-
-
-
 
 	CTexture*  p_Texture = new CTexture(1);
 	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Object\\Texture\\fence_2.png"), NULL, NULL, &pd3dTexture, NULL);
@@ -1036,6 +1043,84 @@ void CItemShader_Alpha::BuildObjects(ID3D11Device * pd3dDevice)
 	pObject->Scale(2.0f);
 
 	m_ppObjects[0] = pObject;
+
+	//300.0f, 3260.0f, 3100.0f
+	pObject = new CGameObject();
+	pObject->SetMesh(pMesh);
+	pObject->SetMaterial(ppMaterials[0]);
+	pObject->SetTexture(p_Texture);
+	pObject->SetPosition(200.0f, 3270.0f, 3100.0f);
+	pObject->Rotate(&D3DXVECTOR3(1.0f, 0.0f, 0.0f), -90.0f);
+	
+	p_Texture = new CTexture(1);
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Object\\Texture\\fence_1.png"), NULL, NULL, &pd3dTexture, NULL);
+	p_Texture->SetTexture(0, pd3dTexture, pd3dSamplerState);
+
+	pObject->SetTexture(p_Texture);
+
+	CTexture* p_Texture2 = new CTexture(1);
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Object\\Texture\\fence_alpha.png"), NULL, NULL, &pd3dTexture, NULL);
+	p_Texture2->SetTexture(0, pd3dTexture, pd3dSamplerState);
+
+	pObject->SetAlphaMap(p_Texture2);
+	pObject->Scale(2.0f);
+	
+	m_ppObjects[1] = pObject;
+
+
+	//300.0f, 3260.0f, 3100.0f
+	pObject = new CGameObject();
+	pObject->SetMesh(pMesh);
+	pObject->SetMaterial(ppMaterials[0]);
+	pObject->SetTexture(p_Texture);
+	pObject->SetPosition(395.0f, 3270.0f, 3100.0f);
+	pObject->Rotate(&D3DXVECTOR3(1.0f, 0.0f, 0.0f), -90.0f);
+
+	p_Texture = new CTexture(1);
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Object\\Texture\\fence_1.png"), NULL, NULL, &pd3dTexture, NULL);
+	p_Texture->SetTexture(0, pd3dTexture, pd3dSamplerState);
+
+	pObject->SetTexture(p_Texture);
+
+	p_Texture2 = new CTexture(1);
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Object\\Texture\\fence_alpha.png"), NULL, NULL, &pd3dTexture, NULL);
+	p_Texture2->SetTexture(0, pd3dTexture, pd3dSamplerState);
+
+	pObject->SetAlphaMap(p_Texture2);
+	pObject->Scale(2.0f);
+
+	m_ppObjects[2] = pObject;
+
+	pObject = new CGameObject();
+	pMesh = new CItemMesh(pd3dDevice, "fence.src", true);
+
+	pObject->SetMesh(pMesh);
+	pObject->SetMaterial(ppMaterials[0]);
+	pObject->SetTexture(p_Texture);
+	pObject->SetAlphaMap(p_Texture2);
+
+	pObject->SetPosition(530.0f, 3270.0f, 3100.0f);
+	pObject->Rotate(&D3DXVECTOR3(1.0f, 0.0f, 0.0f), -90.0f);
+	pObject->Scale(2.0f);
+
+	m_ppObjects[3] = pObject;
+
+
+	pObject = new CGameObject();
+	pMesh = new CItemMesh(pd3dDevice, "fence.src", true);
+
+	pObject->SetMesh(pMesh);
+	pObject->SetMaterial(ppMaterials[0]);
+	pObject->SetTexture(p_Texture);
+	pObject->SetAlphaMap(p_Texture2);
+
+	pObject->SetPosition(65.0f, 3270.0f, 3100.0f);
+	pObject->Rotate(&D3DXVECTOR3(1.0f, 0.0f, 0.0f), -90.0f);
+	pObject->Scale(2.0f);
+
+	m_ppObjects[4] = pObject;
+
+
 
 	CreateShaderVariables(pd3dDevice);
 	delete[] ppMaterials;
@@ -1146,7 +1231,7 @@ void CItemShader_Door::BuildObjects(ID3D11Device * pd3dDevice)
 	pObject->SetMesh(pMesh);
 	pObject->SetMaterial(ppMaterials[0]);
 	pObject->SetTexture(p_Texture);
-	pObject->SetPosition(300.0f, 3260.0f, 3100.0f);
+	pObject->SetPosition(297.0f, 3260.0f, 3100.0f);
 	pObject->Rotate(&D3DXVECTOR3(1.0f, 0.0f, 0.0f), -90.0f);
 	pObject->Scale(0.5f);
 

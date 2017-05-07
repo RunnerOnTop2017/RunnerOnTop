@@ -424,9 +424,13 @@ CCubeMesh::CCubeMesh(ID3D11Device *pd3dDevice, float minX , float maxX, float mi
 	{
 		mColor = D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f);
 	}
-	else
+	else if (tag  == REAL)
 	{
+		mColor = D3DXCOLOR(0.0f, 0.0f, 1.0f, 1.0f);
+	}
+	else {
 		mColor = D3DXCOLOR(1.0f, 1.0f, 0.0f, 1.0f);
+
 	}
 	
 	pVertices[0] = CDiffuseNormalVertex(D3DXVECTOR3(minX, minY, minZ), D3DXVECTOR3(0.0f,0.0f,0.0f), mColor);

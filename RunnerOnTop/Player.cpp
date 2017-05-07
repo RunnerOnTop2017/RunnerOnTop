@@ -307,11 +307,6 @@ void CPlayer::Render(ID3D11DeviceContext *pd3dDeviceContext)
 
 bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 {
-	if (bInteraction)
-		std::cout << "True" << std::endl;
-	else
-		std::cout << "False" << std::endl;
-
 	// 이동 거리
 	D3DXVECTOR3 dxvShift = m_d3dxvVelocity *fTimeElapsed;
 
@@ -328,6 +323,7 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 	{
 		D3DXVec3Transform(&cPosition[i], &cVertex[i].m_d3dxvPosition, &m_d3dxmtxWorld);
 	}
+	
 
 	float minX = cPosition[0].x, minY = cPosition[0].y, minZ = cPosition[0].z;
 	float maxX = cPosition[0].x, maxY = cPosition[0].y, maxZ = cPosition[0].z;
@@ -344,8 +340,11 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 
 	D3DXVECTOR3 d3dxv_cMax = { maxX, maxY, maxZ };
 	D3DXVECTOR3 d3dxv_cMin = { minX, minY, minZ };
-
-
+#ifdef _DEBUG
+	//system("cls");
+	printf("MAX[ %f | %f | %f ]\n", maxX, maxY, maxZ);
+	printf("MIN[ %f | %f | %f ]\n", minX, minY, minZ);
+#endif
 	CDiffusedShader *pShader = (CDiffusedShader*)m_pPlayerUpdatedContext;
 
 	int nObjects = pShader->m_nObjects;
@@ -363,7 +362,12 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 			m_d3dxvVelocity.x = 0.0f;
 
 		if (y == true)
+		{
 			m_d3dxvVelocity.y = 0.0f;
+			D3DXVECTOR3 vec = GetPosition();
+			vec.y = d3dxvMax.y+0.1f;
+			SetPosition(vec);
+		}
 
 		if (z == true)
 			m_d3dxvVelocity.z = 0.0f;
@@ -371,7 +375,7 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 
 	if (m_pState->GetState() == STATE_RUNJUMP)
 	{
-		m_d3dxvVelocity.y = 0.0f;
+		//m_d3dxvVelocity.y = 0.0f;
 	}
 
 
@@ -385,8 +389,9 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 
 		if (true == CollisionCheck(d3dxv_cMax, d3dxv_cMin, d3dxvMax, d3dxvMin, dxvShift, x, y, z))
 		{
-
-			if (((CCubeMesh*)pShader->m_ppObjects[i]->m_pMesh)->m_tag == DOOR)
+			OBJECTTAG tag = ((CCubeMesh*)pShader->m_ppObjects[i]->m_pMesh)->m_tag;
+			// 문?
+			if (DOOR == tag)
 			{
 				
 				if (bInteraction)
@@ -407,6 +412,10 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 					}
 				}
 				
+			}
+			else if (CONDITIONER == tag)
+			{
+				m_d3dxvVelocity.x += 5.0f;
 			}
 			else
 			{
