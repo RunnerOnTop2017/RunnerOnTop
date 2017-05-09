@@ -53,6 +53,11 @@ void CScene::BuildObjects(ID3D11Device *pd3dDevice)
 	m_pSkybox->CreateShader(pd3dDevice);
 	m_pSkybox->BuildObjects(pd3dDevice);
 
+	//UI
+	m_pUIShader = new CUIShader();
+	m_pUIShader->CreateShader(pd3dDevice);
+	m_pUIShader->BuildObjects(pd3dDevice);
+
 	m_ppShaders[3]->m_ppObjects[16]->ref = m_ppShaders[2]->m_ppObjects[0];
 	
 	BuildLights(pd3dDevice);
@@ -124,12 +129,22 @@ void CScene::Render(ID3D11DeviceContext*pd3dDeviceContext, CCamera *pCamera)
 		m_pSkybox->Render(pd3dDeviceContext, pCamera);
 	}
 
+	
+
 	for (int i = 0; i < m_nShaders; i++)
 	{
 		m_ppShaders[i]->Render(pd3dDeviceContext, pCamera);
 	}
 
+	
 
+}
+void CScene::DrawUI(ID3D11DeviceContext * pd3dDeviceContext, CCamera *pCamera)
+{
+	if (m_pUIShader)
+	{
+		m_pUIShader->Render(pd3dDeviceContext, pCamera);
+	}
 }
 void CScene::BuildLights(ID3D11Device *pd3dDevice)
 {

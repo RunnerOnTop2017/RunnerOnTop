@@ -230,6 +230,7 @@ cbuffer cbViewProjectionMatrix : register(b0)
 {
 	matrix gmtxView: packoffset(c0);
 	matrix gmtxProjection: packoffset(c4);
+	matrix gmtxOrtho : packoffset(c8);
 };
 
 // 월드변환행렬
@@ -695,4 +696,39 @@ float4 SkinnedPS(SkinnedVertexOut input) : SV_Target
 	cColor = cColor *cIllumination;
 	
 	return(cColor);
+}
+
+struct VS_UI_INPUT {
+	float3 position: POSITION;
+	float4 color: COLOR0;
+};
+
+
+struct VS_UI_OUTPUT
+{
+	float4 position : SV_POSITION;
+	float4 color: COLOR0;
+};
+
+VS_UI_OUTPUT VS_UI(VS_UI_INPUT input)
+{
+	VS_UI_OUTPUT output = (VS_UI_OUTPUT)0;
+
+	float4 pos = float4(input.position, 1.0f);
+
+	matrix mtxWorldViewProjection = mul(gmtxWorld, gmtxView);
+	mtxWorldViewProjection = mul(mtxWorldViewProjection, gmtxOrtho);
+
+	output.position = mul(pos, gmtxWorld);
+	output.position = mul(output.position, gmtxView);
+	output.position = mul(output.position, gmtxOrtho);
+
+	output.color = input.color;
+
+	return output;
+}
+
+float4 PS_UI(VS_UI_OUTPUT input) : SV_Target
+{
+	return input.color;
 }

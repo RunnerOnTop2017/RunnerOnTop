@@ -4,6 +4,7 @@
 #define SHADER_H
 
 #include"GameObject.h"
+#include "UIClass.h"
 struct VS_CB_WORLD_MATRIX
 {
 	D3DXMATRIX m_d3dxmtxWorld;
@@ -177,6 +178,17 @@ public:
 	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamera = NULL);
 };
 
+class CUIShader : public CShader {
+	D3DXMATRIX mtxWorld;
+public:
+	CUIClass *m_pUI;
+	virtual void CreateShader(ID3D11Device *pd3dDevice);
+	virtual void CreateShaderVariables(ID3D11Device *pd3dDevice);
+
+	virtual void BuildObjects(ID3D11Device *pd3dDevice);
+	virtual void ReleaseObjects();
+	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamera = NULL);
+};
 
 
 #endif

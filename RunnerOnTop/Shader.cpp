@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "Shader.h"
-
+#include "Player.h"
 
 CShader::CShader()
 {
@@ -1033,7 +1033,7 @@ void CItemShader_Alpha::BuildObjects(ID3D11Device * pd3dDevice)
 	pObject->SetMesh(pMesh);
 	pObject->SetMaterial(ppMaterials[0]);
 	pObject->SetTexture(p_Texture);
-	pObject->SetPosition(300.0f, 3270.0f, 3500.0f);
+	pObject->SetPosition(300.0f, 3270.0f, 2000.0f);
 	pObject->Rotate(&D3DXVECTOR3(1.0f, 0.0f, 0.0f), -90.0f);
 	p_Texture = new CTexture(1);
 	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Object\\texture\\fence_2_alpha.png"), NULL, NULL, &pd3dTexture, NULL);
@@ -1255,5 +1255,71 @@ void CItemShader_Door::Render(ID3D11DeviceContext * pd3dDeviceContext, CCamera *
 		m_ppObjects[0]->MoveStrafe(-30.0f);
 	}
 	CTextureShader::Render(pd3dDeviceContext, pCamera);
+
+}
+
+void CUIShader::CreateShader(ID3D11Device * pd3dDevice)
+{
+	CShader::CreateShader(pd3dDevice);
+	D3D11_INPUT_ELEMENT_DESC d3dInputLayout[] =
+	{
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "COLOR0", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	};
+	UINT nElements = ARRAYSIZE(d3dInputLayout);
+	CreateVertexShaderFromFile(pd3dDevice, L"Effect.fx", "VS_UI", "vs_4_0", &m_pd3dVertexShader, d3dInputLayout, nElements, &m_pd3dVertexLayout);
+	CreatePixelShaderFromFile(pd3dDevice, L"Effect.fx", "PS_UI", "ps_4_0", &m_pd3dPixelShader);
+}
+
+void CUIShader::CreateShaderVariables(ID3D11Device * pd3dDevice)
+{
+	CShader::CreateShaderVariables(pd3dDevice);
+}
+
+void CUIShader::BuildObjects(ID3D11Device * pd3dDevice)
+{
+	D3DXMatrixIdentity(&mtxWorld);
+	m_pUI = new CUIClass(pd3dDevice);
+	CreateShaderVariables(pd3dDevice);
+}
+
+void CUIShader::ReleaseObjects()
+{
+	delete m_pUI;
+}
+
+void CUIShader::Render(ID3D11DeviceContext * pd3dDeviceContext, CCamera * pCamera)
+{
+	pd3dDeviceContext->IASetInputLayout(m_pd3dVertexLayout);
+	pd3dDeviceContext->VSSetShader(m_pd3dVertexShader, NULL, 0);
+	pd3dDeviceContext->PSSetShader(m_pd3dPixelShader, NULL, 0);
+	//D3DXMATRIX matrix;// = pCamera->GetCameraWorldMatrix();
+	if (pCamera)
+	{
+		D3DXMATRIX matrix;
+		CPlayer *player = pCamera->GetPlayer();
+		float len = DISTANCE;
+		float myLen = GETDISTANCE(player->GetPosition().x, player->GetPosition().z);
+
+		float ratio = myLen / len;
+
+		float bar = m_pUI->GetBarLength();
+
+		ratio = bar*(1.0f-ratio);
+
+		D3DXMATRIX move;
+		D3DXMatrixTranslation(&move, ratio, 0.0f, 0.0f);
+
+		matrix = pCamera->GetCameraWorldMatrix();
+		UpdateShaderVariables(pd3dDeviceContext, &matrix);
+
+		m_pUI->RenderBar(pd3dDeviceContext);
+		matrix = move*matrix;
+		UpdateShaderVariables(pd3dDeviceContext, &matrix);
+
+		m_pUI->RenderMarker(pd3dDeviceContext);
+	
+	}
+	
 
 }

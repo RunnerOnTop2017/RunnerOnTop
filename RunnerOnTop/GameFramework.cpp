@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "GameFramework.h"
 #include "State.h"
+#include "UIClass.h"
+
 CGameFramework::CGameFramework()
 {
 	m_pd3dDevice = NULL;
@@ -63,6 +65,71 @@ bool CGameFramework::CreateRenderTargetDepthStencilView()
 	d3dDepthStencilBufferDesc.CPUAccessFlags = 0;
 	d3dDepthStencilBufferDesc.MiscFlags = 0;
 	if (FAILED(hResult = m_pd3dDevice->CreateTexture2D(&d3dDepthStencilBufferDesc, NULL, &m_pd3dDepthStencilBuffer))) return(false);
+
+
+	// Initialize the description of the stencil state.
+	D3D11_DEPTH_STENCIL_DESC depthStencilDesc;
+
+	ZeroMemory(&depthStencilDesc, sizeof(depthStencilDesc));
+
+	// Set up the description of the stencil state.
+	depthStencilDesc.DepthEnable = true;
+	depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+	depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
+
+	depthStencilDesc.StencilEnable = true;
+	depthStencilDesc.StencilReadMask = 0xFF;
+	depthStencilDesc.StencilWriteMask = 0xFF;
+
+	// Stencil operations if pixel is front-facing.
+	depthStencilDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+	depthStencilDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR;
+	depthStencilDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+	depthStencilDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+
+	// Stencil operations if pixel is back-facing.
+	depthStencilDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+	depthStencilDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR;
+	depthStencilDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+	depthStencilDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+
+	// Create the depth stencil state.
+	
+	if (FAILED(hResult = m_pd3dDevice->CreateDepthStencilState(&depthStencilDesc, &m_pd3dDepthStencilState))) return (false);
+	
+	// Set the depth stencil state.
+	m_pd3dDeviceContext->OMSetDepthStencilState(m_pd3dDepthStencilState, 1);
+
+
+	D3D11_DEPTH_STENCIL_DESC depthDisableStencilDesc;
+	ZeroMemory(&depthDisableStencilDesc, sizeof(depthDisableStencilDesc));
+
+	// Set up the description of the stencil state.
+	depthDisableStencilDesc.DepthEnable = false;
+	depthDisableStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+	depthDisableStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
+
+	depthDisableStencilDesc.StencilEnable = true;
+	depthDisableStencilDesc.StencilReadMask = 0xFF;
+	depthDisableStencilDesc.StencilWriteMask = 0xFF;
+
+	// Stencil operations if pixel is front-facing.
+	depthDisableStencilDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+	depthDisableStencilDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR;
+	depthDisableStencilDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+	depthDisableStencilDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+
+	// Stencil operations if pixel is back-facing.
+	depthDisableStencilDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+	depthDisableStencilDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR;
+	depthDisableStencilDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+	depthDisableStencilDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+
+	// Create the depth stencil state.
+
+	if (FAILED(hResult = m_pd3dDevice->CreateDepthStencilState(&depthDisableStencilDesc, &m_pd3dDepthDisableStencilState))) return (false);
+
+
 
 	// Create the depth stencil view
 	D3D11_DEPTH_STENCIL_VIEW_DESC d3dDepthStencilViewDesc;
@@ -262,6 +329,8 @@ void CGameFramework::BuildObjects()
 	CCamera *pCamera = pAirplanePlyer->GetCamera();
 	pCamera->SetViewport(m_pd3dDeviceContext, 0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
 	pCamera->GenerateProjectionMatrix(1.01f, 500000.0f, ASPECT_RATIO, 45.0f);
+	pCamera->GenerateOrthoMatrixc(FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.1f, 1000.0f);
+
 	pCamera->GenerateViewMatrix();
 
 	
@@ -395,9 +464,13 @@ void CGameFramework::FrameAdvance()
 		for (int j = 0; j < m_nPlayers; j++) if (m_ppPlayers[j]) m_ppPlayers[j]->Render(m_pd3dDeviceContext);
 		
 		if (m_pScene) m_pScene->Render(m_pd3dDeviceContext, pCamera);
-		
-		
 	}
+
+
+	m_pd3dDeviceContext->OMSetDepthStencilState(m_pd3dDepthDisableStencilState, 1);
+	if (m_pScene)m_pScene->DrawUI(m_pd3dDeviceContext, pCamera);
+	m_pd3dDeviceContext->OMSetDepthStencilState(m_pd3dDepthStencilState, 1);
+
 
 	m_pDXGISwapChain->Present(0, 0);
 

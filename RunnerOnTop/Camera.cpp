@@ -98,6 +98,12 @@ void CCamera::GenerateProjectionMatrix(float fNearPlaneDistance, float fFarPlane
 	D3DXMatrixPerspectiveFovLH(&m_d3dxmtxProjection, (float)D3DXToRadian(fFOVAngle), fAspectRatio, fNearPlaneDistance, fFarPlaneDistance);
 }
 
+void CCamera::GenerateOrthoMatrixc(float fScreenWidth, float fScreenHeight, float fScreenNear, float fScreenFar)
+{
+	D3DXMatrixOrthoLH(&m_d3dxmtxOrtho, fScreenWidth, fScreenHeight, fScreenNear, fScreenFar);
+
+}
+
 void CCamera::CreateShaderVariables(ID3D11Device *pd3dDevice)
 {
 	D3D11_BUFFER_DESC bd;
@@ -116,6 +122,8 @@ void CCamera::UpdateShaderVariables(ID3D11DeviceContext *pd3dDeviceContext)
 	VS_CB_CAMERA *pcbViewProjection = (VS_CB_CAMERA *)d3dMappedResource.pData;
 	D3DXMatrixTranspose(&pcbViewProjection->m_d3dxmtxView, &m_d3dxmtxView);
 	D3DXMatrixTranspose(&pcbViewProjection->m_d3dxmtxProjection, &m_d3dxmtxProjection);
+	D3DXMatrixTranspose(&pcbViewProjection->m_d3dxmtxOrtho, &m_d3dxmtxOrtho);
+
 	pd3dDeviceContext->Unmap(m_pd3dcbCamera, 0);
 
 	pd3dDeviceContext->VSSetConstantBuffers(NULL, 1, &m_pd3dcbCamera);
@@ -130,6 +138,25 @@ void CCamera::SetViewport(ID3D11DeviceContext *pd3dDeviceContext, DWORD xTopLeft
 	m_d3dViewport.MinDepth = fMinZ;
 	m_d3dViewport.MaxDepth = fMaxZ;
 	pd3dDeviceContext->RSSetViewports(1, &m_d3dViewport);
+}
+
+D3DXMATRIX CCamera::GetCameraWorldMatrix()
+{
+	D3DXMATRIX m_d3dxmtxWorld;
+	D3DXMatrixIdentity(&m_d3dxmtxWorld);
+	m_d3dxmtxWorld._11 = m_d3dxvRight.x;
+	m_d3dxmtxWorld._12 = m_d3dxvRight.y;
+	m_d3dxmtxWorld._13 = m_d3dxvRight.z;
+	m_d3dxmtxWorld._21 = m_d3dxvUp.x;
+	m_d3dxmtxWorld._22 = m_d3dxvUp.y;
+	m_d3dxmtxWorld._23 = m_d3dxvUp.z;
+	m_d3dxmtxWorld._31 = m_d3dxvLook.x;
+	m_d3dxmtxWorld._32 = m_d3dxvLook.y;
+	m_d3dxmtxWorld._33 = m_d3dxvLook.z;
+	m_d3dxmtxWorld._41 = m_d3dxvPosition.x;
+	m_d3dxmtxWorld._42 = m_d3dxvPosition.y;
+	m_d3dxmtxWorld._43 = m_d3dxvPosition.z;
+	return m_d3dxmtxWorld;
 }
 
 

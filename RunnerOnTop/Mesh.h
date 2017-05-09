@@ -187,8 +187,9 @@ public:
 		frameNumber %= AnimSize;
 		D3DXMATRIX* Transform = new D3DXMATRIX[mBoneData.size()];
 		D3DXMATRIX tempM = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-		for (int i = 0; i < mBoneData.size(); ++i)
+		for (unsigned int i = 0; i < mBoneData.size(); ++i)
 		{
+			
 			Transform[i] = mBoneData[i][frameNumber];
 		}
 		return Transform;

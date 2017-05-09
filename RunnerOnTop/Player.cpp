@@ -22,6 +22,7 @@ CPlayer::CPlayer()
 	m_fYaw = 0.0f;
 	bInteraction = false;
 	EndAnimation = false;
+	Interacted_OBJ = NULL;
 	m_pPlayerUpdatedContext = NULL;
 	m_pCameraUpdatedContext = NULL;
 	
@@ -198,7 +199,10 @@ void CPlayer::Update(float fTimeElapsed)
 	fLength = sqrtf(m_d3dxvVelocity.y * m_d3dxvVelocity.y);
 	if (fLength > m_fMaxVelocityY) m_d3dxvVelocity.y *= (m_fMaxVelocityY / fLength);
 
-
+	DWORD nCurrentCameraMode = m_pCamera->GetMode();
+	
+	
+	if(nCurrentCameraMode != SPACESHIP_CAMERA)
 	/*플레이어의 위치가 변경될 때 추가로 수행할 작업을 수행한다. 예를 들어, 플레이어의 위치가 변경되었지만 플레이어 객체에는 지형(Terrain)의 정보가 없다. 플레이어의 새로운 위치가 유효한 위치가 아닐 수도 있고 또는 플레이어의 충돌 검사 등을 수행할 필요가 있다. 이러한 상황에서 플레이어의 위치를 유효한 위치로 다시 변경할 수 있다.*/
 	if (m_pPlayerUpdatedContext) OnPlayerUpdated(fTimeElapsed);
 
@@ -206,7 +210,7 @@ void CPlayer::Update(float fTimeElapsed)
 	Move(m_d3dxvVelocity * fTimeElapsed, false);
 
 
-	DWORD nCurrentCameraMode = m_pCamera->GetMode();
+	
 	//플레이어의 위치가 변경되었으므로 카메라의 상태를 갱신한다.
 	if (nCurrentCameraMode == THIRD_PERSON_CAMERA) m_pCamera->Update(fTimeElapsed);
 	//카메라의 위치가 변경될 때 추가로 수행할 작업을 수행한다. 
@@ -341,7 +345,7 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 	D3DXVECTOR3 d3dxv_cMax = { maxX, maxY, maxZ };
 	D3DXVECTOR3 d3dxv_cMin = { minX, minY, minZ };
 #ifdef _DEBUG
-	//system("cls");
+	system("cls");
 	printf("MAX[ %f | %f | %f ]\n", maxX, maxY, maxZ);
 	printf("MIN[ %f | %f | %f ]\n", minX, minY, minZ);
 #endif
@@ -393,24 +397,25 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 			// 문?
 			if (DOOR == tag)
 			{
-				
 				if (bInteraction)
 				{
-					if (pShader->m_ppObjects[i]->ref->bInteracted == false)
+					if (pShader->m_ppObjects[i]->ref->bInteracted == false && Interacted_OBJ == NULL)
 					{
 						m_pState->SetSubState(STATE_KICK);
 						Interacted_OBJ = pShader->m_ppObjects[i];
 						//pShader->m_ppObjects[i]->ref->bInteracted = true;
 					}
 				}
-				else if(!bInteraction && Interacted_OBJ == NULL)
+
+
+			/*	else if(!bInteraction && Interacted_OBJ == NULL)
 				{
 					if (pShader->m_ppObjects[i]->ref->bInteracted == false)
 					{
 						m_pState->SetState(STATE_FALLBACK);
 						pShader->m_ppObjects[i]->ref->bInteracted = true;
 					}
-				}
+				}*/
 				
 			}
 			else if (CONDITIONER == tag)
