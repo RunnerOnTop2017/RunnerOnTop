@@ -144,10 +144,10 @@ void CGameObject::SetMaterial(CMaterial *pMaterial)
 void CGameObject::Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamera)
 {
 	if (m_pMesh)m_pMesh->Render(pd3dDeviceContext);
-	if (!transform)
+	/*if (!transform)
 	{
 		transform = m_pMesh->getTransform(framenumber++);
-	}
+	}*/
 }
 
 void CGameObject::SetTexture(CTexture *pTexture)

@@ -345,7 +345,7 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 	D3DXVECTOR3 d3dxv_cMax = { maxX, maxY, maxZ };
 	D3DXVECTOR3 d3dxv_cMin = { minX, minY, minZ };
 #ifdef _DEBUG
-	system("cls");
+	//system("cls");
 	printf("MAX[ %f | %f | %f ]\n", maxX, maxY, maxZ);
 	printf("MIN[ %f | %f | %f ]\n", minX, minY, minZ);
 #endif
@@ -353,7 +353,7 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 
 	int nObjects = pShader->m_nObjects;
 	// 바닥 충돌 체크
-	for (int i = 0; i < 15; ++i)
+	for (int i = 0; i < 27; ++i)
 	{
 		CDiffuseNormalVertex *mVertices = ((CCubeMesh*)pShader->m_ppObjects[i]->m_pMesh)->pVertices; //(8개)
 
@@ -375,6 +375,10 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 
 		if (z == true)
 			m_d3dxvVelocity.z = 0.0f;
+
+		if (x || y || z) {
+			std::cout << "[" << i << "]" << std::endl;
+		}
 	}
 
 	if (m_pState->GetState() == STATE_RUNJUMP)
@@ -384,7 +388,7 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 
 
 	// 건물 충돌체크
-	for (int i = 15; i < nObjects; ++i)
+	for (int i = 27; i < nObjects; ++i)
 	{
 		CDiffuseNormalVertex *mVertices = ((CCubeMesh*)pShader->m_ppObjects[i]->m_pMesh)->pVertices; //(8개)
 		D3DXVECTOR3 d3dxvMax = { mVertices[1].m_d3dxvPosition.x , mVertices[4].m_d3dxvPosition.y, mVertices[2].m_d3dxvPosition.z };
