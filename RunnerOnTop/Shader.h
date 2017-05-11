@@ -5,6 +5,11 @@
 
 #include"GameObject.h"
 #include "UIClass.h"
+
+#define OBJECT_CNT 48
+#define FLOOR_CNT 27
+
+
 struct VS_CB_WORLD_MATRIX
 {
 	D3DXMATRIX m_d3dxmtxWorld;

@@ -353,7 +353,7 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 
 	int nObjects = pShader->m_nObjects;
 	// 바닥 충돌 체크
-	for (int i = 0; i < 27; ++i)
+	for (int i = 0; i < FLOOR_CNT; ++i)
 	{
 		CDiffuseNormalVertex *mVertices = ((CCubeMesh*)pShader->m_ppObjects[i]->m_pMesh)->pVertices; //(8개)
 
@@ -388,7 +388,7 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 
 
 	// 건물 충돌체크
-	for (int i = 27; i < nObjects; ++i)
+	for (int i = FLOOR_CNT; i < nObjects; ++i)
 	{
 		CDiffuseNormalVertex *mVertices = ((CCubeMesh*)pShader->m_ppObjects[i]->m_pMesh)->pVertices; //(8개)
 		D3DXVECTOR3 d3dxvMax = { mVertices[1].m_d3dxvPosition.x , mVertices[4].m_d3dxvPosition.y, mVertices[2].m_d3dxvPosition.z };
@@ -403,24 +403,43 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 			{
 				if (bInteraction)
 				{
-					if (pShader->m_ppObjects[i]->ref->bInteracted == false && Interacted_OBJ == NULL)
+					if (pShader->m_ppObjects[i]->ref!= NULL && pShader->m_ppObjects[i]->ref->bInteracted == false && Interacted_OBJ == NULL)
 					{
-						m_pState->SetSubState(STATE_KICK);
+						m_pState->SetSubState(STATE_SMASH);
 						Interacted_OBJ = pShader->m_ppObjects[i];
 						//pShader->m_ppObjects[i]->ref->bInteracted = true;
 					}
 				}
-
-
-			/*	else if(!bInteraction && Interacted_OBJ == NULL)
+			}
+			else if (REALDOOR == tag)
+			{
+				if (NULL != pShader->m_ppObjects[i]->ref && false == pShader->m_ppObjects[i]->ref->bInteracted)
 				{
-					if (pShader->m_ppObjects[i]->ref->bInteracted == false)
+					m_pState->SetState(STATE_FALLBACK);
+					pShader->m_ppObjects[i]->ref->bInteracted = true;
+					if (NULL!=Interacted_OBJ)
 					{
-						m_pState->SetState(STATE_FALLBACK);
-						pShader->m_ppObjects[i]->ref->bInteracted = true;
+						Interacted_OBJ->ref->bInteracted = true;
+						Interacted_OBJ = NULL;
+						EndAnimation = false;
 					}
-				}*/
-				
+					
+				}
+			}
+			else if (FENCE == tag)
+			{
+				if (NULL == Interacted_OBJ)
+				{
+					if (x == true)
+						m_d3dxvVelocity.x *= -1.0f;
+
+					if (y == true)
+						m_d3dxvVelocity.y *= -1.0f;
+
+					if (z == true)
+						m_d3dxvVelocity.z *= -1.0f;
+					m_pState->SetState(STATE_FALLBACK);
+				}
 			}
 			else if (CONDITIONER == tag)
 			{
@@ -437,9 +456,7 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 				if (z == true)
 					m_d3dxvVelocity.z *= -1.0f;
 			}
-			
 
-		
 		}
 	}
 	if (EndAnimation)
@@ -460,7 +477,7 @@ CAirplanePlayer::CAirplanePlayer(ID3D11Device *pd3dDevice)
 {
 	//비행기 메쉬를 생성한다.
 	CMesh *pAirplaneMesh = new CCharacterMesh(pd3dDevice);
-	CCubeMesh *Collision = new CCubeMesh(pd3dDevice, -20.0f, 20.0f, 0.0f, 75.0f, -20.0f, 20.0f);
+	CCubeMesh *Collision = new CCubeMesh(pd3dDevice, -15.0f, 15.0f, 0.0f, 75.0f, -15.0f, 15.0f);
 	SetMesh(pAirplaneMesh);
 	pCollision = Collision;
 	//플레이어(비행기) 메쉬를 렌더링할 때 사용할 쉐이더를 생성한다.

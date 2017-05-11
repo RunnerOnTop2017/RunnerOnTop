@@ -59,7 +59,8 @@ void CScene::BuildObjects(ID3D11Device *pd3dDevice)
 	m_pUIShader->BuildObjects(pd3dDevice);
 
 	m_ppShaders[3]->m_ppObjects[42]->ref = m_ppShaders[2]->m_ppObjects[0];
-	
+	m_ppShaders[3]->m_ppObjects[43]->ref = m_ppShaders[2]->m_ppObjects[0];
+
 	BuildLights(pd3dDevice);
 }
 
@@ -133,6 +134,11 @@ void CScene::Render(ID3D11DeviceContext*pd3dDeviceContext, CCamera *pCamera)
 
 	for (int i = 0; i < m_nShaders; i++)
 	{
+#ifdef _DEBUG
+		if(3==i)
+			m_ppShaders[i]->Render(pd3dDeviceContext, pCamera);
+#endif
+	if (3 != i)
 		m_ppShaders[i]->Render(pd3dDeviceContext, pCamera);
 	}
 

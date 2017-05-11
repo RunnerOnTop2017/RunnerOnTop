@@ -424,7 +424,7 @@ CCubeMesh::CCubeMesh(ID3D11Device *pd3dDevice, float minX , float maxX, float mi
 	{
 		mColor = D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f);
 	}
-	else if (tag  == REAL)
+	else if (tag  == REALDOOR || tag == FENCE)
 	{
 		mColor = D3DXCOLOR(0.0f, 0.0f, 1.0f, 1.0f);
 	}
