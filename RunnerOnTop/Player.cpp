@@ -362,62 +362,83 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 		D3DXVECTOR3 d3dxvMin = { mVertices[0].m_d3dxvPosition.x , mVertices[0].m_d3dxvPosition.y,  mVertices[0].m_d3dxvPosition.z };
 		bool x, y, z;
 		CollisionCheck(d3dxv_cMax, d3dxv_cMin, d3dxvMax, d3dxvMin, dxvShift, x, y, z);
-
+		OBJECTTAG tag = ((CCubeMesh*)pShader->m_ppObjects[i]->m_pMesh)->m_tag;
 		
-
-		if(m_pState->GetState() == STATE_RUNJUMP &&(x || z))
+		if (tag == FALL)
 		{
-			if (lastFloorIndex != i)
+			if( (-1 != lastFloorIndex) && (x||y||z))
 			{
-				
-				float maxY = d3dxv_cMin.y;
-				
-				if (abs(maxY - d3dxvMax.y) < 20.0f)
+				CDiffuseNormalVertex *vertices = ((CCubeMesh*)pShader->m_ppObjects[lastFloorIndex]->m_pMesh)->pVertices;
+
+				D3DXVECTOR3 dMax = { vertices[1].m_d3dxvPosition.x , vertices[4].m_d3dxvPosition.y, vertices[2].m_d3dxvPosition.z };
+				D3DXVECTOR3 dMin = { vertices[0].m_d3dxvPosition.x , vertices[0].m_d3dxvPosition.y,  vertices[0].m_d3dxvPosition.z };
+				D3DXVECTOR3 vec = (dMax + dMin) / 2.0f;
+				vec.y = dMax.y+0.1f;
+				SetPosition(vec);
+				m_d3dxvVelocity.x = 0.0f;
+				m_d3dxvVelocity.y = 0.0f;
+				m_d3dxvVelocity.z = 0.0f;
+
+			}
+		}
+		else
+		{
+			if (m_pState->GetState() == STATE_RUNJUMP && (x || z))
+			{
+				if (lastFloorIndex != i)
+				{
+
+					float maxY = d3dxv_cMin.y;
+
+					if (abs(maxY - d3dxvMax.y) < 20.0f)
+					{
+						m_d3dxvVelocity.y = 0.0f;
+						D3DXVECTOR3 vec = GetPosition();
+						vec.y = d3dxvMax.y + 0.1f;
+						SetPosition(vec);
+					}
+					else
+					{
+
+						m_d3dxvVelocity.x = 0.0f;
+						m_d3dxvVelocity.y = 0.0f;
+						m_d3dxvVelocity.z = 0.0f;
+
+					}
+				}
+				else
 				{
 					m_d3dxvVelocity.y = 0.0f;
 					D3DXVECTOR3 vec = GetPosition();
 					vec.y = d3dxvMax.y + 0.1f;
 					SetPosition(vec);
 				}
-				else
-				{
-
-					m_d3dxvVelocity.x = 0.0f;
-					m_d3dxvVelocity.y = 0.0f;
-					m_d3dxvVelocity.z = 0.0f;
-
-				}
 			}
-			else
+			else if (x)
+			{
+				m_d3dxvVelocity.x = 0.0f;
+			}
+			else if (z)
+			{
+				m_d3dxvVelocity.z = 0.0f;
+			}
+			else if (y == true)
 			{
 				m_d3dxvVelocity.y = 0.0f;
 				D3DXVECTOR3 vec = GetPosition();
 				vec.y = d3dxvMax.y + 0.1f;
 				SetPosition(vec);
-			}
-		}
-		else if (x)
-		{
-			m_d3dxvVelocity.x = 0.0f;
-		}
-		else if (z)
-		{
-			m_d3dxvVelocity.z = 0.0f;
-		} 
-		else if (y == true)
-		{
-			m_d3dxvVelocity.y = 0.0f;
-			D3DXVECTOR3 vec = GetPosition();
-			vec.y = d3dxvMax.y + 0.1f;
-			SetPosition(vec);
-			if (lastFloorIndex != i)
-			{
-				lastFloorIndex = i;
+				if (lastFloorIndex != i)
+				{
+					lastFloorIndex = i;
+				}
 			}
 		}
 
+		
+
 		if (y) {
-			std::cout << "[" << i << "]" << std::endl;
+			std::cout << "[" << lastFloorIndex << "]" << std::endl;
 		}
 	}
 

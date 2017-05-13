@@ -58,8 +58,8 @@ void CScene::BuildObjects(ID3D11Device *pd3dDevice)
 	m_pUIShader->CreateShader(pd3dDevice);
 	m_pUIShader->BuildObjects(pd3dDevice);
 
-	m_ppShaders[3]->m_ppObjects[42]->ref = m_ppShaders[2]->m_ppObjects[0];
-	m_ppShaders[3]->m_ppObjects[43]->ref = m_ppShaders[2]->m_ppObjects[0];
+	m_ppShaders[3]->m_ppObjects[58]->ref = m_ppShaders[2]->m_ppObjects[0];
+	m_ppShaders[3]->m_ppObjects[59]->ref = m_ppShaders[2]->m_ppObjects[0];
 
 	BuildLights(pd3dDevice);
 }
