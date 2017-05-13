@@ -42,7 +42,7 @@ protected:
 	CAnimateShader *m_pShader;
 
 	CCubeMesh *pCollision;
-
+	int lastFloorIndex;
 public:
 	CPlayer();
 	~CPlayer();

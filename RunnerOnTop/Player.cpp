@@ -23,6 +23,7 @@ CPlayer::CPlayer()
 	bInteraction = false;
 	EndAnimation = false;
 	Interacted_OBJ = NULL;
+	lastFloorIndex = -1;
 	m_pPlayerUpdatedContext = NULL;
 	m_pCameraUpdatedContext = NULL;
 	
@@ -345,7 +346,7 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 	D3DXVECTOR3 d3dxv_cMax = { maxX, maxY, maxZ };
 	D3DXVECTOR3 d3dxv_cMin = { minX, minY, minZ };
 #ifdef _DEBUG
-	//system("cls");
+	system("cls");
 	printf("MAX[ %f | %f | %f ]\n", maxX, maxY, maxZ);
 	printf("MIN[ %f | %f | %f ]\n", minX, minY, minZ);
 #endif
@@ -362,21 +363,60 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 		bool x, y, z;
 		CollisionCheck(d3dxv_cMax, d3dxv_cMin, d3dxvMax, d3dxvMin, dxvShift, x, y, z);
 
-		if (x == true)
-			m_d3dxvVelocity.x = 0.0f;
+		
 
-		if (y == true)
+		if(m_pState->GetState() == STATE_RUNJUMP &&(x || z))
+		{
+			if (lastFloorIndex != i)
+			{
+				
+				float maxY = d3dxv_cMin.y;
+				
+				if (abs(maxY - d3dxvMax.y) < 20.0f)
+				{
+					m_d3dxvVelocity.y = 0.0f;
+					D3DXVECTOR3 vec = GetPosition();
+					vec.y = d3dxvMax.y + 0.1f;
+					SetPosition(vec);
+				}
+				else
+				{
+
+					m_d3dxvVelocity.x = 0.0f;
+					m_d3dxvVelocity.y = 0.0f;
+					m_d3dxvVelocity.z = 0.0f;
+
+				}
+			}
+			else
+			{
+				m_d3dxvVelocity.y = 0.0f;
+				D3DXVECTOR3 vec = GetPosition();
+				vec.y = d3dxvMax.y + 0.1f;
+				SetPosition(vec);
+			}
+		}
+		else if (x)
+		{
+			m_d3dxvVelocity.x = 0.0f;
+		}
+		else if (z)
+		{
+			m_d3dxvVelocity.z = 0.0f;
+		} 
+		else if (y == true)
 		{
 			m_d3dxvVelocity.y = 0.0f;
 			D3DXVECTOR3 vec = GetPosition();
-			vec.y = d3dxvMax.y+0.1f;
+			vec.y = d3dxvMax.y + 0.1f;
 			SetPosition(vec);
+			if (lastFloorIndex != i)
+			{
+				lastFloorIndex = i;
+			}
 		}
 
-		if (z == true)
-			m_d3dxvVelocity.z = 0.0f;
-
-		if (x || y || z) {
+		if (y) {
 			std::cout << "[" << i << "]" << std::endl;
 		}
 	}
