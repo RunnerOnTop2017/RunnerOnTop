@@ -350,6 +350,8 @@ void CGameFramework::BuildObjects()
 	pAnimationClip->LoadAnimation("smash");
 	pAnimationClip->LoadAnimation("fallback");
 	pAnimationClip->LoadAnimation("standup");
+	pAnimationClip->LoadAnimation("fallfront");
+
 
 	pState->SetPlayer(pAirplanePlyer);
 
@@ -418,7 +420,7 @@ void CGameFramework::ProcessInput()
 		//플레이어를 이동하거나(dwDirection) 회전한다(cxDelta 또는 cyDelta).
 		if ((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f))
 		{
-			if( (cxDelta || cyDelta ) && m_ppPlayers[0]->m_pState->GetState() != STATE_SLIDE)
+			if( (cxDelta || cyDelta ) && m_ppPlayers[0]->m_pState->GetState() != STATE_SLIDE &&m_ppPlayers[0]->m_pState->GetState() != STATE_FALLBACK&&m_ppPlayers[0]->m_pState->GetState() != STATE_FALLFRONT)
 			{
 				/*cxDelta는 y-축의 회전을 나타내고 cyDelta는 x-축의 회전을 나타낸다. 오른쪽 마우스 버튼이 눌려진 경우 cxDelta는 z-축의 회전을 나타낸다.*/
 				if (pKeyBuffer[VK_RBUTTON] & 0xF0)

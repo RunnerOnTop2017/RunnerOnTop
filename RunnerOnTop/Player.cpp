@@ -346,9 +346,9 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 	D3DXVECTOR3 d3dxv_cMax = { maxX, maxY, maxZ };
 	D3DXVECTOR3 d3dxv_cMin = { minX, minY, minZ };
 #ifdef _DEBUG
-	system("cls");
-	printf("MAX[ %f | %f | %f ]\n", maxX, maxY, maxZ);
-	printf("MIN[ %f | %f | %f ]\n", minX, minY, minZ);
+	//system("cls");
+	//printf("MAX[ %f | %f | %f ]\n", maxX, maxY, maxZ);
+	//printf("MIN[ %f | %f | %f ]\n", minX, minY, minZ);
 #endif
 	CDiffusedShader *pShader = (CDiffusedShader*)m_pPlayerUpdatedContext;
 
@@ -438,7 +438,7 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 		
 
 		if (y) {
-			std::cout << "[" << lastFloorIndex << "]" << std::endl;
+			//std::cout << "[" << lastFloorIndex << "]" << std::endl;
 		}
 	}
 
@@ -489,7 +489,7 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 			}
 			else if (FENCE == tag)
 			{
-				if (NULL == Interacted_OBJ)
+				if (m_pState->GetState() != STATE_SLIDE)
 				{
 					if (x == true)
 						m_d3dxvVelocity.x *= -1.0f;
@@ -500,6 +500,26 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 					if (z == true)
 						m_d3dxvVelocity.z *= -1.0f;
 					m_pState->SetState(STATE_FALLBACK);
+				}
+			}
+			else if (FENCEHOLE == tag)
+			{
+				if (bInteraction)
+				{
+					if (pShader->m_ppObjects[i]->ref != NULL && Interacted_OBJ == NULL)
+					{
+						Interacted_OBJ = pShader->m_ppObjects[i];
+						m_pState->SetState(STATE_SLIDE);
+						bInteraction = false;
+					}
+				}
+			}
+			else if (PIPE == tag)
+			{
+				if (m_pState->GetState() != STATE_RUNJUMP &&Interacted_OBJ == NULL)
+				{
+					m_pState->SetState(STATE_FALLFRONT);
+					Interacted_OBJ = pShader->m_ppObjects[i];
 				}
 			}
 			else if (CONDITIONER == tag)
@@ -522,8 +542,21 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 	}
 	if (EndAnimation)
 	{
-		Interacted_OBJ->ref->bInteracted = true;
-		Interacted_OBJ = NULL;
+		if (m_pState->GetPrevState() == STATE_FALLFRONT)
+		{
+			D3DXVECTOR3 vec = GetPosition();
+			D3DXVECTOR3 look = GetLookAt();
+
+			vec += look*100.0f;
+
+			SetPosition(vec);
+		}
+
+		if (Interacted_OBJ)
+		{
+			Interacted_OBJ->ref->bInteracted = true;
+			Interacted_OBJ = NULL;
+		}
 		EndAnimation = false;
 	}
 	return true;

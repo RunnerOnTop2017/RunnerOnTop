@@ -6,7 +6,7 @@
 #include"GameObject.h"
 #include "UIClass.h"
 
-#define OBJECT_CNT 64
+#define OBJECT_CNT 69
 #define FLOOR_CNT 28
 
 

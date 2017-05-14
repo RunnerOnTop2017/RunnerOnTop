@@ -15,6 +15,7 @@ CState::CState()
 	hashMap.insert({ STATE_KICK, "smash" });
 	hashMap.insert({ STATE_STANDUP, "standup" });
 	hashMap.insert({ STATE_FALLBACK, "fallback" });
+	hashMap.insert({ STATE_FALLFRONT, "fallfront" });
 
 
 	
@@ -69,6 +70,16 @@ STATENUMBER CState::GetSubState()
 	return m_sub_state;
 }
 
+STATENUMBER CState::GetNextState()
+{
+	return m_next_state;
+}
+
+STATENUMBER CState::GetPrevState()
+{
+	return m_prev_state;
+}
+
 void CState::ChangeState(STATENUMBER newState, unsigned int keyBuf)
 {
 	if (m_state < STATE_INTERACTION)
@@ -79,7 +90,7 @@ void CState::ChangeState(STATENUMBER newState, unsigned int keyBuf)
 	switch (newState)
 	{
 	case STATE_IDLE: //IDLE로 변경하려 할때
-		if (m_state == STATE_FALLBACK)
+		if (m_state == STATE_FALLBACK || m_state == STATE_FALLFRONT)
 		{
 			m_next_state = STATE_IDLE;
 		}
@@ -122,7 +133,11 @@ void CState::ChangeState(STATENUMBER newState, unsigned int keyBuf)
 		
 		break;
 	case STATE_RUN:
-		if (m_state == STATE_FALLBACK)
+		if (m_state == STATE_FALLBACK || m_state == STATE_FALLFRONT)
+		{
+			m_next_state = STATE_RUN;
+		}
+		else if (m_state == STATE_SLIDE)
 		{
 			m_next_state = STATE_RUN;
 		}
@@ -297,29 +312,10 @@ D3DXMATRIX * CState::GetAnimation()
 					 frame, frame2, f, a);
 			 } 
 
-		 }
-		
-		 
-		 /* if (frame > m_pAnimationClip->GetCurrentMatirxSize((char*)hashMap.find(m_state)->second.c_str()) - 11)
-		 {
-		 if (ratio >= 1.0f)
-		 {
-		 std::cout << hashMap.find(m_next_state)->second << std::endl;
-
-		 frame = frame2;
-		 ratio = 0.0f;
-		 m_state = m_next_state;
-		 frame2 = 0;
-		 m_next_state = STATE_NULL;
-		 }
-		 else
-		 {
-		 ratio += 0.1f;
-		 return  m_pAnimationClip->GetBlendAnimation((char*)hashMap.find(m_state)->second.c_str(), (char*)hashMap.find(m_next_state)->second.c_str(),
-		 frame, frame2, 0.5f, NULL);
-		 }
-		 }*/
+		}
 	 }
+
+	
 
 	 // 달리는중
 	 if (m_state == STATE_RUN)
@@ -355,6 +351,18 @@ D3DXMATRIX * CState::GetAnimation()
 				 frame, frame2, 0.5f, NULL);
 	 }
 
+	 if (m_state == STATE_SLIDE)
+	 {
+		 if (m_pAnimationClip->GetCurrentMatirxSize((char*)hashMap.find(m_state)->second.c_str()) <= frame)
+		 {
+			 m_state = m_next_state;
+			 m_pPlayer->EndAnimation = true;
+		 }
+		 else
+		 {
+			 return m_pAnimationClip->GetAnimation((char *)hashMap.find(m_state)->second.c_str(), frame, buf);
+		 }
+	 }
 	
 	 if (m_state == STATE_FALLBACK)
 	 {
@@ -367,6 +375,30 @@ D3DXMATRIX * CState::GetAnimation()
 				 m_prev_state = m_state;
 				 frame2 = 0;
 				 m_state = m_next_state;
+			 }
+			 else
+			 {
+				 ratio += 0.1f;
+				 return m_pAnimationClip->GetBlendAnimation((char*)hashMap.find(m_state)->second.c_str(), (char*)hashMap.find(m_prev_state)->second.c_str(),
+					 frame, frame2, ratio, NULL);
+			 }
+		 }
+	 }
+
+	 if (m_state == STATE_FALLFRONT)
+	 {
+		 if (frame > m_pAnimationClip->GetCurrentMatirxSize((char*)hashMap.find(m_state)->second.c_str()) - 11)
+		 {
+			 if (ratio >= 1.0f)
+			 {
+				 //frame = frame2;
+				 ratio = 0.0f;
+				 m_prev_state = m_state;
+				 frame2 = 0;
+				 m_state = m_next_state;
+				 std::cout << m_next_state << std::endl;
+
+				 m_pPlayer->EndAnimation = true;
 			 }
 			 else
 			 {

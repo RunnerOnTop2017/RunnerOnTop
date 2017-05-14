@@ -14,6 +14,7 @@
 #define STATE_RUNJUMP 11
 #define STATE_FALLBACK 21
 #define STATE_STANDUP 22
+#define STATE_FALLFRONT 23
 #define STATE_INTERACTION 100
 #define STATE_SLIDE 101
 #define STATE_KICK 102
@@ -42,11 +43,14 @@ public:
 	CState();
 	~CState();
 	STATENUMBER GetState();
+	STATENUMBER GetSubState();
+	STATENUMBER GetNextState();
+	STATENUMBER GetPrevState();
+
 	void SetState(STATENUMBER state);
 	void SetSubState(STATENUMBER state);
 	void SetPlayer(CPlayer *player);
 
-	STATENUMBER GetSubState();
 	void ChangeState(STATENUMBER newState,unsigned int keyBuf = 0);
 	void SetTimer(CGameTimer * timer);
 	void SetAnimationClip(CAnimationClip* clip);

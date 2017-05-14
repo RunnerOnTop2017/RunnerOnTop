@@ -57,9 +57,18 @@ void CScene::BuildObjects(ID3D11Device *pd3dDevice)
 	m_pUIShader = new CUIShader();
 	m_pUIShader->CreateShader(pd3dDevice);
 	m_pUIShader->BuildObjects(pd3dDevice);
-
+	 //문
 	m_ppShaders[3]->m_ppObjects[58]->ref = m_ppShaders[2]->m_ppObjects[0];
 	m_ppShaders[3]->m_ppObjects[59]->ref = m_ppShaders[2]->m_ppObjects[0];
+
+	//펜스
+	m_ppShaders[3]->m_ppObjects[63]->ref = m_ppShaders[4]->m_ppObjects[0];
+	m_ppShaders[3]->m_ppObjects[64]->ref = m_ppShaders[4]->m_ppObjects[0];
+
+	//파이프
+	m_ppShaders[3]->m_ppObjects[68]->ref = m_ppShaders[1]->m_ppObjects[1];
+
+
 
 	BuildLights(pd3dDevice);
 }
@@ -80,13 +89,7 @@ void CScene::ReleaseObjects()
 		delete m_pSkybox;
 	}
 
-	//if (m_ppObjects)
-	//{
-	//	for (int i = 0; i < m_nObjects; i++)
-	//		m_ppObjects[i]->Release();
-
-	//	delete[]m_ppObjects;
-	//}
+	
 }
 
 bool CScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
