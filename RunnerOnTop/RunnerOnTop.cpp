@@ -61,6 +61,7 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
 		else
 		{
 			gGameFramework.FrameAdvance();
+			InvalidateRect(msg.hwnd, NULL, false);
 		}
 	}
 	gGameFramework.OnDestroy();
@@ -139,7 +140,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	int wmId, wmEvent;
 	PAINTSTRUCT ps;
 	HDC hdc;
-
+	HDC memdc;
+	HBITMAP hbit, oldbit;
 	switch (message)
 	{
 	case WM_COMMAND:
@@ -159,9 +161,19 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		}
 		break;
 	case WM_PAINT:
+	{
 		hdc = BeginPaint(hWnd, &ps);
+		//memdc = CreateCompatibleDC(hdc);
 		// TODO: 여기에 그리기 코드를 추가합니다.
+
+		//RECT rt = { 0,10,500.50 };
+		//FillRect(hdc, &rt, CreateSolidBrush(BLACK_BRUSH));
+
+
+		//DeleteDC(memdc);
 		EndPaint(hWnd, &ps);
+	}
+		
 		break;
 	case WM_DESTROY:
 		PostQuitMessage(0);

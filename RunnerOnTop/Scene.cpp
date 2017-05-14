@@ -9,6 +9,7 @@ CScene::CScene()
 	//m_ppObjects = NULL;
 	//m_nObjects = 0;
 	m_pLights = NULL;
+	m_pSkybox = NULL;
 }
 
 
@@ -19,16 +20,54 @@ CScene::~CScene()
 
 void CScene::BuildObjects(ID3D11Device *pd3dDevice)
 {
-	m_nShaders = 2;
+	m_nShaders = 5;
 	m_ppShaders = new CShader*[m_nShaders];
 
+	// 맵
 	m_ppShaders[0] = new CTextureShader();
 	m_ppShaders[0]->CreateShader(pd3dDevice);
 	m_ppShaders[0]->BuildObjects(pd3dDevice);
 
-	m_ppShaders[1] = new CDiffusedShader();
+	//기타 아이템
+	m_ppShaders[1] = new CItemShader();
 	m_ppShaders[1]->CreateShader(pd3dDevice);
 	m_ppShaders[1]->BuildObjects(pd3dDevice);
+
+	// 문
+	m_ppShaders[2] = new CItemShader_Door();
+	m_ppShaders[2]->CreateShader(pd3dDevice);
+	m_ppShaders[2]->BuildObjects(pd3dDevice);
+
+	// 바운딩박스
+	m_ppShaders[3] = new CDiffusedShader();
+	m_ppShaders[3]->CreateShader(pd3dDevice);
+	m_ppShaders[3]->BuildObjects(pd3dDevice);
+
+	// 마지막 알파맵
+	m_ppShaders[4] = new CItemShader_Alpha();
+	m_ppShaders[4]->CreateShader(pd3dDevice);
+	m_ppShaders[4]->BuildObjects(pd3dDevice);
+
+	//스카이박스
+	m_pSkybox = new CSkyBoxShader();
+	m_pSkybox->CreateShader(pd3dDevice);
+	m_pSkybox->BuildObjects(pd3dDevice);
+
+	//UI
+	m_pUIShader = new CUIShader();
+	m_pUIShader->CreateShader(pd3dDevice);
+	m_pUIShader->BuildObjects(pd3dDevice);
+	 //문
+	m_ppShaders[3]->m_ppObjects[58]->ref = m_ppShaders[2]->m_ppObjects[0];
+	m_ppShaders[3]->m_ppObjects[59]->ref = m_ppShaders[2]->m_ppObjects[0];
+
+	//펜스
+	m_ppShaders[3]->m_ppObjects[63]->ref = m_ppShaders[4]->m_ppObjects[0];
+	m_ppShaders[3]->m_ppObjects[64]->ref = m_ppShaders[4]->m_ppObjects[0];
+
+	//파이프
+	m_ppShaders[3]->m_ppObjects[68]->ref = m_ppShaders[1]->m_ppObjects[1];
+
 
 
 	BuildLights(pd3dDevice);
@@ -45,13 +84,12 @@ void CScene::ReleaseObjects()
 		delete[]m_ppShaders;
 	}
 
-	//if (m_ppObjects)
-	//{
-	//	for (int i = 0; i < m_nObjects; i++)
-	//		m_ppObjects[i]->Release();
+	if (m_pSkybox)
+	{
+		delete m_pSkybox;
+	}
 
-	//	delete[]m_ppObjects;
-	//}
+	
 }
 
 bool CScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
@@ -90,10 +128,31 @@ void CScene::Render(ID3D11DeviceContext*pd3dDeviceContext, CCamera *pCamera)
 
 		UpdateLights(pd3dDeviceContext);
 	}
+	if (m_pSkybox)
+	{
+		m_pSkybox->Render(pd3dDeviceContext, pCamera);
+	}
+
+	
 
 	for (int i = 0; i < m_nShaders; i++)
 	{
+#ifdef _DEBUG
+		if(3==i)
+			m_ppShaders[i]->Render(pd3dDeviceContext, pCamera);
+#endif
+	if (3 != i)
 		m_ppShaders[i]->Render(pd3dDeviceContext, pCamera);
+	}
+
+	
+
+}
+void CScene::DrawUI(ID3D11DeviceContext * pd3dDeviceContext, CCamera *pCamera)
+{
+	if (m_pUIShader)
+	{
+		m_pUIShader->Render(pd3dDeviceContext, pCamera);
 	}
 }
 void CScene::BuildLights(ID3D11Device *pd3dDevice)
@@ -106,9 +165,9 @@ void CScene::BuildLights(ID3D11Device *pd3dDevice)
 	//3개의 조명(점 광원, 스팟 광원, 방향성 광원)을 설정한다.
 	m_pLights->m_pLights[0].m_bEnable = 1.0f;
 	m_pLights->m_pLights[0].m_nType = DIRECTIONAL_LIGHT;
-	m_pLights->m_pLights[0].m_d3dxcAmbient = D3DXCOLOR(0.8f, 0.8f, 0.8f, 0.5f);
+	m_pLights->m_pLights[0].m_d3dxcAmbient = D3DXCOLOR(0.5f, 0.5f, 0.5f, 0.3f);
 	m_pLights->m_pLights[0].m_d3dxcDiffuse = D3DXCOLOR(0.5f, 0.5f, 0.5f, 0.3f);
-	m_pLights->m_pLights[0].m_d3dxcSpecular = D3DXCOLOR(0.5f, 0.5f, 0.5f, 1.0f);
+	m_pLights->m_pLights[0].m_d3dxcSpecular = D3DXCOLOR(0.5f, 0.5f, 0.5f, 0.0f);
 	m_pLights->m_pLights[0].m_d3dxvDirection = D3DXVECTOR3(0.0f, -1.0f, -1.0f);
 	
 	D3D11_BUFFER_DESC d3dBufferDesc;

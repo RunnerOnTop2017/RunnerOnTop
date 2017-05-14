@@ -30,6 +30,11 @@ private:
 private:
 	ID3D11Texture2D *m_pd3dDepthStencilBuffer;
 	ID3D11DepthStencilView *m_pd3dDepthStencilView;
+
+	ID3D11DepthStencilState *m_pd3dDepthStencilState;
+	ID3D11DepthStencilState *m_pd3dDepthDisableStencilState;
+
+
 public:
 	CGameFramework();
 	~CGameFramework();

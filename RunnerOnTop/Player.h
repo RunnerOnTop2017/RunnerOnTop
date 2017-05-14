@@ -3,6 +3,7 @@
 #include "Camera.h"
 #include "GameObject.h"
 #include "Shader.h"
+#include "State.h"
 
 class CPlayer : public CGameObject
 {
@@ -36,12 +37,12 @@ protected:
 
 	//플레이어의 현재 카메라이다.
 	CCamera *m_pCamera;
-
+	
 	//3인칭 카메라일 때 플레이어를 그리기 위해 사용하는 쉐이더이다.
 	CAnimateShader *m_pShader;
 
 	CCubeMesh *pCollision;
-
+	int lastFloorIndex;
 public:
 	CPlayer();
 	~CPlayer();
@@ -56,6 +57,11 @@ public:
 	void SetMaxVelocityXZ(float fMaxVelocity) { m_fMaxVelocityXZ = fMaxVelocity; }
 	void SetMaxVelocityY(float fMaxVelocity) { m_fMaxVelocityY = fMaxVelocity; }
 	void SetVelocity(const D3DXVECTOR3& d3dxvVelocity) { m_d3dxvVelocity = d3dxvVelocity; }
+
+	//아이템용
+	bool bInteraction;
+	bool EndAnimation;
+	CGameObject *Interacted_OBJ;
 
 	/*플레이어의 위치를 d3dxvPosition 위치로 설정한다. d3dxvPosition 벡터에서 현재 플레이어의 위치 벡터를 빼면 현재 플레이어의 위치에서 d3dxvPosition 방향으로의 방향 벡터가 된다. 현재 플레이어의 위치에서 이 방향 벡터 만큼 이동한다.*/
 	void SetPosition(const D3DXVECTOR3& d3dxvPosition) { Move((d3dxvPosition - m_d3dxvPosition), false); }
@@ -108,4 +114,5 @@ public:
 
 	virtual void ChangeCamera(ID3D11Device *pd3dDevice, DWORD nNewCameraMode, float fTimeElapsed);
 	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext);
+	void SetState(CState* pState);
 };

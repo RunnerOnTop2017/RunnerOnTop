@@ -5,6 +5,7 @@
 
 
 CMesh::CMesh() {
+	m_pd3dBlendState = NULL;
 	m_pd3dRasterizerState = NULL;
 	m_pd3dIndexBuffer = NULL;
 	m_nIndices = 0;
@@ -19,7 +20,7 @@ CMesh::CMesh(ID3D11Device *pd3dDevice)
 	m_d3dPrimitiveTopology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 	m_nReferences = 1;
 	m_pd3dRasterizerState = NULL;
-
+	m_pd3dBlendState = NULL;
 	m_pd3dIndexBuffer = NULL;
 	m_nIndices = 0;
 	m_nStartIndex = 0;
@@ -55,6 +56,8 @@ void CMesh::Render(ID3D11DeviceContext *pd3dDeviceContext)
 
 	pd3dDeviceContext->IASetPrimitiveTopology(m_d3dPrimitiveTopology);
 	//래스터라이저 상태를 디바이스 컨텍스트에 설정한다.
+	if (m_pd3dBlendState) pd3dDeviceContext->OMSetBlendState(m_pd3dBlendState, NULL, 0xffffff);
+	
 	if (m_pd3dRasterizerState) pd3dDeviceContext->RSSetState(m_pd3dRasterizerState);
 
 	if (m_pd3dIndexBuffer)
@@ -306,15 +309,15 @@ void CMeshIlluminated::Render(ID3D11DeviceContext *pd3dImmediateDeviceContext)
 CMeshTextured::CMeshTextured(ID3D11Device *pd3dDevice, float fWidth, float fHeight, float fDepth) : CMeshIlluminated(pd3dDevice)
 {
 	//m_nVertices;
-	m_nStride = sizeof(CTexturedNormalVertex);
+	m_nStride = sizeof(CTexturedNormalVertexUVW);
 	m_nOffset = 0;
 	m_d3dPrimitiveTopology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
-	FILE *fp = fopen("Data\\Maps\\maps1.arc", "rb");
+	FILE *fp = fopen("Data\\Maps\\map01.src", "rb");
 	int size;
 	fread((char*)&size, sizeof(int), 1, fp);
-	m_pVertices = new CTexturedNormalVertex[size];
-	fread((char*)m_pVertices, sizeof(CTexturedNormalVertex), size, fp);
+	m_pVertices = new CTexturedNormalVertexUVW[size];
+	fread((char*)m_pVertices, sizeof(CTexturedNormalVertexUVW), size, fp);
 	fclose(fp);
 
 	m_nVertices = size;
@@ -371,19 +374,6 @@ CCharacterMesh::CCharacterMesh(ID3D11Device *pd3dDevice, float fWidth, float fHe
 
 	m_nIndices = indexSize;
 
-	fp = fopen("Data\\Animation\\run.anm", "rb");
-	int BoneSIze, matrixSize;
-	fread((char*)&BoneSIze, sizeof(int), 1, fp);
-	fread((char*)&matrixSize, sizeof(int), 1, fp);
-	for (int i = 0; i < BoneSIze; ++i)
-	{
-		D3DXMATRIX* mMatrix = new D3DXMATRIX[matrixSize];
-		fread((char*)mMatrix, sizeof(D3DXMATRIX), matrixSize, fp);
-		mBoneData.push_back(mMatrix);
-	}
-	AnimSize = matrixSize;
-	fclose(fp);
-
 	D3D11_BUFFER_DESC d3dBufferDesc;
 	ZeroMemory(&d3dBufferDesc, sizeof(D3D11_BUFFER_DESC));
 	d3dBufferDesc.Usage = D3D11_USAGE_DEFAULT;
@@ -420,7 +410,7 @@ void CCharacterMesh::Render(ID3D11DeviceContext *pd3dDeviceContext)
 	CMesh::Render(pd3dDeviceContext);
 }
 
-CCubeMesh::CCubeMesh(ID3D11Device *pd3dDevice)
+CCubeMesh::CCubeMesh(ID3D11Device *pd3dDevice, float minX , float maxX, float minY, float maxY, float minZ, float maxZ, OBJECTTAG tag)
 {
 	m_nStride = sizeof(CDiffuseNormalVertex);
 	m_nOffset = 0;
@@ -428,16 +418,30 @@ CCubeMesh::CCubeMesh(ID3D11Device *pd3dDevice)
 	
 	//CDiffuseNormalVertex pVertices[8];
 	m_nVertices = 8;
-	
-	pVertices[0] = CDiffuseNormalVertex(D3DXVECTOR3(-10.0f, 0.0f, -10.0f), D3DXVECTOR3(0.0f,0.0f,0.0f), D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f));
-	pVertices[1] = CDiffuseNormalVertex(D3DXVECTOR3(10.0f, 0.0f, -10.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f));
-	pVertices[2] = CDiffuseNormalVertex(D3DXVECTOR3(-10.0f, 0.0f, 10.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f));
-	pVertices[3] = CDiffuseNormalVertex(D3DXVECTOR3(10.0f, 0.0f, 10.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f));
-	pVertices[4] = CDiffuseNormalVertex(D3DXVECTOR3(-10.0f, 60.0f, -10.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f));
-	pVertices[5] = CDiffuseNormalVertex(D3DXVECTOR3(10.0f, 60.0f, -10.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f));
-	pVertices[6] = CDiffuseNormalVertex(D3DXVECTOR3(-10.0f, 60.0f, 10.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f));
-	pVertices[7] = CDiffuseNormalVertex(D3DXVECTOR3(10.0f, 60.0f, 10.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f));
+	D3DXCOLOR mColor;
+	m_tag = tag;
+	if (tag == MAP)
+	{
+		mColor = D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f);
+	}
+	else if (tag  == REALDOOR || tag == FENCE)
+	{
+		mColor = D3DXCOLOR(0.0f, 0.0f, 1.0f, 1.0f);
+	}
+	else {
+		mColor = D3DXCOLOR(1.0f, 1.0f, 0.0f, 1.0f);
 
+	}
+	
+	pVertices[0] = CDiffuseNormalVertex(D3DXVECTOR3(minX, minY, minZ), D3DXVECTOR3(0.0f,0.0f,0.0f), mColor);
+	pVertices[1] = CDiffuseNormalVertex(D3DXVECTOR3(maxX, minY, minZ), D3DXVECTOR3(0.0f, 0.0f, 0.0f), mColor);
+	pVertices[2] = CDiffuseNormalVertex(D3DXVECTOR3(minX, minY, maxZ), D3DXVECTOR3(0.0f, 0.0f, 0.0f), mColor);
+	pVertices[3] = CDiffuseNormalVertex(D3DXVECTOR3(maxX, minY, maxZ), D3DXVECTOR3(0.0f, 0.0f, 0.0f), mColor);
+	pVertices[4] = CDiffuseNormalVertex(D3DXVECTOR3(minX, maxY, minZ), D3DXVECTOR3(0.0f, 0.0f, 0.0f), mColor);
+	pVertices[5] = CDiffuseNormalVertex(D3DXVECTOR3(maxX, maxY, minZ), D3DXVECTOR3(0.0f, 0.0f, 0.0f), mColor);
+	pVertices[6] = CDiffuseNormalVertex(D3DXVECTOR3(minX, maxY, maxZ), D3DXVECTOR3(0.0f, 0.0f, 0.0f), mColor);
+	pVertices[7] = CDiffuseNormalVertex(D3DXVECTOR3(maxX, maxY, maxZ), D3DXVECTOR3(0.0f, 0.0f, 0.0f), mColor);
+	
 
 	D3D11_BUFFER_DESC d3dBufferDesc;
 	ZeroMemory(&d3dBufferDesc, sizeof(D3D11_BUFFER_DESC));
@@ -450,7 +454,7 @@ CCubeMesh::CCubeMesh(ID3D11Device *pd3dDevice)
 	d3dBufferData.pSysMem = pVertices;
 	pd3dDevice->CreateBuffer(&d3dBufferDesc, &d3dBufferData, &m_pd3dVertexBuffer);
 
-
+	// 밑면			윗면
 	//  2	3		6	7
 	//  0	1		4	5
 
@@ -580,4 +584,193 @@ void CCubeMesh::GetLeft(D3DXVECTOR3* vPlanes)
 	vPlanes[i++] = pVertices[0].m_d3dxvPosition;
 	vPlanes[i++] = pVertices[4].m_d3dxvPosition;
 	vPlanes[i++] = pVertices[6].m_d3dxvPosition;
+}
+
+CSkyBoxMesh::CSkyBoxMesh(ID3D11Device * pd3dDevice, float fWidth, float fHeight, float fDepth) : CMeshTextured(pd3dDevice)
+{
+	m_nStride = sizeof(CTexturedNormalVertex);
+	m_nOffset = 0;
+	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+	CTexturedNormalVertex *Vertices;
+	FILE *fp = fopen("Data\\Maps\\skyMesh.arc", "rb");
+	int size;
+	fread((char*)&size, sizeof(int), 1, fp);
+	Vertices = new CTexturedNormalVertex[size];
+	fread((char*)Vertices, sizeof(CTexturedNormalVertex), size, fp);
+	fclose(fp);
+
+	m_nVertices = size;
+
+
+	D3D11_BUFFER_DESC d3dBufferDesc;
+	ZeroMemory(&d3dBufferDesc, sizeof(D3D11_BUFFER_DESC));
+	d3dBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	d3dBufferDesc.ByteWidth = m_nStride * m_nVertices;
+	d3dBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	d3dBufferDesc.CPUAccessFlags = 0;
+	D3D11_SUBRESOURCE_DATA d3dBufferData;
+	ZeroMemory(&d3dBufferData, sizeof(D3D11_SUBRESOURCE_DATA));
+	d3dBufferData.pSysMem = Vertices;
+	pd3dDevice->CreateBuffer(&d3dBufferDesc, &d3dBufferData, &m_pd3dVertexBuffer);
+
+	SetRasterizerState(pd3dDevice);
+}
+
+CSkyBoxMesh::~CSkyBoxMesh()
+{
+}
+
+void CSkyBoxMesh::SetRasterizerState(ID3D11Device * pd3dDevice)
+{
+	D3D11_RASTERIZER_DESC d3dRasterizerDesc;
+	ZeroMemory(&d3dRasterizerDesc, sizeof(D3D11_RASTERIZER_DESC));
+	d3dRasterizerDesc.CullMode = D3D11_CULL_NONE;
+	d3dRasterizerDesc.FillMode = D3D11_FILL_SOLID;
+	d3dRasterizerDesc.DepthClipEnable = true;
+	pd3dDevice->CreateRasterizerState(&d3dRasterizerDesc, &m_pd3dRasterizerState);
+}
+
+void CSkyBoxMesh::Render(ID3D11DeviceContext * pd3dDeviceContext)
+{
+	CMeshTextured::Render(pd3dDeviceContext);
+}
+
+CFloorMesh::CFloorMesh(ID3D11Device * pd3dDevice, float fWidth, float fHeight, float fDepth) : CMeshTextured(pd3dDevice)
+{
+	m_nStride = sizeof(CTexturedNormalVertexUVW);
+	m_nOffset = 0;
+	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+	
+	// 0  1
+	// 2  3
+	m_nVertices = 4;
+	int i = 0;
+	m_pVertices = new CTexturedNormalVertexUVW[4];
+	m_pVertices[i++] = { -10000.0f, 0.0f, 10000.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0 }; //0
+	m_pVertices[i++] = { 10000.0f, 0.0f, 10000.0f, 0.0f, 1.0f, 0.0f, 64.0f, 0.0f, 0 }; // 1
+	m_pVertices[i++] = { -10000.0f, 0.0f, -10000.0f, 0.0f, 1.0f, 0.0f, 0.0f, 64.0f, 0 }; // 2
+	m_pVertices[i++] = { 10000.0f, 0.0f, -10000.0f, 0.0f, 1.0f, 0.0f, 64.0f,64.0f, 0 }; // 3
+	
+
+	D3D11_BUFFER_DESC d3dBufferDesc;
+	ZeroMemory(&d3dBufferDesc, sizeof(D3D11_BUFFER_DESC));
+	d3dBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	d3dBufferDesc.ByteWidth = m_nStride * m_nVertices;
+	d3dBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	d3dBufferDesc.CPUAccessFlags = 0;
+	D3D11_SUBRESOURCE_DATA d3dBufferData;
+	ZeroMemory(&d3dBufferData, sizeof(D3D11_SUBRESOURCE_DATA));
+	d3dBufferData.pSysMem = m_pVertices;
+	pd3dDevice->CreateBuffer(&d3dBufferDesc, &d3dBufferData, &m_pd3dVertexBuffer);
+
+	WORD * pIndices = new WORD[6];
+	m_nIndices = 6;
+
+	pIndices[0] = 0;
+	pIndices[1] = 1;
+	pIndices[2] = 2;
+	pIndices[3] = 1;
+	pIndices[4] = 3;
+	pIndices[5] = 2;
+
+
+
+
+	ZeroMemory(&d3dBufferDesc, sizeof(D3D11_BUFFER_DESC));
+	d3dBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	d3dBufferDesc.ByteWidth = sizeof(WORD) * m_nIndices;
+	d3dBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	d3dBufferDesc.CPUAccessFlags = 0;
+	ZeroMemory(&d3dBufferData, sizeof(D3D11_SUBRESOURCE_DATA));
+	d3dBufferData.pSysMem = pIndices;
+	//인덱스 버퍼를 생성한다.
+	pd3dDevice->CreateBuffer(&d3dBufferDesc, &d3dBufferData, &m_pd3dIndexBuffer);
+}
+
+CFloorMesh::~CFloorMesh()
+{
+}
+
+void CFloorMesh::SetRasterizerState(ID3D11Device * pd3dDevice)
+{
+	D3D11_RASTERIZER_DESC d3dRasterizerDesc;
+	ZeroMemory(&d3dRasterizerDesc, sizeof(D3D11_RASTERIZER_DESC));
+	d3dRasterizerDesc.CullMode = D3D11_CULL_NONE;
+	d3dRasterizerDesc.FillMode = D3D11_FILL_SOLID;
+	//d3dRasterizerDesc.DepthClipEnable = true;
+	pd3dDevice->CreateRasterizerState(&d3dRasterizerDesc, &m_pd3dRasterizerState);
+}
+
+void CFloorMesh::Render(ID3D11DeviceContext * pd3dDeviceContext)
+{
+	CMeshTextured::Render(pd3dDeviceContext);
+}
+
+CItemMesh::CItemMesh(ID3D11Device * pd3dDevice, const char * filename, bool alphaBlend) : CMeshTextured(pd3dDevice)
+{
+	m_nStride = sizeof(CTexturedNormalVertexUVW);
+	m_nOffset = 0;
+	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+	std::string str = "Data\\Object\\";
+	str += filename;
+
+	FILE *fp = fopen(str.c_str(), "rb");
+	int size;
+	fread((char*)&size, sizeof(int), 1, fp);
+	m_pVertices = new CTexturedNormalVertexUVW[size];
+	fread((char*)m_pVertices, sizeof(CTexturedNormalVertexUVW), size, fp);
+	fclose(fp);
+
+	m_nVertices = size;
+
+
+	D3D11_BUFFER_DESC d3dBufferDesc;
+	ZeroMemory(&d3dBufferDesc, sizeof(D3D11_BUFFER_DESC));
+	d3dBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	d3dBufferDesc.ByteWidth = m_nStride * m_nVertices;
+	d3dBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	d3dBufferDesc.CPUAccessFlags = 0;
+	D3D11_SUBRESOURCE_DATA d3dBufferData;
+	ZeroMemory(&d3dBufferData, sizeof(D3D11_SUBRESOURCE_DATA));
+	d3dBufferData.pSysMem = m_pVertices;
+	pd3dDevice->CreateBuffer(&d3dBufferDesc, &d3dBufferData, &m_pd3dVertexBuffer);
+
+	if (alphaBlend)
+	{
+		D3D11_BLEND_DESC d3dBlendDesc;
+		ZeroMemory(&d3dBlendDesc, sizeof(D3D11_BLEND_DESC));
+
+		d3dBlendDesc.RenderTarget[0].BlendEnable = TRUE;
+		d3dBlendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
+		d3dBlendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+		d3dBlendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+		d3dBlendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+		d3dBlendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
+		d3dBlendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+		d3dBlendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+
+		pd3dDevice->CreateBlendState(&d3dBlendDesc, &m_pd3dBlendState);
+	}
+	
+
+	SetRasterizerState(pd3dDevice);
+}
+
+CItemMesh::~CItemMesh()
+{
+}
+
+void CItemMesh::SetRasterizerState(ID3D11Device * pd3dDevice)
+{
+	D3D11_RASTERIZER_DESC d3dRasterizerDesc;
+	ZeroMemory(&d3dRasterizerDesc, sizeof(D3D11_RASTERIZER_DESC));
+	d3dRasterizerDesc.CullMode = D3D11_CULL_BACK;
+	d3dRasterizerDesc.FillMode = D3D11_FILL_SOLID;
+	d3dRasterizerDesc.DepthClipEnable = true;
+	pd3dDevice->CreateRasterizerState(&d3dRasterizerDesc, &m_pd3dRasterizerState);
+}
+
+void CItemMesh::Render(ID3D11DeviceContext * pd3dDeviceContext)
+{
+	CMeshTextured::Render(pd3dDeviceContext);
 }

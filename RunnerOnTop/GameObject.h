@@ -6,7 +6,7 @@
 
 #include"Mesh.h"
 #include"Camera.h"
-
+#include"State.h"
 
 #define DIR_FORWARD	0x01
 #define DIR_BACKWARD	0x02
@@ -69,7 +69,7 @@ public:
 	D3DXMATRIX *transform;
 	int framenumber;
 	CMesh *m_pMesh;
-
+	CState* m_pState;
 	virtual void SetMesh(CMesh *pMesh);
 	virtual void Animate(ID3D11Device *pd3dDevice,float fTimeElapsed);
 	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamera = NULL);
@@ -86,7 +86,15 @@ public:
 	//로컬 x-축, y-축, z-축 방향으로 회전한다.
 	virtual void Rotate(float fPitch = 10.0f, float fYaw = 10.0f, float fRoll = 10.0f);
 	virtual void Rotate(D3DXVECTOR3 *pd3dxvAxis, float fAngle);
+	float fAngeYaw;
+	float fAngePitch;
+	float fAngeRoll;
 
+	//아이템에 사용됨 유저가 작용했는지 여부
+	bool bInteracted;
+
+	//충돌체크용 쉐이더에서 충돌체크박스가 가르키는 원본데이터
+	CGameObject* ref;
 
 	virtual void Scale(float scaleSize)
 	{
@@ -114,6 +122,8 @@ public:
 	CTexture *m_pBump;
 	void SetBump(CTexture *pBump);
 
+	CTexture *m_pAlpha;
+	void SetAlphaMap(CTexture *pAlpha);
 };
 
 class CRotatingObject : public CGameObject
@@ -132,6 +142,8 @@ private:
 	float m_fRotationSpeed;
 	D3DXVECTOR3 m_d3dxvRotationAxis;
 };
+
+
 
 
 

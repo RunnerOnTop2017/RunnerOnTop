@@ -4,6 +4,12 @@
 #define SHADER_H
 
 #include"GameObject.h"
+#include "UIClass.h"
+
+#define OBJECT_CNT 69
+#define FLOOR_CNT 28
+
+
 struct VS_CB_WORLD_MATRIX
 {
 	D3DXMATRIX m_d3dxmtxWorld;
@@ -12,6 +18,11 @@ struct VS_CB_WORLD_MATRIX
 struct VS_CB_SKINNED
 {
 	D3DXMATRIX BoneTransform[96];
+};
+
+struct VS_CB_ISALPHABLEND
+{
+	bool isAlphaBlend;
 };
 class CShader
 {
@@ -48,7 +59,11 @@ public:
 
 	ID3D11Buffer *m_pd3dcbWorldMatrix;
 	ID3D11Buffer *m_pd3dcbSkinned;
+
 	ID3D11Buffer *m_pd3dcbMaterial;
+
+	ID3D11Buffer *m_isAlphaBlend;
+
 	ID3D11Buffer *m_pd3dcbTexture;
 };
 
@@ -100,7 +115,85 @@ public:
 
 	virtual void BuildObjects(ID3D11Device *pd3dDevice);
 };
+class CSkyBoxShader : public CTextureShader
+{
+public:
+	CSkyBoxShader();
+	~CSkyBoxShader();
 
+	virtual void CreateShader(ID3D11Device *pd3dDevice);
+	virtual void CreateShaderVariables(ID3D11Device *pd3dDevice);
+	virtual void UpdateShaderVariables(ID3D11DeviceContext *pd3dDeviceContext, D3DXMATRIX *pd3dxmtxWorld = NULL);
+	virtual void UpdateShaderVariables(ID3D11DeviceContext *pd3dDeviceContext, MATERIAL *pMaterial = NULL);
+	virtual void UpdateShaderVariables(ID3D11DeviceContext *pd3dDeviceContext, CTexture *pTexture);
+
+	virtual void BuildObjects(ID3D11Device *pd3dDevice);
+	virtual void ReleaseObjects();
+	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamera = NULL);
+};
+
+class CItemShader : public CTextureShader
+{
+public:
+	CItemShader();
+	~CItemShader();
+
+	virtual void CreateShader(ID3D11Device *pd3dDevice);
+	virtual void CreateShaderVariables(ID3D11Device *pd3dDevice);
+	virtual void UpdateShaderVariables(ID3D11DeviceContext *pd3dDeviceContext, D3DXMATRIX *pd3dxmtxWorld = NULL);
+	virtual void UpdateShaderVariables(ID3D11DeviceContext *pd3dDeviceContext, MATERIAL *pMaterial = NULL);
+	virtual void UpdateShaderVariables(ID3D11DeviceContext *pd3dDeviceContext, CTexture *pTexture);
+
+	virtual void BuildObjects(ID3D11Device *pd3dDevice);
+	virtual void ReleaseObjects();
+	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamera = NULL);
+};
+
+class CItemShader_Alpha : public CTextureShader
+{
+public:
+	CItemShader_Alpha();
+	~CItemShader_Alpha();
+
+	virtual void CreateShader(ID3D11Device *pd3dDevice);
+	virtual void CreateShaderVariables(ID3D11Device *pd3dDevice);
+	virtual void UpdateShaderVariables(ID3D11DeviceContext *pd3dDeviceContext, D3DXMATRIX *pd3dxmtxWorld = NULL);
+	virtual void UpdateShaderVariables(ID3D11DeviceContext *pd3dDeviceContext, MATERIAL *pMaterial = NULL);
+	virtual void UpdateShaderVariables(ID3D11DeviceContext *pd3dDeviceContext, CTexture *pTexture);
+
+	virtual void BuildObjects(ID3D11Device *pd3dDevice);
+	virtual void ReleaseObjects();
+	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamera = NULL);
+};
+class CItemShader_Door : public CTextureShader
+{
+	bool *doorDir;
+public:
+	CItemShader_Door();
+	~CItemShader_Door();
+
+	virtual void CreateShader(ID3D11Device *pd3dDevice);
+	virtual void CreateShaderVariables(ID3D11Device *pd3dDevice);
+	virtual void UpdateShaderVariables(ID3D11DeviceContext *pd3dDeviceContext, D3DXMATRIX *pd3dxmtxWorld = NULL);
+	virtual void UpdateShaderVariables(ID3D11DeviceContext *pd3dDeviceContext, MATERIAL *pMaterial = NULL);
+	virtual void UpdateShaderVariables(ID3D11DeviceContext *pd3dDeviceContext, CTexture *pTexture);
+
+	virtual void BuildObjects(ID3D11Device *pd3dDevice);
+	virtual void ReleaseObjects();
+	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamera = NULL);
+};
+
+class CUIShader : public CShader {
+	D3DXMATRIX mtxWorld;
+public:
+	CUIClass *m_pUI;
+	virtual void CreateShader(ID3D11Device *pd3dDevice);
+	virtual void CreateShaderVariables(ID3D11Device *pd3dDevice);
+
+	virtual void BuildObjects(ID3D11Device *pd3dDevice);
+	virtual void ReleaseObjects();
+	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamera = NULL);
+};
 
 
 #endif

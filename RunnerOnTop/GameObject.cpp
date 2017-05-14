@@ -9,8 +9,13 @@ CGameObject::CGameObject()
 	m_pMaterial = NULL;
 	m_pTexture = NULL;
 	m_pBump = NULL;
+	m_pAlpha = NULL;
 	transform = NULL;
 	framenumber = 0;
+	m_pState = NULL;
+	ref = NULL;
+	bInteracted = false;
+	fAngeYaw = fAngePitch = fAngeRoll = 0.0f;
 }
 
 CGameObject::~CGameObject()
@@ -118,6 +123,10 @@ void CGameObject::Rotate(float fPitch, float fYaw, float fRoll)
 void CGameObject::Rotate(D3DXVECTOR3 *pd3dxvAxis, float fAngle)
 {
 	D3DXMATRIX mtxRotate;
+	if (pd3dxvAxis->x == 1.0f) fAngePitch += fAngle;
+	if (pd3dxvAxis->y == 1.0f) fAngeRoll += fAngle;
+	if (pd3dxvAxis->z == 1.0f) fAngeYaw += fAngle;
+
 	D3DXMatrixRotationAxis(&mtxRotate, pd3dxvAxis, (float)D3DXToRadian(fAngle));
 	m_d3dxmtxWorld = mtxRotate * m_d3dxmtxWorld;
 }
@@ -135,10 +144,10 @@ void CGameObject::SetMaterial(CMaterial *pMaterial)
 void CGameObject::Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamera)
 {
 	if (m_pMesh)m_pMesh->Render(pd3dDeviceContext);
-	if (!transform)
+	/*if (!transform)
 	{
 		transform = m_pMesh->getTransform(framenumber++);
-	}
+	}*/
 }
 
 void CGameObject::SetTexture(CTexture *pTexture)
@@ -153,6 +162,13 @@ void CGameObject::SetBump(CTexture * pBump)
 	if (m_pBump) m_pBump->Release();
 	m_pBump = pBump;
 	if (m_pBump) m_pBump->AddRef();
+}
+
+void CGameObject::SetAlphaMap(CTexture * pAlpha)
+{
+	if (m_pAlpha) m_pAlpha->Release();
+	m_pAlpha = pAlpha;
+	if (m_pAlpha) m_pAlpha->AddRef();
 }
 
 
@@ -239,4 +255,3 @@ void CTexture::SetTexture(int nIndex, ID3D11ShaderResourceView *pd3dsrvTexture, 
 	if (m_ppd3dsrvTextures[nIndex]) m_ppd3dsrvTextures[nIndex]->AddRef();
 	if (m_ppd3dSamplerStates[nIndex]) m_ppd3dSamplerStates[nIndex]->AddRef();
 }
-

@@ -20,6 +20,8 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <map>
+
 
 // TODO: 프로그램에 필요한 추가 헤더는 여기에서 참조합니다.
 #include <d3d11.h>
@@ -29,10 +31,13 @@
 #include <math.h>
 #include <mmsystem.h>
 #include <d3d9types.h>
+
+
 #include <xnamath.h>
 
-#define FRAME_BUFFER_WIDTH	640
-#define FRAME_BUFFER_HEIGHT	480
+
+#define FRAME_BUFFER_WIDTH	1280
+#define FRAME_BUFFER_HEIGHT	720
 #define VS_SLOT_VIEWPROJECTION_MATRIX	0x00
 #define VS_SLOT_WORLD_MATRIX			0x01
 #define PS_SLOT_COLOR	0x00
@@ -40,4 +45,25 @@
 #define PS_SLOT_MATERIAL	0x01
 #define PS_SLOT_TEXTURE		0x00
 #define PS_SLOT_BUMP		0x09
-#define PS_SLOT_SAMPLER_STATE		0x02
+#define PS_SLOT_SAMPLER_STATE		0x00
+#define VK_KEYW 0x57
+#define VK_KEYS 0x53
+#define VK_KEYA 0x41
+#define VK_KEYD 0x44
+#define VK_KEYE 0x45
+
+#define OBJECT_DOOR 0
+#define OBJECT_LADDER 1
+#define OBJECT_FENCE 2
+#define OBJECT_PIPE 3
+#define OBJECT_CONDITIONER 4
+#define OBJECT_FENCEHOLE 6
+#define OBJECT_MAP1 10
+#define OBJECT_MAP2 11
+
+#define WM_INTERACT WM_USER+1
+#define CHANGE_POS_SLIDE 0
+
+
+// 첫번째 박스의 max. min, 두번째 박스의 max, min을 인자로 받아 충돌하면 true 아니면 false. 인자로 받은 x,y,z,에 x축과 y축 z축 에 대한 충돌세부사항이 저장된다.
+bool CollisionCheck(D3DXVECTOR3& max1, D3DXVECTOR3& min1, D3DXVECTOR3& max2, D3DXVECTOR3& min2, D3DXVECTOR3& shift, bool& x, bool& y, bool& z);

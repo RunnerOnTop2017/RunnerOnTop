@@ -1,5 +1,7 @@
 #include "stdafx.h"
 #include "GameFramework.h"
+#include "State.h"
+#include "UIClass.h"
 
 CGameFramework::CGameFramework()
 {
@@ -12,7 +14,7 @@ CGameFramework::CGameFramework()
 	m_nWndClientHeight = FRAME_BUFFER_HEIGHT;
 
 	m_pScene = NULL;
-	_tcscpy_s(m_pszBuffer, _T("LapProject("));
+	_tcscpy_s(m_pszBuffer, _T("RunnerOnTop : "));
 
 	m_nPlayers = 0;
 	m_ppPlayers = NULL;
@@ -63,6 +65,71 @@ bool CGameFramework::CreateRenderTargetDepthStencilView()
 	d3dDepthStencilBufferDesc.CPUAccessFlags = 0;
 	d3dDepthStencilBufferDesc.MiscFlags = 0;
 	if (FAILED(hResult = m_pd3dDevice->CreateTexture2D(&d3dDepthStencilBufferDesc, NULL, &m_pd3dDepthStencilBuffer))) return(false);
+
+
+	// Initialize the description of the stencil state.
+	D3D11_DEPTH_STENCIL_DESC depthStencilDesc;
+
+	ZeroMemory(&depthStencilDesc, sizeof(depthStencilDesc));
+
+	// Set up the description of the stencil state.
+	depthStencilDesc.DepthEnable = true;
+	depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+	depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
+
+	depthStencilDesc.StencilEnable = true;
+	depthStencilDesc.StencilReadMask = 0xFF;
+	depthStencilDesc.StencilWriteMask = 0xFF;
+
+	// Stencil operations if pixel is front-facing.
+	depthStencilDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+	depthStencilDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR;
+	depthStencilDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+	depthStencilDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+
+	// Stencil operations if pixel is back-facing.
+	depthStencilDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+	depthStencilDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR;
+	depthStencilDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+	depthStencilDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+
+	// Create the depth stencil state.
+	
+	if (FAILED(hResult = m_pd3dDevice->CreateDepthStencilState(&depthStencilDesc, &m_pd3dDepthStencilState))) return (false);
+	
+	// Set the depth stencil state.
+	m_pd3dDeviceContext->OMSetDepthStencilState(m_pd3dDepthStencilState, 1);
+
+
+	D3D11_DEPTH_STENCIL_DESC depthDisableStencilDesc;
+	ZeroMemory(&depthDisableStencilDesc, sizeof(depthDisableStencilDesc));
+
+	// Set up the description of the stencil state.
+	depthDisableStencilDesc.DepthEnable = false;
+	depthDisableStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+	depthDisableStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
+
+	depthDisableStencilDesc.StencilEnable = true;
+	depthDisableStencilDesc.StencilReadMask = 0xFF;
+	depthDisableStencilDesc.StencilWriteMask = 0xFF;
+
+	// Stencil operations if pixel is front-facing.
+	depthDisableStencilDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+	depthDisableStencilDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR;
+	depthDisableStencilDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+	depthDisableStencilDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+
+	// Stencil operations if pixel is back-facing.
+	depthDisableStencilDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+	depthDisableStencilDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR;
+	depthDisableStencilDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+	depthDisableStencilDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+
+	// Create the depth stencil state.
+
+	if (FAILED(hResult = m_pd3dDevice->CreateDepthStencilState(&depthDisableStencilDesc, &m_pd3dDepthDisableStencilState))) return (false);
+
+
 
 	// Create the depth stencil view
 	D3D11_DEPTH_STENCIL_VIEW_DESC d3dDepthStencilViewDesc;
@@ -228,6 +295,7 @@ LRESULT CALLBACK CGameFramework::OnProcessingWindowMessage(HWND hWnd, UINT nMess
 	case WM_KEYDOWN:
 	case WM_KEYUP:
 		OnProcessingKeyboardMessage(hWnd, nMessageID, wParam, lParam);
+		m_ppPlayers[0]->m_pState->ProcessInput(nMessageID, wParam, lParam);
 		break;
 	}
 	return(0);
@@ -260,13 +328,37 @@ void CGameFramework::BuildObjects()
 	//pAirplanePlyer->Scale(0.1f);
 	CCamera *pCamera = pAirplanePlyer->GetCamera();
 	pCamera->SetViewport(m_pd3dDeviceContext, 0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
-	pCamera->GenerateProjectionMatrix(1.01f, 500000.0f, ASPECT_RATIO, 60.0f);
+	pCamera->GenerateProjectionMatrix(1.01f, 500000.0f, ASPECT_RATIO, 45.0f);
+	pCamera->GenerateOrthoMatrixc(FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.1f, 1000.0f);
+
 	pCamera->GenerateViewMatrix();
 
-	//플레이어의 위치를 스페이스-쉽 카메라로 변경한다.
-	pAirplanePlyer->SetPosition(D3DXVECTOR3(0.0f, 1500.0f, 0.0f));
-	//pAirplanePlyer->Rotate(90.0f, 90.0f, 0.0f);
+	
+	pAirplanePlyer->SetPosition(D3DXVECTOR3(300.0f, 3500.0f, 3500.0f));
+	pAirplanePlyer->Rotate(0.0f, 180.0f, 0.0f);
+	CState *pState = new CState();
+	CAnimationClip *pAnimationClip = new CAnimationClip();
 
+	pAnimationClip->LoadAnimation("idle");
+	pAnimationClip->LoadAnimation("run");
+	pAnimationClip->LoadAnimation("left");
+	pAnimationClip->LoadAnimation("right");
+	pAnimationClip->LoadAnimation("backward");
+	pAnimationClip->LoadAnimation("jump", 40);
+	pAnimationClip->LoadAnimation("jumping");
+	pAnimationClip->LoadAnimation("slide");
+	pAnimationClip->LoadAnimation("smash");
+	pAnimationClip->LoadAnimation("fallback");
+	pAnimationClip->LoadAnimation("standup");
+	pAnimationClip->LoadAnimation("fallfront");
+
+
+	pState->SetPlayer(pAirplanePlyer);
+
+
+	pState->SetAnimationClip(pAnimationClip);
+	pState->SetTimer(&m_GameTimer);
+	pAirplanePlyer->SetState(pState);
 	m_ppPlayers[0] = pAirplanePlyer;
 
 	if (m_pScene)
@@ -299,15 +391,17 @@ void CGameFramework::ProcessInput()
 	{
 		static UCHAR pKeyBuffer[256];
 		DWORD dwDirection = 0;
+		m_ppPlayers[0]->bInteraction = false;
 		/*키보드의 상태 정보를 반환한다. 화살표 키(‘→’, ‘←’, ‘↑’, ‘↓’)를 누르면 플레이어를 오른쪽/왼쪽(로컬 x-축), 앞/뒤(로컬 z-축)로 이동한다. ‘Page Up’과 ‘Page Down’ 키를 누르면 플레이어를 위/아래(로컬 y-축)로 이동한다.*/
 		if (GetKeyboardState(pKeyBuffer))
 		{
-			if (pKeyBuffer[VK_UP] & 0xF0 || pKeyBuffer[VkKeyScan('w')] & 0xF0) dwDirection |= DIR_FORWARD;
+			if (pKeyBuffer[VK_UP] & 0xF0 || pKeyBuffer[VkKeyScan('w')] & 0xF0 || m_ppPlayers[0]->m_pState->GetState() == STATE_SLIDE) dwDirection |= DIR_FORWARD;
 			if (pKeyBuffer[VK_DOWN] & 0xF0 || pKeyBuffer[VkKeyScan('s')] & 0xF0) dwDirection |= DIR_BACKWARD;
 			if (pKeyBuffer[VK_LEFT] & 0xF0 || pKeyBuffer[VkKeyScan('a')] & 0xF0) dwDirection |= DIR_LEFT;
 			if (pKeyBuffer[VK_RIGHT] & 0xF0 || pKeyBuffer[VkKeyScan('d')] & 0xF0) dwDirection |= DIR_RIGHT;
-			if (pKeyBuffer[VK_PRIOR] & 0xF0 || pKeyBuffer[VkKeyScan('r')] & 0xF0) dwDirection |= DIR_UP;
+			if (pKeyBuffer[VK_SPACE] & 0xF0 || pKeyBuffer[VkKeyScan('r')] & 0xF0) dwDirection |= DIR_UP;
 			if (pKeyBuffer[VK_NEXT] & 0xF0 || pKeyBuffer[VkKeyScan('f')] & 0xF0) dwDirection |= DIR_DOWN;
+			if (pKeyBuffer[VkKeyScan('e')] & 0xF0) m_ppPlayers[0]->bInteraction = true;		
 		}
 		float cxDelta = 0.0f, cyDelta = 0.0f;
 		POINT ptCursorPos;
@@ -326,7 +420,7 @@ void CGameFramework::ProcessInput()
 		//플레이어를 이동하거나(dwDirection) 회전한다(cxDelta 또는 cyDelta).
 		if ((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f))
 		{
-			if (cxDelta || cyDelta)
+			if( (cxDelta || cyDelta ) && m_ppPlayers[0]->m_pState->GetState() != STATE_SLIDE &&m_ppPlayers[0]->m_pState->GetState() != STATE_FALLBACK&&m_ppPlayers[0]->m_pState->GetState() != STATE_FALLFRONT)
 			{
 				/*cxDelta는 y-축의 회전을 나타내고 cyDelta는 x-축의 회전을 나타낸다. 오른쪽 마우스 버튼이 눌려진 경우 cxDelta는 z-축의 회전을 나타낸다.*/
 				if (pKeyBuffer[VK_RBUTTON] & 0xF0)
@@ -354,11 +448,11 @@ void CGameFramework::FrameAdvance()
 	ProcessInput();
 
 	AnimateObjects();
+	//m_pd3dDeviceContext->
 
 	float fClearColor[4] = { 0.0f, 0.125f, 0.3f, 1.0f };
 	if (m_pd3dRenderTargetView) m_pd3dDeviceContext->ClearRenderTargetView(m_pd3dRenderTargetView, fClearColor);
 	if (m_pd3dDepthStencilView) m_pd3dDeviceContext->ClearDepthStencilView(m_pd3dDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
-
 	CCamera *pCamera = NULL;
 	for (int i = 0; i < m_nPlayers; i++)
 	{
@@ -366,18 +460,23 @@ void CGameFramework::FrameAdvance()
 		{
 			m_ppPlayers[i]->UpdateShaderVariables(m_pd3dDeviceContext);
 			pCamera = m_ppPlayers[i]->GetCamera();
-			m_ppPlayers[i]->SetPlayerUpdatedContext(m_pScene->m_ppShaders[0]);
+			m_ppPlayers[i]->SetPlayerUpdatedContext(m_pScene->m_ppShaders[3]);
 		}
-		
-		if (m_pScene) m_pScene->Render(m_pd3dDeviceContext, pCamera);
-		
 		//3인칭 카메라일 때 플레이어를 렌더링한다.
 		for (int j = 0; j < m_nPlayers; j++) if (m_ppPlayers[j]) m_ppPlayers[j]->Render(m_pd3dDeviceContext);
+		
+		if (m_pScene) m_pScene->Render(m_pd3dDeviceContext, pCamera);
 	}
+
+
+	m_pd3dDeviceContext->OMSetDepthStencilState(m_pd3dDepthDisableStencilState, 1);
+	if (m_pScene)m_pScene->DrawUI(m_pd3dDeviceContext, pCamera);
+	m_pd3dDeviceContext->OMSetDepthStencilState(m_pd3dDepthStencilState, 1);
+
 
 	m_pDXGISwapChain->Present(0, 0);
 
-	m_GameTimer.GetFrameRate((LPSTR)m_pszBuffer + 22, 27);
+	m_GameTimer.GetFrameRate((LPSTR)m_pszBuffer + 28, 30);
 	::SetWindowText(m_hWnd, m_pszBuffer);
 }
 

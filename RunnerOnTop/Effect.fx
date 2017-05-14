@@ -230,6 +230,7 @@ cbuffer cbViewProjectionMatrix : register(b0)
 {
 	matrix gmtxView: packoffset(c0);
 	matrix gmtxProjection: packoffset(c4);
+	matrix gmtxOrtho : packoffset(c8);
 };
 
 // 월드변환행렬
@@ -245,10 +246,18 @@ cbuffer cbSkinned : register(b2)
 	matrix gBoneTransforms[96];
 };
 
+cbuffer cbAlphaBlend : register(b3)
+{
+	bool isAlphaBlend;
+};
+
 Texture2D gtxtTexture[9] : register(t0); // 텍스쳐
 Texture2D gtxBump[9] : register(t9); // 범프맵
+Texture2D gtxtAlpha[9] : register(t9); // 알파맵
 SamplerState gSamplerState : register(s0); // 텍스쳐 샘플러
 SamplerState gSamplerState_NORMAL : register(s1); // 범프 샘플러
+SamplerState gSamplerState_Alpha : register(s2); // 알파 샘플러
+
 
 //=============================================
 // 구조체
@@ -284,6 +293,27 @@ struct VS_TEXTURED_LIGHTING_OUTPUT
 	float3 normalW : NORMAL;
 	float2 tex2dcoord : TEXCOORD0;
 };
+
+//Texture UVW
+struct VS_TEXTUREDUVW_LIGHTING_INPUT
+{
+	float3 position : POSITION;
+	float3 normal : NORMAL;
+	float2 tex2dcoord : TEXCOORD;
+	int textureNum : TEXNUM;
+};
+
+struct VS_TEXTUREDUVW_LIGHTING_OUTPUT
+{
+	float4 position : SV_POSITION;
+	float3 positionW : POSITION;
+	float3 normalW : NORMAL;
+	float2 tex2dcoord : TEXCOORD0;
+	int textureNum : TEXNUM;
+};
+
+
+
 
 // Animate
 struct SkinnedVertexIn
@@ -349,6 +379,54 @@ VS_TEXTURED_LIGHTING_OUTPUT VSTexturedLighting(VS_TEXTURED_LIGHTING_INPUT input)
 
 	return(output);
 }
+
+VS_TEXTUREDUVW_LIGHTING_OUTPUT VSTexturedUVWLighting(VS_TEXTUREDUVW_LIGHTING_INPUT input)
+{
+	VS_TEXTUREDUVW_LIGHTING_OUTPUT output = (VS_TEXTUREDUVW_LIGHTING_OUTPUT)0;
+
+	output.normalW = mul(input.normal, (float3x3)gmtxWorld);
+	output.positionW = mul((float4)(input.position, 1.0f), gmtxWorld).xyz;
+	//output.positionW += float3(gmtxWorld._41, gmtxWorld._42, gmtxWorld._43);
+
+	matrix mtxWorldViewProjection = mul(gmtxWorld, gmtxView);
+	mtxWorldViewProjection = mul(mtxWorldViewProjection, gmtxProjection);
+
+
+	output.position = mul(float4(input.position, 1.0f), mtxWorldViewProjection);
+
+	output.tex2dcoord = input.tex2dcoord;
+	output.textureNum = input.textureNum;
+
+	return(output);
+}
+
+VS_TEXTUREDUVW_LIGHTING_OUTPUT VSTexturedUVWLightingDoor(VS_TEXTUREDUVW_LIGHTING_INPUT input)
+{
+	VS_TEXTUREDUVW_LIGHTING_OUTPUT output = (VS_TEXTUREDUVW_LIGHTING_OUTPUT)0;
+
+	output.normalW = mul(input.normal, (float3x3)gmtxWorld);
+	output.positionW = mul((float4)(input.position, 1.0f), gmtxWorld).xyz;
+	//output.positionW += float3(gmtxWorld._41, gmtxWorld._42, gmtxWorld._43);
+
+	float3 posL = float3(0.0f, 0.0f, 0.0f);
+	posL = mul(float4(input.position, 1.0f), gBoneTransforms[0]).xyz;
+
+
+	matrix mtxWorldViewProjection = mul(gmtxWorld, gmtxView);
+	mtxWorldViewProjection = mul(mtxWorldViewProjection, gmtxProjection);
+
+
+	output.position = mul(float4(input.position, 1.0f), mtxWorldViewProjection);
+
+	output.tex2dcoord = input.tex2dcoord;
+	output.textureNum = input.textureNum;
+
+	return(output);
+}
+
+
+
+
 
 SkinnedVertexOut SkinnedVS(SkinnedVertexIn vin)
 {
@@ -416,16 +494,149 @@ float4 PSLightingColor(VS_DIFFUSED_COLOR_OUTPUT input) : SV_Target
 {
 	input.normalW = normalize(input.normalW);
 	float4 cIllumination = Lighting(input.positionW, input.normalW);
-	return( input.color * cIllumination);
+	return input.color;
+		//( input.color * cIllumination);
 }
 
 float4 PSTexturedLighting(VS_TEXTURED_LIGHTING_OUTPUT input) : SV_Target
 {
+	if (input.normalW.x == 0.0f && input.normalW.y == 0.0f && input.normalW.z == 0.0f)
+	{
+		float4 cColor = gtxtTexture[0].Sample(gSamplerState, input.tex2dcoord);
+		return cColor;
+	}
 	input.normalW = normalize(input.normalW);
 	float4 cIllumination = Lighting(input.positionW, input.normalW);
 	float4 cColor = gtxtTexture[0].Sample(gSamplerState, input.tex2dcoord) * cIllumination;
 	return cColor;
 }
+
+float4 PSTexturedUVWLighting(VS_TEXTUREDUVW_LIGHTING_OUTPUT input) : SV_Target
+{
+	input.normalW = normalize(input.normalW);
+	float4 cIllumination = Lighting(input.positionW, input.normalW);
+	if (input.normalW.x == 0.0f && input.normalW.y == 0.0f && input.normalW.z == 0.0f)
+	{
+		cIllumination = float4(1.0f, 1.0f, 1.0f, 1.0f);
+	}
+	float4 cColor = { 1.0f, 1.0f, 0.0f, 1.0f };
+	int n = input.textureNum;
+
+	if (n == 0)
+	{
+		cColor = gtxtTexture[0].Sample(gSamplerState, input.tex2dcoord);
+	}
+	else if (n == 1)
+	{
+		cColor = gtxtTexture[1].Sample(gSamplerState, input.tex2dcoord);
+	}
+	else if (n == 2)
+	{
+		cColor = gtxtTexture[2].Sample(gSamplerState, input.tex2dcoord);
+	}
+	else if (n == 3)
+	{
+		cColor = gtxtTexture[3].Sample(gSamplerState, input.tex2dcoord);
+	}
+	else if (n == 4)
+	{
+		cColor = gtxtTexture[4].Sample(gSamplerState, input.tex2dcoord);
+	}
+	else if (n == 5)
+	{
+		cColor = gtxtTexture[5].Sample(gSamplerState, input.tex2dcoord);
+	}
+	else if (n == 6)
+	{
+		cColor = gtxtTexture[6].Sample(gSamplerState, input.tex2dcoord);
+	}
+	else if (n == 7)
+	{
+		cColor = gtxtTexture[7].Sample(gSamplerState, input.tex2dcoord);
+	}
+	else if (n == 8)
+	{
+		cColor = gtxtTexture[8].Sample(gSamplerState, input.tex2dcoord);
+	}
+	else
+	{
+		cColor = gtxtTexture[0].Sample(gSamplerState, input.tex2dcoord);
+	}
+	//float4 cColor = gtxtTexture[0].Sample(gSamplerState, input.tex2dcoord) * cIllumination;
+	return cColor *cIllumination;
+}
+
+//Texture UVW Alpha Vertex Shader
+float4 PSTexturedUVWLightingAlpha(VS_TEXTUREDUVW_LIGHTING_OUTPUT input) : SV_Target
+{
+	input.normalW = normalize(input.normalW);
+	float4 cIllumination = Lighting(input.positionW, input.normalW);
+	if (input.normalW.x == 0.0f && input.normalW.y == 0.0f && input.normalW.z == 0.0f)
+	{
+		cIllumination = float4(1.0f, 1.0f, 1.0f, 1.0f);
+	}
+	float4 cColor = { 1.0f, 1.0f, 0.0f, 1.0f };
+	int n = input.textureNum;
+	float4 sm = float4(0.0f, 0.0f, 0.0f, 0.0f);
+	
+	if (n == 0)
+	{
+		cColor = gtxtTexture[0].Sample(gSamplerState, input.tex2dcoord);
+		sm = gtxtAlpha[0].Sample(gSamplerState, input.tex2dcoord);
+	}
+	else if (n == 1)
+	{
+		cColor = gtxtTexture[1].Sample(gSamplerState, input.tex2dcoord);
+		sm = gtxtAlpha[1].Sample(gSamplerState, input.tex2dcoord);
+	}
+	else if (n == 2)
+	{
+		cColor = gtxtTexture[2].Sample(gSamplerState, input.tex2dcoord);
+		sm = gtxtAlpha[2].Sample(gSamplerState, input.tex2dcoord);
+	}
+	else if (n == 3)
+	{
+		cColor = gtxtTexture[3].Sample(gSamplerState, input.tex2dcoord);
+		sm = gtxtAlpha[3].Sample(gSamplerState, input.tex2dcoord);
+	}
+	else if (n == 4)
+	{
+		cColor = gtxtTexture[4].Sample(gSamplerState, input.tex2dcoord);
+		sm = gtxtAlpha[4].Sample(gSamplerState, input.tex2dcoord);
+	}
+	else if (n == 5)
+	{
+		cColor = gtxtTexture[5].Sample(gSamplerState, input.tex2dcoord);
+		sm = gtxtAlpha[5].Sample(gSamplerState, input.tex2dcoord);
+	}
+	else if (n == 6)
+	{
+		cColor = gtxtTexture[6].Sample(gSamplerState, input.tex2dcoord);
+		sm = gtxtAlpha[6].Sample(gSamplerState, input.tex2dcoord);
+	}
+	else if (n == 7)
+	{
+		cColor = gtxtTexture[7].Sample(gSamplerState, input.tex2dcoord);
+		sm = gtxtAlpha[7].Sample(gSamplerState, input.tex2dcoord);
+	}
+	else
+	{
+		cColor = gtxtTexture[0].Sample(gSamplerState, input.tex2dcoord);
+		sm = gtxtAlpha[0].Sample(gSamplerState, input.tex2dcoord);
+	}
+//float4 cColor = gtxtTexture[0].Sample(gSamplerState, input.tex2dcoord) * cIllumination;
+	if(sm.a == 0.0f)
+	{
+		return cColor;
+	}
+		
+	float alpha = sm.x +sm.y + sm.z;
+	alpha = alpha / 3.0f;
+	cColor.a = alpha;
+	
+	return cColor;
+}
+
 
 float4 SkinnedPS(SkinnedVertexOut input) : SV_Target
 {
@@ -485,4 +696,39 @@ float4 SkinnedPS(SkinnedVertexOut input) : SV_Target
 	cColor = cColor *cIllumination;
 	
 	return(cColor);
+}
+
+struct VS_UI_INPUT {
+	float3 position: POSITION;
+	float4 color: COLOR0;
+};
+
+
+struct VS_UI_OUTPUT
+{
+	float4 position : SV_POSITION;
+	float4 color: COLOR0;
+};
+
+VS_UI_OUTPUT VS_UI(VS_UI_INPUT input)
+{
+	VS_UI_OUTPUT output = (VS_UI_OUTPUT)0;
+
+	float4 pos = float4(input.position, 1.0f);
+
+	matrix mtxWorldViewProjection = mul(gmtxWorld, gmtxView);
+	mtxWorldViewProjection = mul(mtxWorldViewProjection, gmtxOrtho);
+
+	output.position = mul(pos, gmtxWorld);
+	output.position = mul(output.position, gmtxView);
+	output.position = mul(output.position, gmtxOrtho);
+
+	output.color = input.color;
+
+	return output;
+}
+
+float4 PS_UI(VS_UI_OUTPUT input) : SV_Target
+{
+	return input.color;
 }

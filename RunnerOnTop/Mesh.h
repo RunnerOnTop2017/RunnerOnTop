@@ -5,6 +5,7 @@
 #include "Bone.h"
 #define RANDOM_COLOR D3DXCOLOR((rand() * 0xFFFFFF) / RAND_MAX)
 
+enum OBJECTTAG{ MAP, DOOR, CONDITIONER, FENCE, FENCEHOLE ,PIPE, REALDOOR, FALL };
 
 class CVertex
 {
@@ -81,6 +82,20 @@ public:
 	~CTexturedNormalVertex() { }
 };
 
+class CTexturedNormalVertexUVW
+{
+public:
+	D3DXVECTOR3 m_d3dxvPosition;
+	D3DXVECTOR3 m_d3dxvNormal;
+	D3DXVECTOR2 m_d3dxvTexCoord;
+	int textureN;
+
+	CTexturedNormalVertexUVW() {}
+	CTexturedNormalVertexUVW(float x, float y, float z, float nx, float ny, float nz, float u, float v, int w) {
+		m_d3dxvPosition = D3DXVECTOR3(x, y, z); m_d3dxvNormal = D3DXVECTOR3(nx, ny, nz); m_d3dxvTexCoord = D3DXVECTOR2(u, v);  textureN = w;
+	}
+	~CTexturedNormalVertexUVW() {}
+};
 class CSkinnedVertex
 {
 public:
@@ -138,6 +153,7 @@ protected:
 	//정점 데이터를 저장하기 위한 정점 버퍼 인터페이스 포인터
 	ID3D11Buffer *m_pd3dVertexBuffer;
 	ID3D11RasterizerState *m_pd3dRasterizerState;
+	ID3D11BlendState *m_pd3dBlendState;
 
 	//정점 버퍼의 정점 개수, 정점의 바이트 수, 정점 데이터가 정점 버퍼의 어디에서부터
 	//시작하는가를 나타내는 변수를 선언한다.
@@ -158,7 +174,7 @@ protected:
 	//정점 데이터가 어떤 프리미티브를 표현하고 있는 가를 나타내는 멤버변수를 선언한다.
 	D3D11_PRIMITIVE_TOPOLOGY m_d3dPrimitiveTopology;
 public:
-	CTexturedNormalVertex *m_pVertices;
+	CTexturedNormalVertexUVW *m_pVertices;
 	UINT m_nVertices;		//개수
 	UINT m_nIndices;
 public:
@@ -171,8 +187,9 @@ public:
 		frameNumber %= AnimSize;
 		D3DXMATRIX* Transform = new D3DXMATRIX[mBoneData.size()];
 		D3DXMATRIX tempM = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-		for (int i = 0; i < mBoneData.size(); ++i)
+		for (unsigned int i = 0; i < mBoneData.size(); ++i)
 		{
+			
 			Transform[i] = mBoneData[i][frameNumber];
 		}
 		return Transform;
@@ -194,9 +211,10 @@ public:
 
 class CCubeMesh : public CMesh
 {
-	CDiffuseNormalVertex pVertices[8];
 public:
-	CCubeMesh(ID3D11Device *pd3dDevice);
+	OBJECTTAG m_tag;
+	CDiffuseNormalVertex pVertices[8];
+	CCubeMesh(ID3D11Device *pd3dDevice, float minX =-1.0f, float maxX = 1.0f, float minY = -1.0f, float maxY = 1.0f, float minZ = -1.0f, float maxZ=1.0f, OBJECTTAG tag = MAP);
 	~CCubeMesh();
 	virtual void CreateRasterizerState(ID3D11Device *pd3dDevice);
 	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext);
@@ -254,3 +272,32 @@ public:
 	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext);
 };
 
+class CSkyBoxMesh : public CMeshTextured
+{
+public:
+	CSkyBoxMesh(ID3D11Device *pd3dDevice, float fWidth = 2.0f, float fHeight = 2.0f, float fDepth = 2.0f);
+	virtual ~CSkyBoxMesh();
+
+	virtual void SetRasterizerState(ID3D11Device *pd3dDevice);
+	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext);
+};
+
+class CFloorMesh : public CMeshTextured
+{
+public:
+	CFloorMesh(ID3D11Device *pd3dDevice, float fWidth = 2.0f, float fHeight = 2.0f, float fDepth = 2.0f);
+	virtual ~CFloorMesh();
+
+	virtual void SetRasterizerState(ID3D11Device *pd3dDevice);
+	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext);
+};
+
+class CItemMesh : public CMeshTextured
+{
+public:
+	CItemMesh(ID3D11Device *pd3dDevice, const char * filename, bool alphaBlend = false);
+	virtual ~CItemMesh();
+
+	virtual void SetRasterizerState(ID3D11Device *pd3dDevice);
+	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext);
+};

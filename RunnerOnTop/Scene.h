@@ -55,10 +55,11 @@ public:
 	bool ProcessInput();
 	void AnimateObjects(ID3D11Device *pd3dDevice,float fTimeElapsed);
 	void Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamera);
-
+	void DrawUI(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamera);
 	CShader **m_ppShaders;
 	int m_nShaders;
-
+	CSkyBoxShader *m_pSkybox;
+	CUIShader *m_pUIShader;
 	LIGHTS *m_pLights;
 	ID3D11Buffer *m_pd3dcbLights;
 

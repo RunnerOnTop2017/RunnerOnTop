@@ -12,6 +12,7 @@ struct VS_CB_CAMERA
 {
 	D3DXMATRIX m_d3dxmtxView;
 	D3DXMATRIX m_d3dxmtxProjection;
+	D3DXMATRIX m_d3dxmtxOrtho;
 };
 
 class CPlayer;
@@ -23,6 +24,10 @@ protected:
 	//카메라 변환 행렬과 투영 변환 행렬을 나타내는 멤버 변수를 선언한다.
 	D3DXMATRIX m_d3dxmtxView;
 	D3DXMATRIX m_d3dxmtxProjection;
+
+	//OrthoGraphic 행렬
+	D3DXMATRIX m_d3dxmtxOrtho;
+
 
 	//뷰-포트를 나타내는 멤버 변수를 선언한다.
 	D3D11_VIEWPORT m_d3dViewport;
@@ -56,7 +61,7 @@ protected:
 	D3DXVECTOR3 m_d3dxvOffset;
 	//플레이어가 회전할 때 얼마만큼의 시간을 지연시킨 후 카메라를 회전시킬 것인가를 나타낸다.
 	float m_fTimeLag;
-
+	
 public:
 	//카메라 변환행렬을 생성한다.
 	void GenerateViewMatrix();
@@ -74,7 +79,7 @@ public:
 	DWORD GetMode() { return(m_nMode); }
 
 	void GenerateProjectionMatrix(float fNearPlaneDistance, float fFarPlaneDistance, float fAspectRatio, float fFOVAngle);
-
+	void GenerateOrthoMatrixc(float fScreenWidth, float fScreenHeight, float fScreenNear, float fScreenFar);
 	//상수 버퍼를 생성하고 내용을 갱신하는 멤버 함수를 선언한다.
 	void CreateShaderVariables(ID3D11Device *pd3dDevice);
 	void UpdateShaderVariables(ID3D11DeviceContext *pd3dDeviceContext);
@@ -82,6 +87,7 @@ public:
 	void SetPlayer(CPlayer *pPlayer) { m_pPlayer = pPlayer; }
 	CPlayer *GetPlayer() { return(m_pPlayer); }
 
+	
 
 	//뷰-포트를 설정하는 멤버 함수를 선언한다.
 	void SetViewport(ID3D11DeviceContext *pd3dDeviceContext, DWORD xStart, DWORD yStart, DWORD nWidth, DWORD nHeight, float fMinZ = 0.0f, float fMaxZ = 1.0f);
@@ -89,7 +95,11 @@ public:
 
 	D3DXMATRIX GetViewMatrix() { return(m_d3dxmtxView); }
 	D3DXMATRIX GetProjectionMatrix() { return(m_d3dxmtxProjection); }
+	D3DXMATRIX GetOrthoMatrix() { return(m_d3dxmtxOrtho); }
+
 	ID3D11Buffer *GetCameraConstantBuffer() { return(m_pd3dcbCamera); }
+
+	D3DXMATRIX GetCameraWorldMatrix();
 
 	void SetPosition(D3DXVECTOR3 d3dxvPosition) { m_d3dxvPosition = d3dxvPosition; }
 	D3DXVECTOR3& GetPosition() { return(m_d3dxvPosition); }

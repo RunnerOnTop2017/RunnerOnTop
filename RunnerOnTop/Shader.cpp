@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "Shader.h"
+#include "Player.h"
 
 
 CShader::CShader()
@@ -9,7 +10,7 @@ CShader::CShader()
 	m_pd3dVertexLayout = NULL;
 	m_pd3dcbWorldMatrix = NULL;
 	m_pd3dcbMaterial = NULL;
-
+	m_isAlphaBlend = NULL;
 	m_ppObjects = NULL;
 	m_nObjects = 0;
 }
@@ -126,6 +127,16 @@ void CShader::CreateShaderVariables(ID3D11Device *pd3dDevice)
 	d3dBufferDesc3.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	d3dBufferDesc3.ByteWidth = sizeof(MATERIAL);
 	pd3dDevice->CreateBuffer(&d3dBufferDesc3, NULL, &m_pd3dcbMaterial);
+
+
+	D3D11_BUFFER_DESC d3dBufferDesc4;
+	ZeroMemory(&d3dBufferDesc4, sizeof(D3D11_BUFFER_DESC));
+	d3dBufferDesc4.Usage = D3D11_USAGE_DYNAMIC;
+	d3dBufferDesc4.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	d3dBufferDesc4.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	d3dBufferDesc4.ByteWidth = sizeof(VS_CB_ISALPHABLEND);
+	pd3dDevice->CreateBuffer(&d3dBufferDesc4, NULL, &m_isAlphaBlend);
+	std::cout << "";
 }
 
 
@@ -179,11 +190,20 @@ void CShader::Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamera)
 				pd3dDeviceContext->PSSetShaderResources(0x09, m_ppObjects[j]->m_pBump->m_nTextures, m_ppObjects[j]->m_pBump->m_ppd3dsrvTextures);
 				pd3dDeviceContext->PSSetSamplers(0x01, 1, &m_ppObjects[j]->m_pBump->m_ppd3dSamplerStates[0]);
 			}
-			if (m_ppObjects[j]->transform)
+
+			if (m_ppObjects[j]->m_pAlpha)
 			{
-				delete m_ppObjects[j]->transform;
-				m_ppObjects[j]->transform = m_ppObjects[j]->m_pMesh->getTransform(m_ppObjects[j]->framenumber++);
-				UpdateShaderVariables(pd3dDeviceContext, m_ppObjects[j]->transform, m_ppObjects[j]->m_pMesh->GetBoneDataSize());
+				pd3dDeviceContext->PSSetShaderResources(0x09, m_ppObjects[j]->m_pAlpha->m_nTextures, m_ppObjects[j]->m_pAlpha->m_ppd3dsrvTextures);
+				pd3dDeviceContext->PSSetSamplers(0x02, 1, &m_ppObjects[j]->m_pAlpha->m_ppd3dSamplerStates[0]);
+			
+			}
+			
+
+			if (m_ppObjects[j]->m_pState)
+			{
+
+				m_ppObjects[j]->transform = m_ppObjects[j]->m_pState->GetAnimation();
+				UpdateShaderVariables(pd3dDeviceContext, m_ppObjects[j]->transform, m_ppObjects[j]->m_pState->GetBoneSize());
 			}
 			m_ppObjects[j]->Render(pd3dDeviceContext);
 		}
@@ -229,19 +249,577 @@ void CDiffusedShader::UpdateShaderVariables(ID3D11DeviceContext *pd3dDeviceConte
 
 void CDiffusedShader::BuildObjects(ID3D11Device *pd3dDevice)
 {
-	CMesh *pCubeMesh = new CCubeMesh(pd3dDevice);// , 12.0f, 12.0f, 12.0f, D3DCOLOR_XRGB(0, 0, 128));
-
-	m_nObjects = 1;
-	m_ppObjects = new CGameObject*[m_nObjects];
-
-	CGameObject *pRotatingObject = new CGameObject();
 	
-				pRotatingObject->SetMesh(pCubeMesh);
-				pRotatingObject->SetPosition(0.0f, 140.0f, 0.0f);
-				//pRotatingObject->SetRotationAxis(D3DXVECTOR3(0.0f, 1.0f, 0.0f));
-				//pRotatingObject->SetRotationSpeed(1.0f*(i % 10));
-				m_ppObjects[0] = pRotatingObject;
-		
+	m_nObjects = OBJECT_CNT;
+	m_ppObjects = new CGameObject*[m_nObjects];
+	int n = 0;
+	CGameObject *pRotatingObject = new CGameObject();
+	CMesh *pCubeMesh = new CCubeMesh(pd3dDevice, -3000.0f, 3000.0f, 0.0f, 3050.0f, 0.0f, 3800.0f,FALL);
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+
+	m_ppObjects[n++] = pRotatingObject;
+
+	pCubeMesh = new CCubeMesh(pd3dDevice, -3000.0f, 3000.0f, 0.0f, 2580.0f, -3800.0f, 0.0f,FALL);
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+
+	m_ppObjects[n++] = pRotatingObject;
+
+	pCubeMesh = new CCubeMesh(pd3dDevice, -55.0f, 590.0f, 3050.0f, 3275.0f, 3300.0f, 3605.0f);
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+
+	m_ppObjects[n++] = pRotatingObject;
+
+	pCubeMesh = new CCubeMesh(pd3dDevice, -55.0f, 590.0f, 3050.0f, 3275.0f, 2980.0f, 3285.0f);
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+
+	m_ppObjects[n++] = pRotatingObject;
+
+	pCubeMesh = new CCubeMesh(pd3dDevice, 190.0f, 605.0f, 3050.0f, 3275.0f, 2660.0f, 2963.0f);
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+
+	m_ppObjects[n++] = pRotatingObject;
+
+	pCubeMesh = new CCubeMesh(pd3dDevice, -55.0f, 595.0f, 3050.0f, 3275.0f, 1705.0f, 2653.0f);
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+
+	m_ppObjects[n++] = pRotatingObject;
+
+	pCubeMesh = new CCubeMesh(pd3dDevice, 210.0f, 860.0f, 3038.0f, 3263.0f, 1435.0f, 1700.0f);
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+
+	m_ppObjects[n++] = pRotatingObject;
+
+	pCubeMesh = new CCubeMesh(pd3dDevice, 880.0f, 1300.0f, 3038.0f, 3263.0f, 1435.0f, 1735.0f);
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+
+	m_ppObjects[n++] = pRotatingObject;
+
+	pCubeMesh = new CCubeMesh(pd3dDevice, 1340.0f, 1990.0f, 3038.0f, 3263.0f, 1435.0f, 1735.0f);
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+
+	m_ppObjects[n++] = pRotatingObject;
+
+	// 경찰 출발하는 곳
+	pCubeMesh = new CCubeMesh(pd3dDevice, 1340.0f, 1990.0f, 3043.0f, 3268.0f, 1735.0f, 2360.0f);
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+
+	m_ppObjects[n++] = pRotatingObject;
+
+	pCubeMesh = new CCubeMesh(pd3dDevice, 1340.0f, 1990.0f, 3040.0f, 3265.0f, 2360.0f, 2660.0f);
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+
+	m_ppObjects[n++] = pRotatingObject;
+
+	pCubeMesh = new CCubeMesh(pd3dDevice, 1340.0f, 1990.0f, 3033.0f, 3258.0f, 2660.0f, 2980.0f);
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+
+	m_ppObjects[n++] = pRotatingObject;
+
+	pCubeMesh = new CCubeMesh(pd3dDevice, 1340.0f, 1990.0f, 3028.0f, 3253.0f, 2980.0f, 3605.0f);
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+
+	m_ppObjects[n++] = pRotatingObject;
+
+	pCubeMesh = new CCubeMesh(pd3dDevice, 625.0f, 1280.0f, 3005.0f, 3230.0f, 1120.0f, 1430.0f);
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+
+	m_ppObjects[n++] = pRotatingObject;
+
+	pCubeMesh = new CCubeMesh(pd3dDevice, 625.0f, 1280.0f, 2963.0f, 3188.0f, 810.0f, 1120.0f);
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+
+	m_ppObjects[n++] = pRotatingObject;
+
+	pCubeMesh = new CCubeMesh(pd3dDevice, 625.0f, 1280.0f, 2918.0f, 3143.0f, 490.0f, 810.0f);
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+
+	m_ppObjects[n++] = pRotatingObject;
+
+	pCubeMesh = new CCubeMesh(pd3dDevice, 625.0f, 1280.0f, 2883.0f, 3108.f, 173.0f, 490.0f);
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+
+	m_ppObjects[n++] = pRotatingObject;
+
+	pCubeMesh = new CCubeMesh(pd3dDevice, 625.0f, 1280.0f, 2853.0f, 3078.0f, -145.0f, 173.0f);
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+
+	m_ppObjects[n++] = pRotatingObject;
+
+	pCubeMesh = new CCubeMesh(pd3dDevice, 625.0f, 1280.0f, 2813.0f, 3028.f, -460.0f, -145.0f);
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+
+	m_ppObjects[n++] = pRotatingObject;
+
+	pCubeMesh = new CCubeMesh(pd3dDevice, 650.0f, 1295.0f, 2755.0f, 2980.f, -770.0f, -460.0f);
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+
+	m_ppObjects[n++] = pRotatingObject;
+
+	pCubeMesh = new CCubeMesh(pd3dDevice, 1340.0f, 1990.0f, 2755.0f, 2980.f, -770.0f, -460.0f);
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+
+	m_ppObjects[n++] = pRotatingObject;
+
+	pCubeMesh = new CCubeMesh(pd3dDevice, 1340.0f, 1990.0f, 2698.0f, 2923.f, -1090.0f, -770.0f);
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+
+	m_ppObjects[n++] = pRotatingObject;
+
+	pCubeMesh = new CCubeMesh(pd3dDevice, 1340.0f, 1990.0f, 2643.0f, 2868.f, -1400.0f, -1090.0f);
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+
+	m_ppObjects[n++] = pRotatingObject;
+
+	pCubeMesh = new CCubeMesh(pd3dDevice, 1340.0f, 1990.0f, 2598.0f, 2823.f, -1725.0f, -1400.0f);
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+
+	m_ppObjects[n++] = pRotatingObject;
+
+	pCubeMesh = new CCubeMesh(pd3dDevice, 1340.0f, 1990.0f, 2553.0f, 2778.f, -2045.0f, -1725.0f);
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+
+	m_ppObjects[n++] = pRotatingObject;
+
+	pCubeMesh = new CCubeMesh(pd3dDevice, 1340.0f, 1990.0f, 2518.0f, 2743.f, -2355.0f, -2045.0f);
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+
+	m_ppObjects[n++] = pRotatingObject;
+
+	pCubeMesh = new CCubeMesh(pd3dDevice, 1340.0f, 1990.0f, 2498.0f, 2723.f, -2675.0f, -2355.0f);
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+
+	m_ppObjects[n++] = pRotatingObject;
+
+	pCubeMesh = new CCubeMesh(pd3dDevice, -870.0f, 400.0f, 3035.0f, 3260.0f, 770.0f, 1360.0f);
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+
+	m_ppObjects[n++] = pRotatingObject;
+
+	// 건물
+	pCubeMesh = new CCubeMesh(pd3dDevice, -35.0f, 130.0f, 3275.0f, 3321.0f, 3325.0f, 3415.0f);
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+
+	m_ppObjects[n++] = pRotatingObject;
+
+	pCubeMesh = new CCubeMesh(pd3dDevice, 635.0f, 810.f, 3230.0f, 3278.0f, 1340.0f, 1430.0f);
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+
+	m_ppObjects[n++] = pRotatingObject;
+
+	pCubeMesh = new CCubeMesh(pd3dDevice, 1115.0f, 1290.0f, 3188.0f, 3234.0f, 810.0f, 900.0f);
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+
+	m_ppObjects[n++] = pRotatingObject;
+
+	pCubeMesh = new CCubeMesh(pd3dDevice, 635.0f, 810.0f, 3143.0f, 3189.0f, 720.0f, 810.0f);
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+
+	m_ppObjects[n++] = pRotatingObject;
+
+	pCubeMesh = new CCubeMesh(pd3dDevice, 635.0f, 810.0f, 3078.0f, 3124.0f, 83.0f, 173.0f);
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+
+	m_ppObjects[n++] = pRotatingObject;
+
+	pCubeMesh = new CCubeMesh(pd3dDevice, 635.0f, 810.0f, 3028.f, 3074.0f, -460.0f, -350.0f);
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+
+	m_ppObjects[n++] = pRotatingObject;
+
+	pCubeMesh = new CCubeMesh(pd3dDevice, 1780.0f, 1955.0f, 2980.f, 3026.0f, -550.0f, -460.0f);
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+
+	m_ppObjects[n++] = pRotatingObject;
+
+	pCubeMesh = new CCubeMesh(pd3dDevice, 1345.0f, 1520.0f, 2923.f, 2969.0f, -870.0f, -780.0f);
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+
+	m_ppObjects[n++] = pRotatingObject;
+
+	pCubeMesh = new CCubeMesh(pd3dDevice, 1345.0f, 1520.0f, 2778.f, 2824.0f, -1825.0f, -1735.0f);
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+
+	m_ppObjects[n++] = pRotatingObject;
+
+	pCubeMesh = new CCubeMesh(pd3dDevice, 1845.0f, 2020.0f, 2743.f, 2789.0f, -2355.0f, -2265.0f);
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+
+	m_ppObjects[n++] = pRotatingObject;
+
+	pCubeMesh = new CCubeMesh(pd3dDevice, 1345.0f, 1520.0f, 2723.f, 2769.0f, -2460.0f, -2370.0f);
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+
+	m_ppObjects[n++] = pRotatingObject;
+
+	pCubeMesh = new CCubeMesh(pd3dDevice, 670.0f, 1325.0f, 3140.0f, 3365.0f, 2980.0f, 3605.0f);
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+
+	m_ppObjects[n++] = pRotatingObject;
+
+	pCubeMesh = new CCubeMesh(pd3dDevice, 710.0f, 1220.0f, 3140.0f, 3435.0f, 2718.0f, 2955.0f);
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+
+	m_ppObjects[n++] = pRotatingObject;
+
+	pCubeMesh = new CCubeMesh(pd3dDevice, 670.0f, 1325.0f, 3140.0f, 3365.0f, 1780.0f, 2710.0f);
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+
+	m_ppObjects[n++] = pRotatingObject;
+
+	pCubeMesh = new CCubeMesh(pd3dDevice, -55.0f, 148.0f, 3275.0f, 3370.0f, 2370.0f, 2600.0f);
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+
+	m_ppObjects[n++] = pRotatingObject;
+
+	//오늘
+	pCubeMesh = new CCubeMesh(pd3dDevice, -1380.0f, -115.0f, 3000.0f, 3380.0f, 2975.0f, 3570.0f);
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+
+	m_ppObjects[n++] = pRotatingObject;
+
+	pCubeMesh = new CCubeMesh(pd3dDevice, -310.0f, 155.0f, 3000.0f, 3435.0f, 2715.0f, 2935.0f);
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+
+	m_ppObjects[n++] = pRotatingObject;
+
+	pCubeMesh = new CCubeMesh(pd3dDevice, -1380.0f, -115.0f, 3000.0f, 3530.0f, 2060.0f, 2653.0f);
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+
+	m_ppObjects[n++] = pRotatingObject;
+
+	pCubeMesh = new CCubeMesh(pd3dDevice, -1380.0f, -115.0f, 3000.0f, 3445.0f, 1405.0f, 1993.0f);
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+
+	m_ppObjects[n++] = pRotatingObject;
+
+	// 경찰 장애물
+	pCubeMesh = new CCubeMesh(pd3dDevice, 1345.0f, 1520.0f, 3267.0f, 3314.0f, 1960.0f, 2040.0f);
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+
+	m_ppObjects[n++] = pRotatingObject;
+
+	pCubeMesh = new CCubeMesh(pd3dDevice, 1810.0f, 1985.0f, 3267.0f, 3314.0f, 2270.0f, 2350.0f);
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+
+	m_ppObjects[n++] = pRotatingObject;
+
+	pCubeMesh = new CCubeMesh(pd3dDevice, 1345.0f, 1520.0f, 3267.0f, 3317.0f, 2360.0f, 2450.0f);
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+
+	m_ppObjects[n++] = pRotatingObject;
+
+	pCubeMesh = new CCubeMesh(pd3dDevice, 1345.0f, 1520.0f, 3252.0f, 3299.0f, 3190.0f, 3280.0f);
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+
+	m_ppObjects[n++] = pRotatingObject;
+
+	pCubeMesh = new CCubeMesh(pd3dDevice, 1400.0f, 1905.0f, 3000.0f, 3430.0f, 1175.0f, 1405.f);
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+
+	m_ppObjects[n++] = pRotatingObject;
+
+	pCubeMesh = new CCubeMesh(pd3dDevice, 1360.0f, 2040.0f, 3000.0f, 3350.0f, 110.0f, 700.0f);
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+
+	m_ppObjects[n++] = pRotatingObject;
+
+	pCubeMesh = new CCubeMesh(pd3dDevice, 1400.0f, 1900.0f, 2900.0f, 3220.0f, -420.0f, -190.0f);
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+
+	m_ppObjects[n++] = pRotatingObject;
+
+	pCubeMesh = new CCubeMesh(pd3dDevice, -30.0f, 1245.0f, 2500.0f, 3103.0f, -1415.0f, -825.0f);
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+
+	m_ppObjects[n++] = pRotatingObject;
+
+	pCubeMesh = new CCubeMesh(pd3dDevice, -700.0f, 570.0f, 2500.0f, 3360.0f, 100.0f, 700.0f);
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+
+	m_ppObjects[n++] = pRotatingObject;
+
+	pCubeMesh = new CCubeMesh(pd3dDevice, 1240.0f, 1900.0f, 2500.0f, 2820.0f, -3000.0f, -2700.0f);
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+
+	m_ppObjects[n++] = pRotatingObject;
+
+	pCubeMesh = new CCubeMesh(pd3dDevice, 690.0f, 1205.0f, 2500.0f, 2950.0f, -3000.0f, -2700.0f);
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+
+	m_ppObjects[n++] = pRotatingObject;
+
+	// 첫번째 문 인터랙트 영역
+	pCubeMesh = new CCubeMesh(pd3dDevice, 270.0f, 330.0f, 3275.0f, 3360.0f, 3140.0f, 3180.0f, DOOR);
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+
+	m_ppObjects[n++] = pRotatingObject;
+
+	// 첫번째 문 
+	pCubeMesh = new CCubeMesh(pd3dDevice, 270.0f, 330.0f, 3275.0f, 3360.0f, 3100.0f, 3110.0f, REALDOOR);
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+
+	m_ppObjects[n++] = pRotatingObject;
+
+
+	// 첫번째 문 옆 펜스들
+	pCubeMesh = new CCubeMesh(pd3dDevice, 0.0f, 260.0f, 3275.0f, 3360.0f, 3100.0f, 3110.0f, FENCE);
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+
+	m_ppObjects[n++] = pRotatingObject;
+
+	pCubeMesh = new CCubeMesh(pd3dDevice, 340.0f, 600.0f, 3275.0f, 3360.0f, 3100.0f, 3110.0f, FENCE);
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+
+	m_ppObjects[n++] = pRotatingObject;
+
+
+	//컨디셔너 인터랙트 영역
+	pCubeMesh = new CCubeMesh(pd3dDevice, 180, 600.0f, 3275.0f, 3360.0f, 2400.0f, 2600.0f, CONDITIONER);
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+
+	m_ppObjects[n++] = pRotatingObject;
+
+	//구멍뚫린 펜스 인터랙티브 영역
+
+	//앞
+	pCubeMesh = new CCubeMesh(pd3dDevice, 220.0f, 290.0f, 3275.0f, 3360.0f, 2020.0f, 2050.0f, FENCEHOLE);
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+	m_ppObjects[n++] = pRotatingObject;
+
+	//뒤
+	pCubeMesh = new CCubeMesh(pd3dDevice, 220.0f, 290.0f, 3275.0f, 3360.0f, 1950.0f, 1980.0f, FENCEHOLE);
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+	m_ppObjects[n++] = pRotatingObject;
+
+
+	//구멍뚫린 펜스 막힌 영역
+	pCubeMesh = new CCubeMesh(pd3dDevice, 190.0f, 320.0f, 3275.0f, 3360.0f, 1990.0f, 2000.0f, FENCE);
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+	m_ppObjects[n++] = pRotatingObject;
+
+	//그 오른쪽
+	pCubeMesh = new CCubeMesh(pd3dDevice, 60.0f, 190.0f, 3275.0f, 3360.0f, 1990.0f, 2000.0f, FENCE);
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+	m_ppObjects[n++] = pRotatingObject;
+
+	// 그 왼쪽
+	pCubeMesh = new CCubeMesh(pd3dDevice, 320.0f, 580.0f, 3275.0f, 3360.0f, 1990.0f, 2000.0f, FENCE);
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+	m_ppObjects[n++] = pRotatingObject;
+	
+
+	// 문 뒤 파이프
+	pCubeMesh = new CCubeMesh(pd3dDevice, 240.0f, 360.0f, 3275.0f, 3285.0f, 2995.0f, 3005.0f, PIPE);
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+	m_ppObjects[n++] = pRotatingObject;
+
+
 	CreateShaderVariables(pd3dDevice);
 }
 
@@ -277,11 +855,12 @@ void CTextureShader::CreateShader(ID3D11Device * pd3dDevice)
 	{
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "TEXCOORD0", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TEXNUM", 0, DXGI_FORMAT_R32_SINT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
 	UINT nElements = ARRAYSIZE(d3dInputLayout);
-	CreateVertexShaderFromFile(pd3dDevice, L"Effect.fx", "VSTexturedLighting", "vs_4_0", &m_pd3dVertexShader, d3dInputLayout, nElements, &m_pd3dVertexLayout);
-	CreatePixelShaderFromFile(pd3dDevice, L"Effect.fx", "PSTexturedLighting", "ps_4_0", &m_pd3dPixelShader);
+	CreateVertexShaderFromFile(pd3dDevice, L"Effect.fx", "VSTexturedUVWLighting", "vs_4_0", &m_pd3dVertexShader, d3dInputLayout, nElements, &m_pd3dVertexLayout);
+	CreatePixelShaderFromFile(pd3dDevice, L"Effect.fx", "PSTexturedUVWLighting", "ps_4_0", &m_pd3dPixelShader);
 }
 
 void CTextureShader::CreateShaderVariables(ID3D11Device * pd3dDevice)
@@ -309,7 +888,7 @@ void CTextureShader::BuildObjects(ID3D11Device * pd3dDevice)
 	ppMaterials[0] = new CMaterial();
 	ppMaterials[0]->m_Material.m_d3dxcDiffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
 	ppMaterials[0]->m_Material.m_d3dxcAmbient = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
-	ppMaterials[0]->m_Material.m_d3dxcSpecular = D3DXCOLOR(0.5f, 0.5f, 0.5f, 1.0f);
+	ppMaterials[0]->m_Material.m_d3dxcSpecular = D3DXCOLOR(0.5f, 0.5f, 0.5f, 0.0f);
 	ppMaterials[0]->m_Material.m_d3dxcEmissive = D3DXCOLOR(0.0f, 0.0f, 0.0f, 1.0f);
 
 	ID3D11SamplerState *pd3dSamplerState = NULL;
@@ -321,37 +900,35 @@ void CTextureShader::BuildObjects(ID3D11Device * pd3dDevice)
 	d3dSamplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
 	d3dSamplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
 	d3dSamplerDesc.MinLOD = 0;
-	d3dSamplerDesc.MaxLOD = 0;
+	d3dSamplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
 	pd3dDevice->CreateSamplerState(&d3dSamplerDesc, &pd3dSamplerState);
 
 	ID3D11ShaderResourceView *pd3dTexture = NULL;
 
-	CTexture *p_Texture = new CTexture(1);
-	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Maps\\Texture\\map01_s1.png"), NULL, NULL, &pd3dTexture, NULL);
+	CTexture *p_Texture = new CTexture(3);
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Maps\\Texture\\map01_3.png"), NULL, NULL, &pd3dTexture, NULL);
 	p_Texture->SetTexture(0, pd3dTexture, pd3dSamplerState);
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Maps\\Texture\\map01_1.png"), NULL, NULL, &pd3dTexture, NULL);
+	p_Texture->SetTexture(1, pd3dTexture, pd3dSamplerState);
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Maps\\Texture\\map01_2.png"), NULL, NULL, &pd3dTexture, NULL);
+	p_Texture->SetTexture(2, pd3dTexture, pd3dSamplerState);
 	
 	CMesh *pMeshIlluminatedTextured = new CMeshTextured(pd3dDevice, 12.0f, 12.0f, 12.0f);//CCubeMeshIlluminatedTextured(pd3dDevice, 12.0f, 12.0f, 12.0f);
 
-	int xObjects = 3, yObjects = 3, zObjects = 3, i = 0, nObjectTypes = 2;
+	int i = 0, nObjectTypes = 2;
 	m_nObjects = 1;//((xObjects * 2) + 1) * ((yObjects * 2) + 1) * ((zObjects * 2) + 1);
 	m_ppObjects = new CGameObject*[m_nObjects];
+	CGameObject *pObject = NULL;
+	pObject = new CGameObject();
+	pObject->SetMesh(pMeshIlluminatedTextured);
+	pObject->SetMaterial(ppMaterials[0]);
+	pObject->SetTexture(p_Texture);
 
-	float fxPitch = 12.0f * 1.7f;
-	float fyPitch = 12.0f * 1.7f;
-	float fzPitch = 12.0f * 1.7f;
-	CGameObject *pRotatingObject = NULL;
-
-	pRotatingObject = new CGameObject();
-	pRotatingObject->SetMesh(pMeshIlluminatedTextured);
-	pRotatingObject->SetMaterial(ppMaterials[0]);
-	pRotatingObject->SetTexture(p_Texture);
-
-	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
-	pRotatingObject->Rotate(&D3DXVECTOR3(1.0f, 0.0f, 0.0f), -90.0f);
+	pObject->SetPosition(0.0f, 0.0f, 0.0f);
+	//pObject->Rotate(&D3DXVECTOR3(1.0f, 0.0f, 0.0f), -90.0f);
 	//pRotatingObject->
-	pRotatingObject->Scale(0.4f);
-	m_ppObjects[i++] = pRotatingObject;
-
+	pObject->Scale(1000.0f);
+	m_ppObjects[i++] = pObject;
 
 
 	CreateShaderVariables(pd3dDevice);
@@ -439,6 +1016,8 @@ void CAnimateShader::UpdateShaderVariables(ID3D11DeviceContext * pd3dDeviceConte
 	pd3dDeviceContext->Unmap(m_pd3dcbSkinned, 0);
 	pd3dDeviceContext->VSSetConstantBuffers(0x02, 1, &m_pd3dcbSkinned);
 
+	//delete pd3dTransform;
+
 }
 
 void CAnimateShader::BuildObjects(ID3D11Device *pd3dDevice)
@@ -507,8 +1086,6 @@ void CAnimateShader::BuildObjects(ID3D11Device *pd3dDevice)
 	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Character\\police1\\Police1_Moustache_Normal.png"), NULL, NULL, &pd3dTexture, NULL);
 	pBump->SetTexture(5, pd3dTexture, pd3dSamplerState);
 
-	std::cout << "ResourceSize is " << sizeof(D3D11_SHADER_RESOURCE_VIEW_DESC) << std::endl;
-
 	CMesh *pMeshIlluminatedTextured = new CCharacterMesh(pd3dDevice, 12.0f, 12.0f, 12.0f);//CCubeMeshIlluminatedTextured(pd3dDevice, 12.0f, 12.0f, 12.0f);
 
 	int xObjects = 3, yObjects = 3, zObjects = 3, i = 0, nObjectTypes = 2;
@@ -540,4 +1117,698 @@ void CAnimateShader::BuildObjects(ID3D11Device *pd3dDevice)
 	delete[] ppMaterials;
 }
 
+CSkyBoxShader::CSkyBoxShader()
+{
+}
 
+CSkyBoxShader::~CSkyBoxShader()
+{
+}
+
+void CSkyBoxShader::CreateShader(ID3D11Device * pd3dDevice)
+{
+	CShader::CreateShader(pd3dDevice);
+	D3D11_INPUT_ELEMENT_DESC d3dInputLayout[] =
+	{
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TEXCOORD0", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	};
+	UINT nElements = ARRAYSIZE(d3dInputLayout);
+	CreateVertexShaderFromFile(pd3dDevice, L"Effect.fx", "VSTexturedLighting", "vs_4_0", &m_pd3dVertexShader, d3dInputLayout, nElements, &m_pd3dVertexLayout);
+	CreatePixelShaderFromFile(pd3dDevice, L"Effect.fx", "PSTexturedLighting", "ps_4_0", &m_pd3dPixelShader);
+}
+
+void CSkyBoxShader::CreateShaderVariables(ID3D11Device * pd3dDevice)
+{
+	CTextureShader::CreateShaderVariables(pd3dDevice);
+
+}
+
+void CSkyBoxShader::UpdateShaderVariables(ID3D11DeviceContext * pd3dDeviceContext, D3DXMATRIX * pd3dxmtxWorld)
+{
+	CTextureShader::UpdateShaderVariables(pd3dDeviceContext, pd3dxmtxWorld);
+}
+
+void CSkyBoxShader::UpdateShaderVariables(ID3D11DeviceContext * pd3dDeviceContext, MATERIAL * pMaterial)
+{
+	CTextureShader::UpdateShaderVariables(pd3dDeviceContext, pMaterial);
+}
+
+void CSkyBoxShader::UpdateShaderVariables(ID3D11DeviceContext * pd3dDeviceContext, CTexture * pTexture)
+{
+	CTextureShader::UpdateShaderVariables(pd3dDeviceContext, pTexture);
+}
+
+void CSkyBoxShader::BuildObjects(ID3D11Device * pd3dDevice)
+{
+	CMaterial **ppMaterials = new CMaterial*[1];
+	ppMaterials[0] = new CMaterial();
+	ppMaterials[0]->m_Material.m_d3dxcDiffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
+	ppMaterials[0]->m_Material.m_d3dxcAmbient = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
+	ppMaterials[0]->m_Material.m_d3dxcSpecular = D3DXCOLOR(0.5f, 0.5f, 0.5f, 1.0f);
+	ppMaterials[0]->m_Material.m_d3dxcEmissive = D3DXCOLOR(0.0f, 0.0f, 0.0f, 1.0f);
+
+	ID3D11SamplerState *pd3dSamplerState = NULL;
+	D3D11_SAMPLER_DESC d3dSamplerDesc;
+	ZeroMemory(&d3dSamplerDesc, sizeof(D3D11_SAMPLER_DESC));
+	d3dSamplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	d3dSamplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	d3dSamplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	d3dSamplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	d3dSamplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+	d3dSamplerDesc.MinLOD = 0;
+	d3dSamplerDesc.MaxLOD = 0;
+	pd3dDevice->CreateSamplerState(&d3dSamplerDesc, &pd3dSamplerState);
+
+	ID3D11ShaderResourceView *pd3dTexture = NULL;
+
+	CTexture *p_Texture = new CTexture(1);
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Maps\\Texture\\Sky_03.png"), NULL, NULL, &pd3dTexture, NULL);
+	p_Texture->SetTexture(0, pd3dTexture, pd3dSamplerState);
+	
+	CMesh *pMesh = new CSkyBoxMesh(pd3dDevice);
+
+	m_nObjects = 1;
+	m_ppObjects = new CGameObject*[m_nObjects];
+
+	CGameObject *pObject = NULL;
+
+	pObject = new CGameObject();
+	pObject->SetMesh(pMesh);
+	pObject->SetMaterial(ppMaterials[0]);
+	pObject->SetTexture(p_Texture);
+	pObject->Rotate(&D3DXVECTOR3(1.0f, 0.0f, 0.0f), -90.0f);
+
+
+	//pObject->SetPosition(0.0f, -1000.0f, 0.0f);
+	pObject->Scale(1.0f);
+	m_ppObjects[0] = pObject;
+	CreateShaderVariables(pd3dDevice);
+	delete[] ppMaterials;
+}
+
+void CSkyBoxShader::ReleaseObjects()
+{
+	CTextureShader::ReleaseObjects();
+}
+
+void CSkyBoxShader::Render(ID3D11DeviceContext * pd3dDeviceContext, CCamera * pCamera)
+{
+	if (pCamera)
+		m_ppObjects[0]->SetPosition(pCamera->GetPosition());
+	CTextureShader::Render(pd3dDeviceContext, pCamera);
+}
+
+CItemShader::CItemShader()
+{
+}
+
+CItemShader::~CItemShader()
+{
+}
+
+void CItemShader::CreateShader(ID3D11Device * pd3dDevice)
+{
+
+	CShader::CreateShader(pd3dDevice);
+	D3D11_INPUT_ELEMENT_DESC d3dInputLayout[] =
+	{
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TEXNUM", 0, DXGI_FORMAT_R32_SINT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	};
+	UINT nElements = ARRAYSIZE(d3dInputLayout);
+	CreateVertexShaderFromFile(pd3dDevice, L"Effect.fx", "VSTexturedUVWLighting", "vs_4_0", &m_pd3dVertexShader, d3dInputLayout, nElements, &m_pd3dVertexLayout);
+	CreatePixelShaderFromFile(pd3dDevice, L"Effect.fx", "PSTexturedUVWLighting", "ps_4_0", &m_pd3dPixelShader);
+}
+
+void CItemShader::CreateShaderVariables(ID3D11Device * pd3dDevice)
+{
+	CTextureShader::CreateShaderVariables(pd3dDevice);
+
+}
+
+void CItemShader::UpdateShaderVariables(ID3D11DeviceContext * pd3dDeviceContext, D3DXMATRIX * pd3dxmtxWorld)
+{
+	CTextureShader::UpdateShaderVariables(pd3dDeviceContext, pd3dxmtxWorld);
+
+}
+
+void CItemShader::UpdateShaderVariables(ID3D11DeviceContext * pd3dDeviceContext, MATERIAL * pMaterial)
+{
+	CTextureShader::UpdateShaderVariables(pd3dDeviceContext, pMaterial);
+
+}
+
+void CItemShader::UpdateShaderVariables(ID3D11DeviceContext * pd3dDeviceContext, CTexture * pTexture)
+{
+	CTextureShader::UpdateShaderVariables(pd3dDeviceContext, pTexture);
+
+}
+
+void CItemShader::BuildObjects(ID3D11Device * pd3dDevice)
+{
+
+	CMaterial **ppMaterials = new CMaterial*[1];
+	ppMaterials[0] = new CMaterial();
+	ppMaterials[0]->m_Material.m_d3dxcDiffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
+	ppMaterials[0]->m_Material.m_d3dxcAmbient = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
+	ppMaterials[0]->m_Material.m_d3dxcSpecular = D3DXCOLOR(0.5f, 0.5f, 0.5f, 1.0f);
+	ppMaterials[0]->m_Material.m_d3dxcEmissive = D3DXCOLOR(0.0f, 0.0f, 0.0f, 1.0f);
+
+	ID3D11SamplerState *pd3dSamplerState = NULL;
+	D3D11_SAMPLER_DESC d3dSamplerDesc;
+	ZeroMemory(&d3dSamplerDesc, sizeof(D3D11_SAMPLER_DESC));
+	d3dSamplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	d3dSamplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	d3dSamplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	d3dSamplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	d3dSamplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+	d3dSamplerDesc.MinLOD = 0;
+	d3dSamplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+	pd3dDevice->CreateSamplerState(&d3dSamplerDesc, &pd3dSamplerState);
+
+	ID3D11ShaderResourceView *pd3dTexture = NULL;
+
+
+	m_nObjects = 2;
+	m_ppObjects = new CGameObject*[m_nObjects];
+
+	CGameObject *pObject = NULL;
+
+
+	CMesh *pMesh = new CItemMesh(pd3dDevice, "conditioner.src");
+	CTexture *p_Texture = new CTexture(8);
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Object\\texture\\conditioner_4.jpg"), NULL, NULL, &pd3dTexture, NULL);
+	p_Texture->SetTexture(0, pd3dTexture, pd3dSamplerState);
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Object\\texture\\conditioner_2.jpg"), NULL, NULL, &pd3dTexture, NULL);
+	p_Texture->SetTexture(1, pd3dTexture, pd3dSamplerState);
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Object\\texture\\conditioner_3.jpg"), NULL, NULL, &pd3dTexture, NULL);
+	p_Texture->SetTexture(2, pd3dTexture, pd3dSamplerState);
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Object\\texture\\conditioner_1.jpg"), NULL, NULL, &pd3dTexture, NULL);
+	p_Texture->SetTexture(3, pd3dTexture, pd3dSamplerState);
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Object\\texture\\conditioner_5.jpg"), NULL, NULL, &pd3dTexture, NULL);
+	p_Texture->SetTexture(4, pd3dTexture, pd3dSamplerState);
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Object\\texture\\conditioner_6.jpg"), NULL, NULL, &pd3dTexture, NULL);
+	p_Texture->SetTexture(5, pd3dTexture, pd3dSamplerState);
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Object\\texture\\conditioner_7.jpg"), NULL, NULL, &pd3dTexture, NULL);
+	p_Texture->SetTexture(6, pd3dTexture, pd3dSamplerState);
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Object\\texture\\conditioner_8.jpg"), NULL, NULL, &pd3dTexture, NULL);
+	p_Texture->SetTexture(7, pd3dTexture, pd3dSamplerState);
+
+	pObject = new CGameObject();
+	pObject->SetMesh(pMesh);
+	pObject->SetMaterial(ppMaterials[0]);
+	pObject->SetTexture(p_Texture);
+	pObject->Rotate(&D3DXVECTOR3(0.0f, 1.0f, 0.0f), 90.0f);
+	pObject->SetPosition(50.0f, 3270.0f, 2500.0f);
+	
+	pObject->Scale(0.3f);
+	m_ppObjects[0] = pObject;
+	
+
+	pMesh = new CItemMesh(pd3dDevice, "pipe.src");
+	p_Texture = new CTexture(1);
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Object\\texture\\pipe_1.jpg"), NULL, NULL, &pd3dTexture, NULL);
+	p_Texture->SetTexture(0, pd3dTexture, pd3dSamplerState);
+
+	pObject = new CGameObject();
+	pObject->SetMesh(pMesh);
+	pObject->SetMaterial(ppMaterials[0]);
+	pObject->SetTexture(p_Texture);
+	pObject->Rotate(&D3DXVECTOR3(0.0f, 1.0f, 0.0f), 90.0f);
+
+	pObject->SetPosition(300.0f, 3280.0f, 3000.0f);
+
+	pObject->Scale(0.4f);
+	m_ppObjects[1] = pObject;
+
+
+	CreateShaderVariables(pd3dDevice);
+	delete[] ppMaterials;
+}
+
+void CItemShader::ReleaseObjects()
+{
+	CTextureShader::ReleaseObjects();
+}
+
+void CItemShader::Render(ID3D11DeviceContext * pd3dDeviceContext, CCamera * pCamera)
+{
+	
+	CTextureShader::Render(pd3dDeviceContext, pCamera);
+	
+}
+
+
+
+CItemShader_Alpha::CItemShader_Alpha()
+{
+}
+
+CItemShader_Alpha::~CItemShader_Alpha()
+{
+}
+
+void CItemShader_Alpha::CreateShader(ID3D11Device * pd3dDevice)
+{
+
+	CShader::CreateShader(pd3dDevice);
+	D3D11_INPUT_ELEMENT_DESC d3dInputLayout[] =
+	{
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TEXNUM", 0, DXGI_FORMAT_R32_SINT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	};
+	UINT nElements = ARRAYSIZE(d3dInputLayout);
+	CreateVertexShaderFromFile(pd3dDevice, L"Effect.fx", "VSTexturedUVWLighting", "vs_4_0", &m_pd3dVertexShader, d3dInputLayout, nElements, &m_pd3dVertexLayout);
+	CreatePixelShaderFromFile(pd3dDevice, L"Effect.fx", "PSTexturedUVWLightingAlpha", "ps_4_0", &m_pd3dPixelShader);
+}
+
+void CItemShader_Alpha::CreateShaderVariables(ID3D11Device * pd3dDevice)
+{
+	CTextureShader::CreateShaderVariables(pd3dDevice);
+
+}
+
+void CItemShader_Alpha::UpdateShaderVariables(ID3D11DeviceContext * pd3dDeviceContext, D3DXMATRIX * pd3dxmtxWorld)
+{
+	CTextureShader::UpdateShaderVariables(pd3dDeviceContext, pd3dxmtxWorld);
+
+}
+
+void CItemShader_Alpha::UpdateShaderVariables(ID3D11DeviceContext * pd3dDeviceContext, MATERIAL * pMaterial)
+{
+	CTextureShader::UpdateShaderVariables(pd3dDeviceContext, pMaterial);
+
+}
+
+void CItemShader_Alpha::UpdateShaderVariables(ID3D11DeviceContext * pd3dDeviceContext, CTexture * pTexture)
+{
+	CTextureShader::UpdateShaderVariables(pd3dDeviceContext, pTexture);
+
+}
+
+void CItemShader_Alpha::BuildObjects(ID3D11Device * pd3dDevice)
+{
+
+	CMaterial **ppMaterials = new CMaterial*[1];
+	ppMaterials[0] = new CMaterial();
+	ppMaterials[0]->m_Material.m_d3dxcDiffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
+	ppMaterials[0]->m_Material.m_d3dxcAmbient = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
+	ppMaterials[0]->m_Material.m_d3dxcSpecular = D3DXCOLOR(0.5f, 0.5f, 0.5f, 1.0f);
+	ppMaterials[0]->m_Material.m_d3dxcEmissive = D3DXCOLOR(0.0f, 0.0f, 0.0f, 1.0f);
+
+	ID3D11SamplerState *pd3dSamplerState = NULL;
+	D3D11_SAMPLER_DESC d3dSamplerDesc;
+	ZeroMemory(&d3dSamplerDesc, sizeof(D3D11_SAMPLER_DESC));
+	d3dSamplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	d3dSamplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	d3dSamplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	d3dSamplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	d3dSamplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+	d3dSamplerDesc.MinLOD = 0;
+	d3dSamplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+	pd3dDevice->CreateSamplerState(&d3dSamplerDesc, &pd3dSamplerState);
+
+	ID3D11ShaderResourceView *pd3dTexture = NULL;
+
+
+	m_nObjects = 8;
+	m_ppObjects = new CGameObject*[m_nObjects];
+
+	CGameObject *pObject = NULL;
+
+	CTexture*  p_Texture = new CTexture(1);
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Object\\Texture\\fence_2.png"), NULL, NULL, &pd3dTexture, NULL);
+	p_Texture->SetTexture(0, pd3dTexture, pd3dSamplerState);
+
+	CMesh *pMesh = new CItemMesh(pd3dDevice, "fence.src", true);
+
+
+	pObject = new CGameObject();
+	pObject->SetMesh(pMesh);
+	pObject->SetMaterial(ppMaterials[0]);
+	pObject->SetTexture(p_Texture);
+	pObject->SetPosition(255.0f, 3270.0f, 2000.0f);
+	pObject->Rotate(&D3DXVECTOR3(1.0f, 0.0f, 0.0f), -90.0f);
+	p_Texture = new CTexture(1);
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Object\\texture\\fence_2_alpha.png"), NULL, NULL, &pd3dTexture, NULL);
+	p_Texture->SetTexture(0, pd3dTexture, pd3dSamplerState);
+	pObject->SetAlphaMap(p_Texture);
+
+	pObject->Scale(2.0f);
+
+	m_ppObjects[0] = pObject;
+
+
+
+	pObject = new CGameObject();
+	pObject->SetMesh(pMesh);
+	pObject->SetMaterial(ppMaterials[0]);
+	pObject->SetTexture(p_Texture);
+	pObject->SetPosition(120.0f, 3270.0f, 2000.0f);
+	pObject->Rotate(&D3DXVECTOR3(1.0f, 0.0f, 0.0f), -90.0f);
+
+	p_Texture = new CTexture(1);
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Object\\Texture\\fence_1.png"), NULL, NULL, &pd3dTexture, NULL);
+	p_Texture->SetTexture(0, pd3dTexture, pd3dSamplerState);
+
+
+	CTexture* p_Texture2 = new CTexture(1);
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Object\\Texture\\fence_alpha.png"), NULL, NULL, &pd3dTexture, NULL);
+	p_Texture2->SetTexture(0, pd3dTexture, pd3dSamplerState);
+
+	pObject->SetTexture(p_Texture);
+	pObject->SetAlphaMap(p_Texture2);
+	pObject->Scale(2.0f);
+
+	m_ppObjects[1] = pObject;
+
+	pObject = new CGameObject();
+	pObject->SetMesh(pMesh);
+	pObject->SetMaterial(ppMaterials[0]);
+	pObject->SetTexture(p_Texture);
+	pObject->SetPosition(390.0f, 3270.0f, 2000.0f);
+	pObject->Rotate(&D3DXVECTOR3(1.0f, 0.0f, 0.0f), -90.0f);
+
+	p_Texture = new CTexture(1);
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Object\\Texture\\fence_1.png"), NULL, NULL, &pd3dTexture, NULL);
+	p_Texture->SetTexture(0, pd3dTexture, pd3dSamplerState);
+
+
+	p_Texture2 = new CTexture(1);
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Object\\Texture\\fence_alpha.png"), NULL, NULL, &pd3dTexture, NULL);
+	p_Texture2->SetTexture(0, pd3dTexture, pd3dSamplerState);
+
+	pObject->SetTexture(p_Texture);
+	pObject->SetAlphaMap(p_Texture2);
+	pObject->Scale(2.0f);
+
+	m_ppObjects[2] = pObject;
+
+	pObject = new CGameObject();
+	pObject->SetMesh(pMesh);
+	pObject->SetMaterial(ppMaterials[0]);
+	pObject->SetTexture(p_Texture);
+	pObject->SetPosition(525.0f, 3270.0f, 2000.0f);
+	pObject->Rotate(&D3DXVECTOR3(1.0f, 0.0f, 0.0f), -90.0f);
+
+	p_Texture = new CTexture(1);
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Object\\Texture\\fence_1.png"), NULL, NULL, &pd3dTexture, NULL);
+	p_Texture->SetTexture(0, pd3dTexture, pd3dSamplerState);
+
+
+	p_Texture2 = new CTexture(1);
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Object\\Texture\\fence_alpha.png"), NULL, NULL, &pd3dTexture, NULL);
+	p_Texture2->SetTexture(0, pd3dTexture, pd3dSamplerState);
+
+	pObject->SetTexture(p_Texture);
+	pObject->SetAlphaMap(p_Texture2);
+	pObject->Scale(2.0f);
+
+	m_ppObjects[3] = pObject;
+
+
+	//300.0f, 3260.0f, 3100.0f
+	pObject = new CGameObject();
+	pObject->SetMesh(pMesh);
+	pObject->SetMaterial(ppMaterials[0]);
+	pObject->SetTexture(p_Texture);
+	pObject->SetPosition(200.0f, 3270.0f, 3100.0f);
+	pObject->Rotate(&D3DXVECTOR3(1.0f, 0.0f, 0.0f), -90.0f);
+	
+	p_Texture = new CTexture(1);
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Object\\Texture\\fence_1.png"), NULL, NULL, &pd3dTexture, NULL);
+	p_Texture->SetTexture(0, pd3dTexture, pd3dSamplerState);
+
+	pObject->SetTexture(p_Texture);
+
+	p_Texture2 = new CTexture(1);
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Object\\Texture\\fence_alpha.png"), NULL, NULL, &pd3dTexture, NULL);
+	p_Texture2->SetTexture(0, pd3dTexture, pd3dSamplerState);
+
+	pObject->SetAlphaMap(p_Texture2);
+	pObject->Scale(2.0f);
+	
+	m_ppObjects[4] = pObject;
+
+
+	//300.0f, 3260.0f, 3100.0f
+	pObject = new CGameObject();
+	pObject->SetMesh(pMesh);
+	pObject->SetMaterial(ppMaterials[0]);
+	pObject->SetTexture(p_Texture);
+	pObject->SetPosition(395.0f, 3270.0f, 3100.0f);
+	pObject->Rotate(&D3DXVECTOR3(1.0f, 0.0f, 0.0f), -90.0f);
+
+	p_Texture = new CTexture(1);
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Object\\Texture\\fence_1.png"), NULL, NULL, &pd3dTexture, NULL);
+	p_Texture->SetTexture(0, pd3dTexture, pd3dSamplerState);
+
+
+	p_Texture2 = new CTexture(1);
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Object\\Texture\\fence_alpha.png"), NULL, NULL, &pd3dTexture, NULL);
+	p_Texture2->SetTexture(0, pd3dTexture, pd3dSamplerState);
+
+	pObject->SetTexture(p_Texture);
+	pObject->SetAlphaMap(p_Texture2);
+	pObject->Scale(2.0f);
+
+	m_ppObjects[5] = pObject;
+
+	pObject = new CGameObject();
+	pMesh = new CItemMesh(pd3dDevice, "fence.src", true);
+
+	pObject->SetMesh(pMesh);
+	pObject->SetMaterial(ppMaterials[0]);
+	pObject->SetTexture(p_Texture);
+	pObject->SetAlphaMap(p_Texture2);
+
+	pObject->SetPosition(530.0f, 3270.0f, 3100.0f);
+	pObject->Rotate(&D3DXVECTOR3(1.0f, 0.0f, 0.0f), -90.0f);
+	pObject->Scale(2.0f);
+
+	m_ppObjects[6] = pObject;
+
+
+	pObject = new CGameObject();
+	pMesh = new CItemMesh(pd3dDevice, "fence.src", true);
+
+	pObject->SetMesh(pMesh);
+	pObject->SetMaterial(ppMaterials[0]);
+	pObject->SetTexture(p_Texture);
+	pObject->SetAlphaMap(p_Texture2);
+
+	pObject->SetPosition(65.0f, 3270.0f, 3100.0f);
+	pObject->Rotate(&D3DXVECTOR3(1.0f, 0.0f, 0.0f), -90.0f);
+	pObject->Scale(2.0f);
+
+	m_ppObjects[7] = pObject;
+
+
+
+	CreateShaderVariables(pd3dDevice);
+	delete[] ppMaterials;
+}
+
+void CItemShader_Alpha::ReleaseObjects()
+{
+	CTextureShader::ReleaseObjects();
+}
+
+void CItemShader_Alpha::Render(ID3D11DeviceContext * pd3dDeviceContext, CCamera * pCamera)
+{
+
+	CTextureShader::Render(pd3dDeviceContext, pCamera);
+
+}
+
+
+CItemShader_Door::CItemShader_Door()
+{
+}
+
+CItemShader_Door::~CItemShader_Door()
+{
+}
+
+void CItemShader_Door::CreateShader(ID3D11Device * pd3dDevice)
+{
+
+	CShader::CreateShader(pd3dDevice);
+	D3D11_INPUT_ELEMENT_DESC d3dInputLayout[] =
+	{
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TEXNUM", 0, DXGI_FORMAT_R32_SINT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	};
+	UINT nElements = ARRAYSIZE(d3dInputLayout);
+	CreateVertexShaderFromFile(pd3dDevice, L"Effect.fx", "VSTexturedUVWLightingDoor", "vs_4_0", &m_pd3dVertexShader, d3dInputLayout, nElements, &m_pd3dVertexLayout);
+	CreatePixelShaderFromFile(pd3dDevice, L"Effect.fx", "PSTexturedUVWLighting", "ps_4_0", &m_pd3dPixelShader);
+}
+
+void CItemShader_Door::CreateShaderVariables(ID3D11Device * pd3dDevice)
+{
+	CTextureShader::CreateShaderVariables(pd3dDevice);
+
+}
+
+void CItemShader_Door::UpdateShaderVariables(ID3D11DeviceContext * pd3dDeviceContext, D3DXMATRIX * pd3dxmtxWorld)
+{
+	CTextureShader::UpdateShaderVariables(pd3dDeviceContext, pd3dxmtxWorld);
+
+}
+
+void CItemShader_Door::UpdateShaderVariables(ID3D11DeviceContext * pd3dDeviceContext, MATERIAL * pMaterial)
+{
+	CTextureShader::UpdateShaderVariables(pd3dDeviceContext, pMaterial);
+
+}
+
+void CItemShader_Door::UpdateShaderVariables(ID3D11DeviceContext * pd3dDeviceContext, CTexture * pTexture)
+{
+	CTextureShader::UpdateShaderVariables(pd3dDeviceContext, pTexture);
+
+}
+
+void CItemShader_Door::BuildObjects(ID3D11Device * pd3dDevice)
+{
+
+	CMaterial **ppMaterials = new CMaterial*[1];
+	ppMaterials[0] = new CMaterial();
+	ppMaterials[0]->m_Material.m_d3dxcDiffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
+	ppMaterials[0]->m_Material.m_d3dxcAmbient = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
+	ppMaterials[0]->m_Material.m_d3dxcSpecular = D3DXCOLOR(0.5f, 0.5f, 0.5f, 1.0f);
+	ppMaterials[0]->m_Material.m_d3dxcEmissive = D3DXCOLOR(0.0f, 0.0f, 0.0f, 1.0f);
+
+	ID3D11SamplerState *pd3dSamplerState = NULL;
+	D3D11_SAMPLER_DESC d3dSamplerDesc;
+	ZeroMemory(&d3dSamplerDesc, sizeof(D3D11_SAMPLER_DESC));
+	d3dSamplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	d3dSamplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	d3dSamplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	d3dSamplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	d3dSamplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+	d3dSamplerDesc.MinLOD = 0;
+	d3dSamplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+	pd3dDevice->CreateSamplerState(&d3dSamplerDesc, &pd3dSamplerState);
+
+	ID3D11ShaderResourceView *pd3dTexture = NULL;
+
+
+	m_nObjects = 1;
+	m_ppObjects = new CGameObject*[m_nObjects];
+	
+	CGameObject *pObject = NULL;
+
+
+
+
+	CTexture*  p_Texture = new CTexture(1);
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Object\\Texture\\pipe_1.jpg"), NULL, NULL, &pd3dTexture, NULL);
+	p_Texture->SetTexture(0, pd3dTexture, pd3dSamplerState);
+
+	CMesh *pMesh = new CItemMesh(pd3dDevice, "door.src", true);
+
+
+	pObject = new CGameObject();
+	pObject->SetMesh(pMesh);
+	pObject->SetMaterial(ppMaterials[0]);
+	pObject->SetTexture(p_Texture);
+	pObject->SetPosition(297.0f, 3260.0f, 3100.0f);
+	pObject->Rotate(&D3DXVECTOR3(1.0f, 0.0f, 0.0f), -90.0f);
+	pObject->Scale(0.5f);
+
+	m_ppObjects[0] = pObject;
+
+	CreateShaderVariables(pd3dDevice);
+	delete[] ppMaterials;
+}
+
+void CItemShader_Door::ReleaseObjects()
+{
+	CTextureShader::ReleaseObjects();
+}
+
+void CItemShader_Door::Render(ID3D11DeviceContext * pd3dDeviceContext, CCamera * pCamera)
+{
+	if (m_ppObjects[0]->bInteracted && m_ppObjects[0]->fAngeYaw >= -90.0f)
+	{
+		m_ppObjects[0]->MoveStrafe(30.0f);
+		m_ppObjects[0]->Rotate(&D3DXVECTOR3(0.0f, 0.0f, 1.0f), -5.0f);
+		m_ppObjects[0]->MoveStrafe(-30.0f);
+	}
+	CTextureShader::Render(pd3dDeviceContext, pCamera);
+
+}
+
+void CUIShader::CreateShader(ID3D11Device * pd3dDevice)
+{
+	CShader::CreateShader(pd3dDevice);
+	D3D11_INPUT_ELEMENT_DESC d3dInputLayout[] =
+	{
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "COLOR0", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	};
+	UINT nElements = ARRAYSIZE(d3dInputLayout);
+	CreateVertexShaderFromFile(pd3dDevice, L"Effect.fx", "VS_UI", "vs_4_0", &m_pd3dVertexShader, d3dInputLayout, nElements, &m_pd3dVertexLayout);
+	CreatePixelShaderFromFile(pd3dDevice, L"Effect.fx", "PS_UI", "ps_4_0", &m_pd3dPixelShader);
+}
+
+void CUIShader::CreateShaderVariables(ID3D11Device * pd3dDevice)
+{
+	CShader::CreateShaderVariables(pd3dDevice);
+}
+
+void CUIShader::BuildObjects(ID3D11Device * pd3dDevice)
+{
+	D3DXMatrixIdentity(&mtxWorld);
+	m_pUI = new CUIClass(pd3dDevice);
+	CreateShaderVariables(pd3dDevice);
+}
+
+void CUIShader::ReleaseObjects()
+{
+	delete m_pUI;
+}
+
+void CUIShader::Render(ID3D11DeviceContext * pd3dDeviceContext, CCamera * pCamera)
+{
+	pd3dDeviceContext->IASetInputLayout(m_pd3dVertexLayout);
+	pd3dDeviceContext->VSSetShader(m_pd3dVertexShader, NULL, 0);
+	pd3dDeviceContext->PSSetShader(m_pd3dPixelShader, NULL, 0);
+	//D3DXMATRIX matrix;// = pCamera->GetCameraWorldMatrix();
+	if (pCamera)
+	{
+		D3DXMATRIX matrix;
+		CPlayer *player = pCamera->GetPlayer();
+		float len = DISTANCE;
+		float myLen = GETDISTANCE(player->GetPosition().x, player->GetPosition().z);
+
+		float ratio = myLen / len;
+
+		float bar = m_pUI->GetBarLength();
+
+		ratio = bar*(1.0f-ratio);
+
+		D3DXMATRIX move;
+		D3DXMatrixTranslation(&move, ratio, 0.0f, 0.0f);
+
+		matrix = pCamera->GetCameraWorldMatrix();
+		UpdateShaderVariables(pd3dDeviceContext, &matrix);
+
+		m_pUI->RenderBar(pd3dDeviceContext);
+		matrix = move*matrix;
+		UpdateShaderVariables(pd3dDeviceContext, &matrix);
+
+		m_pUI->RenderMarker(pd3dDeviceContext);
+	
+	}
+	
+
+}
