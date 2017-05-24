@@ -90,7 +90,7 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 	wcex.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDC_RUNNERONTOP));
 	wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
 	wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
-	//wcex.lpszMenuName = MAKEINTRESOURCE(IDC_RUNNERONTOP);
+	wcex.lpszMenuName = NULL;// MAKEINTRESOURCE(IDC_RUNNERONTOP);
 	wcex.lpszClassName = szWindowClass;
 	wcex.hIconSm = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
 
@@ -163,14 +163,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	case WM_PAINT:
 	{
 		hdc = BeginPaint(hWnd, &ps);
-		//memdc = CreateCompatibleDC(hdc);
-		// TODO: 여기에 그리기 코드를 추가합니다.
-
-		//RECT rt = { 0,10,500.50 };
-		//FillRect(hdc, &rt, CreateSolidBrush(BLACK_BRUSH));
-
-
-		//DeleteDC(memdc);
 		EndPaint(hWnd, &ps);
 	}
 		

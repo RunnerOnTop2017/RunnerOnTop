@@ -69,18 +69,18 @@ void CPlayer::Move(UINT dwDirection, float fDistance, bool bUpdateVelocity)
 		else
 		{
 			//화살표 키 ‘↑’를 누르면 로컬 z-축 방향으로 이동(전진)한다. ‘↓’를 누르면 반대 방향으로 이동한다.
-			if (dwDirection & DIR_FORWARD && (m_pState->GetState() == STATE_RUN || m_pState->GetState() == STATE_RUNJUMP))
+			if (/*dwDirection & DIR_FORWARD &&*/ (m_pState->GetState() == STATE_RUN || m_pState->GetState() == STATE_RUNJUMP))
 			{
 				d3dxvShift += m_d3dxvLook * fDistance;
 				//MoveForward(fDistance);
 			}
-			if (dwDirection & DIR_BACKWARD && m_pState->GetState() == STATE_BACK) d3dxvShift -= m_d3dxvLook * fDistance;
+			if (/*dwDirection & DIR_BACKWARD &&*/ m_pState->GetState() == STATE_BACK) d3dxvShift -= m_d3dxvLook * fDistance;
 			//화살표 키 ‘→’를 누르면 로컬 x-축 방향으로 이동한다. ‘←’를 누르면 반대 방향으로 이동한다.
-			if (dwDirection & DIR_RIGHT && (m_pState->GetState() == STATE_RIGHT || m_pState->GetSubState() == STATE_RIGHT))d3dxvShift += m_d3dxvRight * fDistance;
-			if (dwDirection & DIR_LEFT && (m_pState->GetState() == STATE_LEFT || m_pState->GetSubState() == STATE_LEFT)) d3dxvShift -= m_d3dxvRight * fDistance;
+			if (/*dwDirection & DIR_RIGHT && */(m_pState->GetState() == STATE_RIGHT || m_pState->GetSubState() == STATE_RIGHT))d3dxvShift += m_d3dxvRight * fDistance;
+			if (/*dwDirection & DIR_LEFT &&*/ (m_pState->GetState() == STATE_LEFT || m_pState->GetSubState() == STATE_LEFT)) d3dxvShift -= m_d3dxvRight * fDistance;
 			//‘Page Up’을 누르면 로컬 y-축 방향으로 이동한다. ‘Page Down’을 누르면 반대 방향으로 이동한다.
 			//if ((dwDirection & DIR_UP) && (m_pState->GetState() != STATE_RUNJUMP)) d3dxvShift += m_d3dxvUp * fDistance * 4000.0f;
-			if (dwDirection & DIR_DOWN) d3dxvShift -= m_d3dxvUp * fDistance;
+			//if (dwDirection & DIR_DOWN) d3dxvShift -= m_d3dxvUp * fDistance;
 		}
 
 
@@ -346,9 +346,9 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 	D3DXVECTOR3 d3dxv_cMax = { maxX, maxY, maxZ };
 	D3DXVECTOR3 d3dxv_cMin = { minX, minY, minZ };
 #ifdef _DEBUG
-	//system("cls");
-	//printf("MAX[ %f | %f | %f ]\n", maxX, maxY, maxZ);
-	//printf("MIN[ %f | %f | %f ]\n", minX, minY, minZ);
+	system("cls");
+	printf("MAX[ %f | %f | %f ]\n", maxX, maxY, maxZ);
+	printf("MIN[ %f | %f | %f ]\n", minX, minY, minZ);
 #endif
 	CDiffusedShader *pShader = (CDiffusedShader*)m_pPlayerUpdatedContext;
 
