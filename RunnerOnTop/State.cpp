@@ -41,7 +41,7 @@ void CState::SetState(STATENUMBER state)
 {
 	m_prev_state = m_state;
 
-	m_next_state = m_state;
+ 	m_next_state = m_state;
 	
 	m_state = state;
 

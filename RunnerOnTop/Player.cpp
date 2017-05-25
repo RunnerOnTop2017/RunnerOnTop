@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "Player.h"
+#include "PathFinder.h"
 
 
 CPlayer::CPlayer()
@@ -28,6 +29,47 @@ CPlayer::CPlayer()
 	m_pCameraUpdatedContext = NULL;
 	
 	m_pShader = NULL;
+
+
+	// 테스트용임. 삭제해야 됨
+
+	for(int i = 0; i<20; ++i)
+	{ 
+		for (int j = 0; j < 20; ++j)
+		{
+			map[i][j] = 1;
+		}
+	}
+
+	map[11][19]	= 0;
+	map[11][18]	= 0;
+	map[11][17]	= 0;
+	map[11][16]	= 0;
+	map[11][15]	= 0;
+	map[11][14]	= 0;
+	map[12][14]	= 0;
+	map[13][12]	= 0;
+	map[13][14]	= 0;
+	map[13][13]	= 0;
+	map[14][14]	= 0;
+	map[15][14]	= 0;
+	map[15][15]	= 0;
+	map[15][16]	= 0;
+	map[15][17]	= 0;
+	map[15][18]	= 0;
+	map[15][19]	= 0;
+	map[12][13]	= 0;
+	map[13][11]	= 0;
+	map[13][10]	= 0;
+	map[13][9]	= 0;
+	map[13][8]	= 0;
+	map[14][8]	= 0;
+	map[15][8]	= 0;
+	map[15][7]	= 0;
+	map[15][6]	= 0;
+	map[15][5]	= 0;
+	map[15][4]	= 0;
+	map[15][3]	= 0;
 }
 
 CPlayer::~CPlayer()
@@ -345,14 +387,87 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 
 	D3DXVECTOR3 d3dxv_cMax = { maxX, maxY, maxZ };
 	D3DXVECTOR3 d3dxv_cMin = { minX, minY, minZ };
+	D3DXVECTOR3 d3dxv_center = (d3dxv_cMax + d3dxv_cMin) / 2.0f;
+	node_pos pos = PositionToNodeIndex(d3dxv_center.x, d3dxv_center.z, 20, minMap, maxMap);
 #ifdef _DEBUG
 	system("cls");
-	printf("MAX[ %f | %f | %f ]\n", maxX, maxY, maxZ);
-	printf("MIN[ %f | %f | %f ]\n", minX, minY, minZ);
+	//printf("MAX[ %f | %f | %f ]\n", maxX, maxY, maxZ);
+	//printf("MIN[ %f | %f | %f ]\n", minX, minY, minZ);
+	//printf("Position : %f, %f, %f\n", d3dxv_center.x, d3dxv_center.y, d3dxv_center.z);
+	for (int i = 0; i < 20; ++i)
+	{
+		for (int j = 0; j < 20; ++j)
+		{
+			if (j == pos.x && i == pos.y)
+			{
+				printf("◎");
+			}
+			else if (map[j][i] == 0)
+			{
+				printf("○");
+			} 
+			else
+			{
+				printf("●");
+
+			}
+		}
+		printf("\n");
+	}
+
+
+	printf("NodeIndex : %d, %d\n", pos.x, pos.y);
+
+	
+
 #endif
 	CDiffusedShader *pShader = (CDiffusedShader*)m_pPlayerUpdatedContext;
 
 	int nObjects = pShader->m_nObjects;
+	
+	std::string path = pathFind(pos.x, pos.y, 15, 3);
+	std::vector<node_pos> vec = PathStringToNodeIndex(path, pos);
+
+	for (int i = 0; i < 20; ++i)
+	{
+		for (int j = 0; j < 20; ++j)
+		{
+			bool b = false;
+			for (int x = 0; x < vec.size(); ++x)
+			{
+				if (j == vec[x].x && i == vec[x].y)
+				{
+					b = true;
+					break;
+				}
+			}
+				
+				if (b)
+				{
+					printf("○");
+				}
+				else
+				{
+					printf("●");
+
+				}
+		}
+		printf("\n");
+	}
+
+	if (vec.size() != 0)
+	{
+		node_pos_float np =  NodeIndexToPosition(vec[0], 20, minMap, maxMap);
+		SetPosition(D3DXVECTOR3(np.x, d3dxv_center.y, np.y));
+		Sleep(1000);
+	}
+	else {
+	
+	}
+	
+
+
+
 	// 바닥 충돌 체크
 	for (int i = 0; i < FLOOR_CNT; ++i)
 	{

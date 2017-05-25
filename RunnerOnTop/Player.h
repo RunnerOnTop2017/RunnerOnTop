@@ -5,6 +5,10 @@
 #include "Shader.h"
 #include "State.h"
 
+// 최종 목적지 15,3
+static D3DXVECTOR2 maxMap = { 3000.0f, 3800.0f };
+static D3DXVECTOR2 minMap = { -3000.0f, -3800.0f };
+
 class CPlayer : public CGameObject
 {
 protected:

@@ -157,6 +157,7 @@
     <ClInclude Include="GameFramework.h" />
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="Mesh.h" />
+    <ClInclude Include="PathFinder.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="RunnerOnTop.h" />
@@ -176,6 +177,7 @@
     <ClCompile Include="GameFramework.cpp" />
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="Mesh.cpp" />
+    <ClCompile Include="PathFinder.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="RunnerOnTop.cpp" />
     <ClCompile Include="Scene.cpp" />
