@@ -5,6 +5,7 @@
 #include "Shader.h"
 #include "State.h"
 
+
 // 최종 목적지 15,3
 static D3DXVECTOR2 maxMap = { 3000.0f, 3800.0f };
 static D3DXVECTOR2 minMap = { -3000.0f, -3800.0f };
@@ -12,6 +13,7 @@ static D3DXVECTOR2 minMap = { -3000.0f, -3800.0f };
 class CPlayer : public CGameObject
 {
 protected:
+	int map[20][20];
 	//플레이어의 위치 벡터, x-축(Right), y-축(Up), z-축(Look) 벡터이다.
 	D3DXVECTOR3 m_d3dxvPosition;
 	D3DXVECTOR3 m_d3dxvRight;

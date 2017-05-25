@@ -7,16 +7,20 @@ path_node::path_node(int xp, int yp, int d, int p)
 	xPos = xp; yPos = yp; level = d; priority = p;
 }
 
-std::string pathFind(const int & xStart, const int & yStart, const int & xFinish, const int & yFinish)
+std::string pathFind(const int & xStart, const int & yStart, const int & xFinish, const int & yFinish, int map[map_size_n][map_size_m])
 {
+
 	static std::priority_queue<path_node> pq[2]; // list of open (not-yet-tried) nodes
+	static int closed_nodes_map[map_size_n][map_size_m]; // map of closed (tried-out) nodes
+	static int open_nodes_map[map_size_n][map_size_m]; // map of open (not-yet-tried) nodes
+	static int dir_map[map_size_n][map_size_m]; // map of directions
+
 	static int pqi; // pq index
 	static path_node* n0;
 	static path_node* m0;
 	static int i, j, x, y, xdx, ydy;
 	static char c;
 	pqi = 0;
-
 	// reset the node maps
 	for (y = 0; y<map_size_m; y++)
 	{

@@ -1,12 +1,8 @@
 #pragma once
 #include "stdafx.h"
 
-const int map_size_n = 20; // horizontal size of the map
-const int map_size_m = 20; // vertical size size of the map
-static int map[map_size_n][map_size_m];
-static int closed_nodes_map[map_size_n][map_size_m]; // map of closed (tried-out) nodes
-static int open_nodes_map[map_size_n][map_size_m]; // map of open (not-yet-tried) nodes
-static int dir_map[map_size_n][map_size_m]; // map of directions
+//static int map[map_size_n][map_size_m];
+
 const int dir = 8; // number of possible directions to go at any position
 // if dir==4
 //static int dx[dir]={1, 0, -1, 0};
@@ -74,7 +70,7 @@ bool operator<(const path_node & a, const path_node & b);
 
 //A* 알고리즘
 // std:;string 형태의 디렉션 인덱스로 반환
-std::string pathFind(const int & xStart, const int & yStart, const int & xFinish, const int & yFinish);
+std::string pathFind(const int & xStart, const int & yStart, const int & xFinish, const int & yFinish, int map[map_size_n][map_size_m]);
 
 
 //현재 x,y  한변의 노드 개수, 미니멈 x,z 맥시멈 x,z

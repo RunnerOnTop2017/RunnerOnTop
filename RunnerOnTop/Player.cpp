@@ -389,72 +389,20 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 	D3DXVECTOR3 d3dxv_cMin = { minX, minY, minZ };
 	D3DXVECTOR3 d3dxv_center = (d3dxv_cMax + d3dxv_cMin) / 2.0f;
 	node_pos pos = PositionToNodeIndex(d3dxv_center.x, d3dxv_center.z, 20, minMap, maxMap);
+	std::string path = pathFind(pos.x, pos.y, 15, 3, map);
+	std::vector<node_pos> vec = PathStringToNodeIndex(path, pos);
 #ifdef _DEBUG
 	system("cls");
 	//printf("MAX[ %f | %f | %f ]\n", maxX, maxY, maxZ);
 	//printf("MIN[ %f | %f | %f ]\n", minX, minY, minZ);
 	//printf("Position : %f, %f, %f\n", d3dxv_center.x, d3dxv_center.y, d3dxv_center.z);
-	for (int i = 0; i < 20; ++i)
-	{
-		for (int j = 0; j < 20; ++j)
-		{
-			if (j == pos.x && i == pos.y)
-			{
-				printf("¡Ý");
-			}
-			else if (map[j][i] == 0)
-			{
-				printf("¡Û");
-			} 
-			else
-			{
-				printf("¡Ü");
-
-			}
-		}
-		printf("\n");
-	}
-
-
 	printf("NodeIndex : %d, %d\n", pos.x, pos.y);
-
-	
-
+	std::cout << path << std::endl;
 #endif
 	CDiffusedShader *pShader = (CDiffusedShader*)m_pPlayerUpdatedContext;
 
 	int nObjects = pShader->m_nObjects;
 	
-	std::string path = pathFind(pos.x, pos.y, 15, 3);
-	std::vector<node_pos> vec = PathStringToNodeIndex(path, pos);
-
-	for (int i = 0; i < 20; ++i)
-	{
-		for (int j = 0; j < 20; ++j)
-		{
-			bool b = false;
-			for (int x = 0; x < vec.size(); ++x)
-			{
-				if (j == vec[x].x && i == vec[x].y)
-				{
-					b = true;
-					break;
-				}
-			}
-				
-				if (b)
-				{
-					printf("¡Û");
-				}
-				else
-				{
-					printf("¡Ü");
-
-				}
-		}
-		printf("\n");
-	}
-
 	if (vec.size() != 0)
 	{
 		node_pos_float np =  NodeIndexToPosition(vec[0], 20, minMap, maxMap);
