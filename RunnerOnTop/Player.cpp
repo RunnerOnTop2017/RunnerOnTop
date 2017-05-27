@@ -30,6 +30,8 @@ CPlayer::CPlayer()
 	
 	m_pShader = NULL;
 
+	currentPos.x = -1;
+	currentPos.y = -1;
 
 	// 테스트용임. 삭제해야 됨
 
@@ -37,7 +39,7 @@ CPlayer::CPlayer()
 	{ 
 		for (int j = 0; j < 20; ++j)
 		{
-			map[i][j] = 1;
+			map[i][j] = 0;
 		}
 	}
 
@@ -388,30 +390,145 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 	D3DXVECTOR3 d3dxv_cMax = { maxX, maxY, maxZ };
 	D3DXVECTOR3 d3dxv_cMin = { minX, minY, minZ };
 	D3DXVECTOR3 d3dxv_center = (d3dxv_cMax + d3dxv_cMin) / 2.0f;
+
+	if (currentPos.x == -1 && currentPos.y == -1)
+	{
+		CreateNodeMap(map, minMap, maxMap, (CDiffusedShader*)m_pPlayerUpdatedContext, 2, FLOOR_CNT, true);
+		for (int i = 0; i < map_size_m; ++i)
+		{
+			for (int j = 0; j < map_size_n; ++j)
+			{
+				if (map[j][i] == 1) map[j][i] = 0;
+				else map[j][i] = 1;
+			}
+		}
+
+		map[13][7] = 1;
+		map[11][3] = 1;
+		map[9][13] = 1;
+		map[12][13] = 1;
+		map[10][13] = 1;
+		map[12][14] = 1;
+		map[12][13] = 0;
+		map[11][12] = 1;
+		map[12][12] = 1;
+		//map[14][7] = 1;
+		//map[13][8] = 1;
+		//map[14][8] = 1;
+		map[14][6] = 1;
+ 		NPCDirection = 3;
+	}
+
+
+
 	node_pos pos = PositionToNodeIndex(d3dxv_center.x, d3dxv_center.z, 20, minMap, maxMap);
-	std::string path = pathFind(pos.x, pos.y, 15, 3, map);
-	std::vector<node_pos> vec = PathStringToNodeIndex(path, pos);
+	static node_pos_float tmp;
+	static float degree;
+	static std::string path;
+	if (pos.x != currentPos.x || pos.y != currentPos.y)
+	{
+		path = pathFind(pos.x, pos.y, 15, 3, map);
+		route.clear();
+		route = PathStringToNodeIndex(path, pos);
+		D3DXVECTOR3 look = GetLookVector();
+		
+		XMVECTOR v1 = { look.x, look.z };
+		if(route.size()!= 0 )
+			tmp = NodeIndexToPosition(route[0], 20, minMap, maxMap);
+		XMVECTOR v2 = {tmp.x -  d3dxv_center.x ,tmp.y - d3dxv_center.z};
+		XMVECTOR angle = XMVector2AngleBetweenVectors(v2, v1);
+		
+
+		float rad = XMVectorGetX(angle);
+		degree = XMConvertToDegrees(rad);
+		if (path.length() !=0)
+		{
+			if (path.at(0) == '0')
+			{
+				if (NPCDirection == 3)
+				{
+					Rotate(0.0f, -90.0f, 0.0f);
+					NPCDirection = 0;
+				}
+				else if (NPCDirection == 1)
+				{
+					Rotate(0.0f, 90.0f, 0.0f);
+					NPCDirection = 0;
+				}
+				else if (NPCDirection == 2)
+				{
+					Rotate(0.0f, 180.0f, 0.0f);
+					NPCDirection = 0;
+				}
+			}
+			else if (path.at(0) == '3')
+			{
+				if (NPCDirection == 0)
+				{
+					Rotate(0.0f, 90.0f, 0.0f);
+					NPCDirection = 3;
+				}
+				else if (NPCDirection == 1)
+				{
+					Rotate(0.0f, 180.0f, 0.0f);
+					NPCDirection = 3;
+				}
+				else if (NPCDirection == 2)
+				{
+					Rotate(0.0f, -90.0f, 0.0f);
+					NPCDirection = 3;
+				}
+			}
+				
+		}
+		//Rotate(0.0f, degree, 0.0f);
+		//Rotate(D3DXVECTOR3(0.0f,1.0f,0.0f), degree);
+		//printf("NodeIndex : %d, %d\n", pos.x, pos.y);
+		currentPos.x = pos.x;
+		currentPos.y = pos.y;
+	}
+
+	
 #ifdef _DEBUG
 	system("cls");
 	//printf("MAX[ %f | %f | %f ]\n", maxX, maxY, maxZ);
 	//printf("MIN[ %f | %f | %f ]\n", minX, minY, minZ);
-	//printf("Position : %f, %f, %f\n", d3dxv_center.x, d3dxv_center.y, d3dxv_center.z);
-	printf("NodeIndex : %d, %d\n", pos.x, pos.y);
+	bool b = false;
+	for (int y = 0; y < map_size_m; ++y)
+	{
+		for (int x = 0; x < map_size_n; ++x)
+		{
+			b = false;
+			for (int i = 0; i < route.size(); ++i)
+			{
+				if (route[i].x == x && route[i].y == y)
+				{
+					b = true;
+				
+					break;
+				}
+			}
+			if(x == pos.x && y == pos.y) std::cout << "⊙";
+			else if(b) 	std::cout << "◎";
+			else if (map[x][y] == 0) std::cout << "○";
+			else if (map[x][y] == 1) std::cout << "●";
+
+
+		}
+		std::cout << std::endl;
+	}
+
+	printf("Position : %f, %f, %f\n", d3dxv_center.x, d3dxv_center.y, d3dxv_center.z);
+	printf("Node Pos : %d, %d\n", pos.x, pos.y);
+	printf("Current Node Pos : %d, %d\n", currentPos.x, currentPos.y);
+	printf("Node Center : %f, %f\n", tmp.x, tmp.y);
+	printf("Degree : %f\n", degree);
 	std::cout << path << std::endl;
+	//std::cout << route[0].x<<", "<<route[0].y << std::endl;
 #endif
 	CDiffusedShader *pShader = (CDiffusedShader*)m_pPlayerUpdatedContext;
 
 	int nObjects = pShader->m_nObjects;
-	
-	if (vec.size() != 0)
-	{
-		node_pos_float np =  NodeIndexToPosition(vec[0], 20, minMap, maxMap);
-		SetPosition(D3DXVECTOR3(np.x, d3dxv_center.y, np.y));
-		Sleep(1000);
-	}
-	else {
-	
-	}
 	
 
 
@@ -423,6 +540,9 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 
 		D3DXVECTOR3 d3dxvMax = { mVertices[1].m_d3dxvPosition.x , mVertices[4].m_d3dxvPosition.y, mVertices[2].m_d3dxvPosition.z };
 		D3DXVECTOR3 d3dxvMin = { mVertices[0].m_d3dxvPosition.x , mVertices[0].m_d3dxvPosition.y,  mVertices[0].m_d3dxvPosition.z };
+
+
+
 		bool x, y, z;
 		CollisionCheck(d3dxv_cMax, d3dxv_cMin, d3dxvMax, d3dxvMin, dxvShift, x, y, z);
 		OBJECTTAG tag = ((CCubeMesh*)pShader->m_ppObjects[i]->m_pMesh)->m_tag;
@@ -552,7 +672,7 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 			}
 			else if (FENCE == tag)
 			{
-				if (m_pState->GetState() != STATE_SLIDE)
+				/*if (m_pState->GetState() != STATE_SLIDE)
 				{
 					if (x == true)
 						m_d3dxvVelocity.x *= -1.0f;
@@ -563,7 +683,7 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 					if (z == true)
 						m_d3dxvVelocity.z *= -1.0f;
 					m_pState->SetState(STATE_FALLBACK);
-				}
+				}*/
 			}
 			else if (FENCEHOLE == tag)
 			{
@@ -591,6 +711,7 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 			}
 			else
 			{
+				std::cout << "WALL : " << i << std::endl;
 				if (x == true)
 					m_d3dxvVelocity.x *= -1.0f;
 
@@ -633,7 +754,7 @@ void CPlayer::OnCameraUpdated(float fTimeElapsed)
 CAirplanePlayer::CAirplanePlayer(ID3D11Device *pd3dDevice)
 {
 	//비행기 메쉬를 생성한다.
-	CMesh *pAirplaneMesh = new CCharacterMesh(pd3dDevice);
+	CMesh *pAirplaneMesh = new CCharacterMesh(pd3dDevice, "Police01");
 	CCubeMesh *Collision = new CCubeMesh(pd3dDevice, -15.0f, 15.0f, 0.0f, 75.0f, -15.0f, 15.0f);
 	SetMesh(pAirplaneMesh);
 	pCollision = Collision;

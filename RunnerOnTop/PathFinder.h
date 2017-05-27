@@ -1,15 +1,15 @@
 #pragma once
 #include "stdafx.h"
-
+#include "Shader.h"
 //static int map[map_size_n][map_size_m];
 
-const int dir = 8; // number of possible directions to go at any position
+const int dir = 4; // number of possible directions to go at any position
 // if dir==4
-//static int dx[dir]={1, 0, -1, 0};
-//static int dy[dir]={0, 1, 0, -1};
+static int dx[dir]={1, 0, -1, 0};
+static int dy[dir]={0, 1, 0, -1};
  // if dir==8
-static int dx[dir] = { 1, 1, 0, -1, -1, -1, 0, 1 };
-static int dy[dir] = { 0, 1, 1, 1, 0, -1, -1, -1 };
+//static int dx[dir] = { 1, 1, 0, -1, -1, -1, 0, 1 };
+//static int dy[dir] = { 0, 1, 1, 1, 0, -1, -1, -1 };
 
 struct node_pos {
 	int x;
@@ -81,3 +81,5 @@ node_pos_float NodeIndexToPosition(node_pos pos, float dm, D3DXVECTOR2 minMap, D
 
 std::vector<node_pos> PathStringToNodeIndex(std::string path, node_pos pos);
 
+// 노드맵을 만들어줌 노드맵과 바운딩박스의 충돌여부가 마지막 bool값이면 벽을 만들어줌
+void CreateNodeMap(int map[map_size_n][map_size_m], D3DXVECTOR2 minMap, D3DXVECTOR2 maxMap, CDiffusedShader* pShader, int start_Obj, int cnt_Obj, bool dis);

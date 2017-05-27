@@ -357,7 +357,7 @@ void CMeshTextured::Render(ID3D11DeviceContext *pd3dDeviceContext)
 	CMeshIlluminated::Render(pd3dDeviceContext);
 }
 
-CCharacterMesh::CCharacterMesh(ID3D11Device *pd3dDevice, float fWidth, float fHeight, float fDepth) : CMeshIlluminated(pd3dDevice)
+CCharacterMesh::CCharacterMesh(ID3D11Device *pd3dDevice, char* filename , float fWidth, float fHeight, float fDepth) : CMeshIlluminated(pd3dDevice)
 {
 	m_nStride = sizeof(CSkinnedVertex);
 	m_nOffset = 0;
@@ -366,7 +366,14 @@ CCharacterMesh::CCharacterMesh(ID3D11Device *pd3dDevice, float fWidth, float fHe
 
 	m_nIndices;
 	int indexSize = 0;
-	FILE *fp = fopen("Data\\character\\Police01.msh", "rb");
+	std::string file = "Data\\character\\";
+	file.append(filename);
+	file.append(".msh");
+	//FILE *fp = fopen("Data\\character\\Police01.msh", "rb");
+	//wsprintf()
+	//MessageBoxA(NULL, file.c_str(), NULL, MB_OK);
+	FILE *fp = fopen(file.c_str(), "rb");
+
 	fread((char*)&indexSize, sizeof(int), 1, fp);
 	CSkinnedVertex *pVertices = new CSkinnedVertex[indexSize];
 	fread((char*)pVertices, sizeof(CSkinnedVertex), indexSize, fp);

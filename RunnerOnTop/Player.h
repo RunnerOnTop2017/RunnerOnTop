@@ -4,7 +4,7 @@
 #include "GameObject.h"
 #include "Shader.h"
 #include "State.h"
-
+#include "PathFinder.h"
 
 // 최종 목적지 15,3
 static D3DXVECTOR2 maxMap = { 3000.0f, 3800.0f };
@@ -13,7 +13,10 @@ static D3DXVECTOR2 minMap = { -3000.0f, -3800.0f };
 class CPlayer : public CGameObject
 {
 protected:
+	// 길찾기용
 	int map[20][20];
+	node_pos currentPos;
+	std::vector<node_pos> route;
 	//플레이어의 위치 벡터, x-축(Right), y-축(Up), z-축(Look) 벡터이다.
 	D3DXVECTOR3 m_d3dxvPosition;
 	D3DXVECTOR3 m_d3dxvRight;
@@ -35,6 +38,8 @@ protected:
 	float m_fMaxVelocityY;
 	//플레이어에 작용하는 마찰력을 나타낸다.
 	float m_fFriction;
+
+	int NPCDirection;
 
 	//플레이어의 위치가 바뀔 때마다 호출되는 OnPlayerUpdated() 함수에서 사용하는 데이터이다.
 	LPVOID m_pPlayerUpdatedContext;

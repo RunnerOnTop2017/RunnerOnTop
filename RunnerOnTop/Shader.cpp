@@ -479,7 +479,7 @@ void CDiffusedShader::BuildObjects(ID3D11Device *pd3dDevice)
 	m_ppObjects[n++] = pRotatingObject;
 
 	// °Ç¹°
-	pCubeMesh = new CCubeMesh(pd3dDevice, -35.0f, 130.0f, 3275.0f, 3321.0f, 3325.0f, 3415.0f);
+	pCubeMesh = new CCubeMesh(pd3dDevice, -35.0f, 130.0f, 3275.0f, 3321.0f, 3325.0f, 3415.0f, OBJ);
 	pRotatingObject = new CGameObject();
 
 	pRotatingObject->SetMesh(pCubeMesh);
@@ -487,7 +487,7 @@ void CDiffusedShader::BuildObjects(ID3D11Device *pd3dDevice)
 
 	m_ppObjects[n++] = pRotatingObject;
 
-	pCubeMesh = new CCubeMesh(pd3dDevice, 635.0f, 810.f, 3230.0f, 3278.0f, 1340.0f, 1430.0f);
+	pCubeMesh = new CCubeMesh(pd3dDevice, 635.0f, 810.f, 3230.0f, 3278.0f, 1340.0f, 1430.0f, OBJ);
 	pRotatingObject = new CGameObject();
 
 	pRotatingObject->SetMesh(pCubeMesh);
@@ -495,7 +495,7 @@ void CDiffusedShader::BuildObjects(ID3D11Device *pd3dDevice)
 
 	m_ppObjects[n++] = pRotatingObject;
 
-	pCubeMesh = new CCubeMesh(pd3dDevice, 1115.0f, 1290.0f, 3188.0f, 3234.0f, 810.0f, 900.0f);
+	pCubeMesh = new CCubeMesh(pd3dDevice, 1115.0f, 1290.0f, 3188.0f, 3234.0f, 810.0f, 900.0f, OBJ);
 	pRotatingObject = new CGameObject();
 
 	pRotatingObject->SetMesh(pCubeMesh);
@@ -503,7 +503,7 @@ void CDiffusedShader::BuildObjects(ID3D11Device *pd3dDevice)
 
 	m_ppObjects[n++] = pRotatingObject;
 
-	pCubeMesh = new CCubeMesh(pd3dDevice, 635.0f, 810.0f, 3143.0f, 3189.0f, 720.0f, 810.0f);
+	pCubeMesh = new CCubeMesh(pd3dDevice, 635.0f, 810.0f, 3143.0f, 3189.0f, 720.0f, 810.0f,OBJ);
 	pRotatingObject = new CGameObject();
 
 	pRotatingObject->SetMesh(pCubeMesh);
@@ -511,7 +511,7 @@ void CDiffusedShader::BuildObjects(ID3D11Device *pd3dDevice)
 
 	m_ppObjects[n++] = pRotatingObject;
 
-	pCubeMesh = new CCubeMesh(pd3dDevice, 635.0f, 810.0f, 3078.0f, 3124.0f, 83.0f, 173.0f);
+	pCubeMesh = new CCubeMesh(pd3dDevice, 635.0f, 810.0f, 3078.0f, 3124.0f, 83.0f, 173.0f,OBJ);
 	pRotatingObject = new CGameObject();
 
 	pRotatingObject->SetMesh(pCubeMesh);
@@ -519,7 +519,7 @@ void CDiffusedShader::BuildObjects(ID3D11Device *pd3dDevice)
 
 	m_ppObjects[n++] = pRotatingObject;
 
-	pCubeMesh = new CCubeMesh(pd3dDevice, 635.0f, 810.0f, 3028.f, 3074.0f, -460.0f, -350.0f);
+	pCubeMesh = new CCubeMesh(pd3dDevice, 635.0f, 810.0f, 3028.f, 3074.0f, -460.0f, -350.0f, OBJ);
 	pRotatingObject = new CGameObject();
 
 	pRotatingObject->SetMesh(pCubeMesh);
@@ -527,7 +527,7 @@ void CDiffusedShader::BuildObjects(ID3D11Device *pd3dDevice)
 
 	m_ppObjects[n++] = pRotatingObject;
 
-	pCubeMesh = new CCubeMesh(pd3dDevice, 1780.0f, 1955.0f, 2980.f, 3026.0f, -550.0f, -460.0f);
+	pCubeMesh = new CCubeMesh(pd3dDevice, 1780.0f, 1955.0f, 2980.f, 3026.0f, -550.0f, -460.0f, OBJ);
 	pRotatingObject = new CGameObject();
 
 	pRotatingObject->SetMesh(pCubeMesh);
@@ -535,7 +535,7 @@ void CDiffusedShader::BuildObjects(ID3D11Device *pd3dDevice)
 
 	m_ppObjects[n++] = pRotatingObject;
 
-	pCubeMesh = new CCubeMesh(pd3dDevice, 1345.0f, 1520.0f, 2923.f, 2969.0f, -870.0f, -780.0f);
+	pCubeMesh = new CCubeMesh(pd3dDevice, 1345.0f, 1520.0f, 2923.f, 2969.0f, -870.0f, -780.0f, OBJ);
 	pRotatingObject = new CGameObject();
 
 	pRotatingObject->SetMesh(pCubeMesh);
@@ -543,7 +543,7 @@ void CDiffusedShader::BuildObjects(ID3D11Device *pd3dDevice)
 
 	m_ppObjects[n++] = pRotatingObject;
 
-	pCubeMesh = new CCubeMesh(pd3dDevice, 1345.0f, 1520.0f, 2778.f, 2824.0f, -1825.0f, -1735.0f);
+	pCubeMesh = new CCubeMesh(pd3dDevice, 1345.0f, 1520.0f, 2778.f, 2824.0f, -1825.0f, -1735.0f, OBJ);
 	pRotatingObject = new CGameObject();
 
 	pRotatingObject->SetMesh(pCubeMesh);
@@ -551,7 +551,7 @@ void CDiffusedShader::BuildObjects(ID3D11Device *pd3dDevice)
 
 	m_ppObjects[n++] = pRotatingObject;
 
-	pCubeMesh = new CCubeMesh(pd3dDevice, 1845.0f, 2020.0f, 2743.f, 2789.0f, -2355.0f, -2265.0f);
+	pCubeMesh = new CCubeMesh(pd3dDevice, 1845.0f, 2020.0f, 2743.f, 2789.0f, -2355.0f, -2265.0f, OBJ);
 	pRotatingObject = new CGameObject();
 
 	pRotatingObject->SetMesh(pCubeMesh);
@@ -559,7 +559,7 @@ void CDiffusedShader::BuildObjects(ID3D11Device *pd3dDevice)
 
 	m_ppObjects[n++] = pRotatingObject;
 
-	pCubeMesh = new CCubeMesh(pd3dDevice, 1345.0f, 1520.0f, 2723.f, 2769.0f, -2460.0f, -2370.0f);
+	pCubeMesh = new CCubeMesh(pd3dDevice, 1345.0f, 1520.0f, 2723.f, 2769.0f, -2460.0f, -2370.0f, OBJ);
 	pRotatingObject = new CGameObject();
 
 	pRotatingObject->SetMesh(pCubeMesh);
@@ -1086,7 +1086,7 @@ void CAnimateShader::BuildObjects(ID3D11Device *pd3dDevice)
 	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Character\\police1\\Police1_Moustache_Normal.png"), NULL, NULL, &pd3dTexture, NULL);
 	pBump->SetTexture(5, pd3dTexture, pd3dSamplerState);
 
-	CMesh *pMeshIlluminatedTextured = new CCharacterMesh(pd3dDevice, 12.0f, 12.0f, 12.0f);//CCubeMeshIlluminatedTextured(pd3dDevice, 12.0f, 12.0f, 12.0f);
+	CMesh *pMeshIlluminatedTextured = new CCharacterMesh(pd3dDevice,"Police01", 12.0f, 12.0f, 12.0f);//CCubeMeshIlluminatedTextured(pd3dDevice, 12.0f, 12.0f, 12.0f);
 
 	int xObjects = 3, yObjects = 3, zObjects = 3, i = 0, nObjectTypes = 2;
 	m_nObjects = 1;//((xObjects * 2) + 1) * ((yObjects * 2) + 1) * ((zObjects * 2) + 1);
@@ -1097,15 +1097,16 @@ void CAnimateShader::BuildObjects(ID3D11Device *pd3dDevice)
 	float fzPitch = 12.0f * 1.7f;
 	CGameObject *pRotatingObject = NULL;
 
+
+
+
 	pRotatingObject = new CGameObject();
 	pRotatingObject->SetMesh(pMeshIlluminatedTextured);
-	pRotatingObject->SetMaterial(ppMaterials[i % 3]);
+	pRotatingObject->SetMaterial(ppMaterials[0]);
 	pRotatingObject->SetTexture(p_Texture);
 	pRotatingObject->SetBump(pBump);
 	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
-	//pRotatingObject->SetRotationAxis(D3DXVECTOR3(0.0f, 1.0f, 0.0f));
-	//pRotatingObject->SetRotationSpeed(1.0f);// *(i % 10));
-	//pRotatingObject->Scale(1.0f);
+	
 	m_ppObjects[i++] = pRotatingObject;
 
 

@@ -5,7 +5,7 @@
 #include "Bone.h"
 #define RANDOM_COLOR D3DXCOLOR((rand() * 0xFFFFFF) / RAND_MAX)
 
-enum OBJECTTAG{ MAP, DOOR, CONDITIONER, FENCE, FENCEHOLE ,PIPE, REALDOOR, FALL };
+enum OBJECTTAG{ MAP, DOOR, CONDITIONER, FENCE, FENCEHOLE ,PIPE, REALDOOR, FALL, OBJ };
 
 class CVertex
 {
@@ -266,7 +266,7 @@ class CCharacterMesh : public CMeshIlluminated
 	//ID3D11Device *m_pd3dDevice;
 	int AnimaionCount;
 public:
-	CCharacterMesh(ID3D11Device *pd3dDevice, float fWidth = 2.0f, float fHeight = 2.0f, float fDepth = 2.0f);
+	CCharacterMesh(ID3D11Device *pd3dDevice,char* filename ,  float fWidth = 2.0f, float fHeight = 2.0f, float fDepth = 2.0f);
 	virtual ~CCharacterMesh();
 	virtual void SetRasterizerState(ID3D11Device *pd3dDevice);
 	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext);

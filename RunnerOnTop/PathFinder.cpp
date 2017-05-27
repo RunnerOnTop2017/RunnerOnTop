@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "PathFinder.h"
-
+#include "xnaCollision.h"
 
 path_node::path_node(int xp, int yp, int d, int p)
 {
@@ -160,11 +160,11 @@ node_pos_float NodeIndexToPosition(node_pos pos, float dm, D3DXVECTOR2 minMap, D
 	node_pos_float ret;
 
 
-	float distX = maxMap.x - minMap.x;
-	float distZ = maxMap.y - minMap.y;
-
-	float m_dx = (int)(distX / dm);
-	float m_dz = (int)(distZ / dm);
+	float distX = abs(maxMap.x - minMap.x);
+	float distZ = abs(maxMap.y - minMap.y);
+	std::cout << "DIST : " << distX<< ", " << distZ << std::endl;
+	float m_dx = (distX / dm);
+	float m_dz = (distZ / dm);
 
 
 	ret.x = (m_dx * pos.x) + (m_dx * 0.5f) - abs(minMap.x);
@@ -189,6 +189,59 @@ std::vector<node_pos> PathStringToNodeIndex(std::string path, node_pos pos)
 	}
 
 	return ret;
+}
+
+void CreateNodeMap(int map[map_size_n][map_size_m], D3DXVECTOR2 minMap, D3DXVECTOR2 maxMap, CDiffusedShader * pShader, int start_Obj, int cnt_Obj, bool dis)
+{
+
+	CGameObject **Obj = pShader->m_ppObjects;
+
+	for (int y = 0; y < map_size_m; ++y)
+	{
+		for (int x = 0; x < map_size_n; ++ x)
+		{
+			XNA::AxisAlignedBox aabb1;
+			XNA::AxisAlignedBox aabb2;
+
+			float distX = maxMap.x - minMap.x;
+			float distZ = maxMap.y - minMap.y;
+
+			float m_dx = (distX / map_size_n);
+			float m_dz = (distZ / map_size_m);
+
+			float centerx = (m_dx * x) + (m_dx * 0.5f) - abs(minMap.x);
+			float centery = (m_dz * y) + (m_dz * 0.5f) - abs(minMap.y);
+
+			float extentsx = m_dx / 2.0f;
+
+			aabb1.Center = { centerx,2000.0f, centery };
+			aabb1.Extents = { m_dx / 2.0f, 1500.0f, m_dz / 2.0f };
+
+			for (int i = start_Obj; i < cnt_Obj; ++i)
+			{
+				OBJECTTAG tag = ((CCubeMesh*)Obj[i]->m_pMesh)->m_tag;
+				CDiffuseNormalVertex *mVertices = ((CCubeMesh*)Obj[i]->m_pMesh)->pVertices;
+				D3DXVECTOR3 d3dxvMax = { mVertices[1].m_d3dxvPosition.x , mVertices[4].m_d3dxvPosition.y, mVertices[2].m_d3dxvPosition.z };
+				D3DXVECTOR3 d3dxvMin = { mVertices[0].m_d3dxvPosition.x , mVertices[0].m_d3dxvPosition.y,  mVertices[0].m_d3dxvPosition.z };
+				D3DXVECTOR3 center = (d3dxvMax + d3dxvMin) / 2.0f;
+				aabb2.Center = { center.x, center.y, center.z };
+				aabb2.Extents = { center.x - d3dxvMin.x , center.y - d3dxvMin.y, center.z - d3dxvMin.z };
+				if (tag == MAP)
+				{
+					if (dis == XNA::IntersectAxisAlignedBoxAxisAlignedBox(&aabb1, &aabb2))
+					{
+						map[x][y] = 1;
+					}
+					
+				}
+			
+			}
+				
+		}
+	}
+
+	
+
 }
 
 bool operator<(const path_node & a, const path_node & b)

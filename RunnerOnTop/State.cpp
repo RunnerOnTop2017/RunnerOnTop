@@ -20,7 +20,7 @@ CState::CState()
 
 	
 	m_prev_state = STATE_IDLE;
-	m_state = STATE_IDLE;
+	m_state = STATE_RUN;
 	m_next_state = STATE_NULL;
 	frame = 0;
 	frame2 = 0;
