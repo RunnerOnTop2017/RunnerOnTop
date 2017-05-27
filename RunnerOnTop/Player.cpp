@@ -479,6 +479,43 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 					NPCDirection = 3;
 				}
 			}
+			else if (path.at(0) == '2')
+			{
+				if (NPCDirection == 3)
+				{
+					Rotate(0.0f, 90.0f, 0.0f);
+					NPCDirection = 0;
+				}
+				else if (NPCDirection == 1)
+				{
+					Rotate(0.0f, -90.0f, 0.0f);
+					NPCDirection = 0;
+				}
+				else if (NPCDirection == 0)
+				{
+					Rotate(0.0f, 180.0f, 0.0f);
+					NPCDirection = 0;
+				}
+			}
+			else if (path.at(0) == '1')
+			{
+				if (NPCDirection == 0)
+				{
+					Rotate(0.0f, -90.0f, 0.0f);
+					NPCDirection = 3;
+				}
+				else if (NPCDirection == 3)
+				{
+					Rotate(0.0f, 180.0f, 0.0f);
+					NPCDirection = 3;
+				}
+				else if (NPCDirection == 2)
+				{
+					Rotate(0.0f, 90.0f, 0.0f);
+					NPCDirection = 3;
+				}
+			}
+			
 				
 		}
 		//Rotate(0.0f, degree, 0.0f);
