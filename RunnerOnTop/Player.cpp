@@ -347,6 +347,9 @@ void CPlayer::Render(ID3D11DeviceContext *pd3dDeviceContext)
 	{
 
 		m_pShader->m_ppObjects[0]->m_d3dxmtxWorld = m_d3dxmtxWorld;
+		D3DXMATRIX matrix;
+		D3DXMatrixTranslation(&matrix, 50.0f, 0.0f, 0.0f);
+		m_pShader->m_ppObjects[1]->m_d3dxmtxWorld = matrix*m_d3dxmtxWorld;
 
 		m_pShader->Render(pd3dDeviceContext);
 	}
