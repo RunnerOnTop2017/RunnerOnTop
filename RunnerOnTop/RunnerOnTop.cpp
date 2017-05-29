@@ -7,19 +7,22 @@
 
 
 #define MAX_LOADSTRING 100
-
+enum GAMESTATENUM {
+	LOBBY, INGAME
+};
 // 전역 변수:
 HINSTANCE hInst;								// 현재 인스턴스입니다.
 TCHAR szTitle[MAX_LOADSTRING];					// 제목 표시줄 텍스트입니다.
 TCHAR szWindowClass[MAX_LOADSTRING];			// 기본 창 클래스 이름입니다.
 CGameFramework gGameFramework;
 HINSTANCE ghInstance;
-
+GAMESTATENUM gameState;
 // 이 코드 모듈에 들어 있는 함수의 정방향 선언입니다.
 ATOM				MyRegisterClass(HINSTANCE hInstance);
 BOOL				InitInstance(HINSTANCE, int);
 LRESULT CALLBACK	WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK	About(HWND, UINT, WPARAM, LPARAM);
+void UIProcessMessage(HWND hWnd,UINT message, WPARAM wParam, LPARAM lParam);
 
 int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
 	_In_opt_ HINSTANCE hPrevInstance,
@@ -37,7 +40,7 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
 	LoadString(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
 	LoadString(hInstance, IDC_RUNNERONTOP, szWindowClass, MAX_LOADSTRING);
 	MyRegisterClass(hInstance);
-
+	gameState = LOBBY;
 	// 응용 프로그램 초기화를 수행합니다.
 	if (!InitInstance(hInstance, nCmdShow))
 	{
@@ -49,20 +52,36 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
 	// 기본 메시지 루프입니다.
 	while (1)
 	{
-		if (::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+		if (gameState == LOBBY)
 		{
-			if (msg.message == WM_QUIT) break;
-			if (!::TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
+			if (::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 			{
-				::TranslateMessage(&msg);
-				::DispatchMessage(&msg);
+				if (msg.message == WM_QUIT) break;
+				if (!::TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
+				{
+					::TranslateMessage(&msg);
+					::DispatchMessage(&msg);
+				}
 			}
 		}
-		else
-		{
-			gGameFramework.FrameAdvance();
-			InvalidateRect(msg.hwnd, NULL, false);
+		else if(gameState == INGAME)
+		{ 
+			if (::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+			{
+				if (msg.message == WM_QUIT) break;
+				if (!::TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
+				{
+					::TranslateMessage(&msg);
+					::DispatchMessage(&msg);
+				}
+			}
+			else
+			{
+				gGameFramework.FrameAdvance();
+				//InvalidateRect(msg.hwnd, NULL, false);
+			}
 		}
+	
 	}
 	gGameFramework.OnDestroy();
 
@@ -135,13 +154,26 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 //  WM_DESTROY	- 종료 메시지를 게시하고 반환합니다.
 //
 //
+
+static HBITMAP bmp_background;
+static HBITMAP bmp_menu;
+
+static BOOL start_mouse;
+static BOOL end_mouse;
+
+static RECT rt;
+
+int mx, my;
+
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	int wmId, wmEvent;
 	PAINTSTRUCT ps;
 	HDC hdc;
-	HDC memdc;
-	HBITMAP hbit, oldbit;
+
+	
+	HDC hMemDC, hOldMemDC;
+	HBITMAP hBitmap, hOldBitmap;
 	switch (message)
 	{
 	case WM_COMMAND:
@@ -152,6 +184,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		{
 		case IDM_FULLSCREEN:
 			SetWindowPos(hWnd, HWND_TOPMOST, 0, 0, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN), 0L);
+			InvalidateRect(hWnd, NULL, false);
 			break;
 		case IDM_EXIT:
 			DestroyWindow(hWnd);
@@ -160,9 +193,55 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			return DefWindowProc(hWnd, message, wParam, lParam);
 		}
 		break;
+	case WM_CREATE:
+		//SetWindowLongPtr()
+		//SetWindowPos(hWnd, HWND_TOPMOST, 0, 0, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN), 0L);
+
+		
+		bmp_background = (HBITMAP)LoadImage(NULL, L"Data\\UI\\background.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);// (HBITMAP)LoadBitmap(g_hInstance, MAKEINTRESOURCE(IDB_BITMAP2));
+		bmp_menu = (HBITMAP)LoadImage(NULL, L"Data\\UI\\menu.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+		//InvalidateRect(hWnd, NULL, false);
+
+		break;
 	case WM_PAINT:
 	{
 		hdc = BeginPaint(hWnd, &ps);
+
+		if (gameState == LOBBY)
+		{
+			GetClientRect(hWnd, &rt);
+
+			hMemDC = CreateCompatibleDC(hdc);
+			hBitmap = CreateCompatibleBitmap(hdc, 1280, 720);
+			hOldBitmap = (HBITMAP)SelectObject(hMemDC, hBitmap);
+
+			hOldMemDC = CreateCompatibleDC(hdc);
+
+			SelectObject(hOldMemDC, bmp_background);
+			StretchBlt(hMemDC, 0, 0, 1280, 720, hOldMemDC, 0, 0, 1024, 1024, SRCCOPY);
+
+			SelectObject(hOldMemDC, bmp_menu);
+
+			if (start_mouse)
+				StretchBlt(hMemDC, 900, 540, 130, 60, hOldMemDC, 230, 40, 170, 50, SRCCOPY);
+			else
+				StretchBlt(hMemDC, 900, 540, 130, 60, hOldMemDC, 30, 40, 170, 50, SRCCOPY);
+
+			if (end_mouse)
+				StretchBlt(hMemDC, 900, 600, 130, 60, hOldMemDC, 230, 285, 170, 50, SRCCOPY);
+			else
+				StretchBlt(hMemDC, 900, 600, 130, 60, hOldMemDC, 30, 285, 170, 50, SRCCOPY);
+
+			DeleteDC(hOldMemDC);
+
+			//BitBlt(hdc, 0, 0, rt.right, rt.bottom, hMemDC, 0, 0, SRCCOPY);
+			StretchBlt(hdc, 0, 0, rt.right, rt.bottom, hMemDC, 0, 0, 1280, 720, SRCCOPY);
+
+			SelectObject(hMemDC, hOldBitmap);
+			DeleteObject(hBitmap);
+
+			DeleteDC(hMemDC);
+		}
 		EndPaint(hWnd, &ps);
 	}
 		
@@ -178,7 +257,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	case WM_MOUSEMOVE:
 	case WM_KEYDOWN:
 	case WM_KEYUP:
-		gGameFramework.OnProcessingWindowMessage(hWnd, message, wParam, lParam);
+		if(gameState == LOBBY)
+			UIProcessMessage(hWnd, message, wParam, lParam);
+		else if(gameState == INGAME)
+			gGameFramework.OnProcessingWindowMessage(hWnd, message, wParam, lParam);
 		break;
 	default:
 		return DefWindowProc(hWnd, message, wParam, lParam);
@@ -204,4 +286,45 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 		break;
 	}
 	return (INT_PTR)FALSE;
+}
+
+void UIProcessMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	switch (message)
+	{
+	case WM_LBUTTONDOWN:
+		mx = LOWORD(lParam);
+		my = HIWORD(lParam);
+
+		if (end_mouse)
+			exit(0);
+		if (start_mouse)
+		{
+			SetWindowPos(hWnd, HWND_TOPMOST, 0, 0, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN), 0L);
+
+			gameState = INGAME;
+
+		}
+		InvalidateRect(hWnd, NULL, false);
+		break;
+	case WM_MOUSEMOVE:
+		mx = LOWORD(lParam);
+		my = HIWORD(lParam);
+		rt.right * (1030 / 1280);
+		rt.bottom * (540 / 720);
+		if ((rt.right * (900.0f / 1280.0f) < mx && mx < rt.right * (1030.0f / 1280.0f)) && (rt.bottom * (540.0f / 720.0f) < my && my < rt.bottom * (600.0f / 720.0f)))
+			start_mouse = true;
+		else
+			start_mouse = false;
+
+		if ((rt.right * (900.0f / 1280.0f) < mx && mx < rt.right * (1030.0f / 1280.0f)) && (rt.bottom * (600.0f / 720.0f) < my&&my < rt.bottom * (660.0f / 720.0f)))
+			end_mouse = true;
+		else
+			end_mouse = false;
+
+		InvalidateRect(hWnd, NULL, false);
+		break;
+
+	}
+
 }
