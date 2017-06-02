@@ -68,7 +68,9 @@ void CScene::BuildObjects(ID3D11Device *pd3dDevice)
 	//ÆÄÀÌÇÁ
 	m_ppShaders[3]->m_ppObjects[68]->ref = m_ppShaders[1]->m_ppObjects[1];
 
-
+	m_pCharacters = new CAnimateShader();
+	m_pCharacters->CreateShader(pd3dDevice);
+	m_pCharacters->BuildObjects(pd3dDevice);
 
 	BuildLights(pd3dDevice);
 }

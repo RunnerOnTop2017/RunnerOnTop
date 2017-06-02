@@ -318,11 +318,15 @@ void CGameFramework::OnDestroy()
 void CGameFramework::BuildObjects()
 {
 	m_pScene = new CScene();
-
+	if (m_pScene)
+	{
+		m_pScene->BuildObjects(m_pd3dDevice);
+		m_pScene->BuildLights(m_pd3dDevice);
+	}
 	m_nPlayers = 1;
 	m_ppPlayers = new CPlayer*[m_nPlayers];
 
-	CAirplanePlayer *pAirplanePlyer = new CAirplanePlayer(m_pd3dDevice);
+	CAirplanePlayer *pAirplanePlyer = new CAirplanePlayer(m_pd3dDevice, m_pScene->m_pCharacters);
 	//플레이어의 카메라를 스페이스-쉽 카메라로 변경한다.
 	pAirplanePlyer->ChangeCamera(m_pd3dDevice, THIRD_PERSON_CAMERA, m_GameTimer.GetTimeElapsed());
 	//pAirplanePlyer->Scale(0.1f);
@@ -340,7 +344,7 @@ void CGameFramework::BuildObjects()
 	CAnimationClip *pAnimationClip = new CAnimationClip();
 
 	pAnimationClip->LoadAnimation("idle");
-	pAnimationClip->LoadAnimation("run");
+	pAnimationClip->LoadAnimation("run2");
 	pAnimationClip->LoadAnimation("left");
 	pAnimationClip->LoadAnimation("right");
 	pAnimationClip->LoadAnimation("backward");
@@ -361,11 +365,7 @@ void CGameFramework::BuildObjects()
 	pAirplanePlyer->SetState(pState);
 	m_ppPlayers[0] = pAirplanePlyer;
 
-	if (m_pScene)
-	{
-		m_pScene->BuildObjects(m_pd3dDevice);
-		m_pScene->BuildLights(m_pd3dDevice);
-	}
+	
 
 }
 
@@ -395,7 +395,7 @@ void CGameFramework::ProcessInput()
 		/*키보드의 상태 정보를 반환한다. 화살표 키(‘→’, ‘←’, ‘↑’, ‘↓’)를 누르면 플레이어를 오른쪽/왼쪽(로컬 x-축), 앞/뒤(로컬 z-축)로 이동한다. ‘Page Up’과 ‘Page Down’ 키를 누르면 플레이어를 위/아래(로컬 y-축)로 이동한다.*/
 		if (GetKeyboardState(pKeyBuffer))
 		{
-			if (/*pKeyBuffer[VK_UP] & 0xF0 || pKeyBuffer[VkKeyScan('w')] & 0xF0 ||*/ m_ppPlayers[0]->m_pState->GetState() == STATE_RUN||m_ppPlayers[0]->m_pState->GetState() == STATE_SLIDE) dwDirection |= DIR_FORWARD;
+			if (/*pKeyBuffer[VK_UP] & 0xF0 || pKeyBuffer[VkKeyScan('w')] & 0xF0 ||*/ m_ppPlayers[0]->m_pState->GetState() == STATE_RUN|| m_ppPlayers[0]->m_pState->GetState() == STATE_RUNJUMP ||m_ppPlayers[0]->m_pState->GetState() == STATE_SLIDE) dwDirection |= DIR_FORWARD;
 			if (pKeyBuffer[VK_DOWN] & 0xF0 || pKeyBuffer[VkKeyScan('s')] & 0xF0) dwDirection |= DIR_BACKWARD;
 			if (pKeyBuffer[VK_LEFT] & 0xF0 || pKeyBuffer[VkKeyScan('a')] & 0xF0) dwDirection |= DIR_LEFT;
 			if (pKeyBuffer[VK_RIGHT] & 0xF0 || pKeyBuffer[VkKeyScan('d')] & 0xF0) dwDirection |= DIR_RIGHT;

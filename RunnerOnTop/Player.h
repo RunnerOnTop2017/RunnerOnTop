@@ -120,7 +120,7 @@ public:
 class CAirplanePlayer : public CPlayer
 {
 public:
-	CAirplanePlayer(ID3D11Device *pd3dDevice);
+	CAirplanePlayer(ID3D11Device *pd3dDevice, CAnimateShader* pShader);
 	~CAirplanePlayer();
 
 	virtual void ChangeCamera(ID3D11Device *pd3dDevice, DWORD nNewCameraMode, float fTimeElapsed);

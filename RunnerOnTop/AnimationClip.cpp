@@ -135,11 +135,23 @@ CAnimationClip::~CAnimationClip()
 bool CAnimationClip::LoadAnimation(char * name)
 {
 	//CAnimation *pAnimation = new CAnimation(name);
-	auto ret = DATA.insert({ name, nullptr });
-	if (ret.second)
+	if (strcmp(name, "run2") == 0)
 	{
-		ret.first->second = new CAnimation(name);
+		auto ret = DATA.insert({ "run", nullptr });
+		if (ret.second)
+		{
+			ret.first->second = new CAnimation(name);
+		}
 	}
+	else
+	{
+		auto ret = DATA.insert({ name, nullptr });
+		if (ret.second)
+		{
+			ret.first->second = new CAnimation(name);
+		}
+	}
+	
 	return true;
 }
 

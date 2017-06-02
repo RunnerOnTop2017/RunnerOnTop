@@ -791,18 +791,18 @@ void CPlayer::OnCameraUpdated(float fTimeElapsed)
 }
 
 
-CAirplanePlayer::CAirplanePlayer(ID3D11Device *pd3dDevice)
+CAirplanePlayer::CAirplanePlayer(ID3D11Device *pd3dDevice, CAnimateShader *pShader)
 {
 	//비행기 메쉬를 생성한다.
-	CMesh *pAirplaneMesh = new CCharacterMesh(pd3dDevice, "Police01");
+	//CMesh *pAirplaneMesh = new CCharacterMesh(pd3dDevice, "Police01");
 	CCubeMesh *Collision = new CCubeMesh(pd3dDevice, -15.0f, 15.0f, 0.0f, 75.0f, -15.0f, 15.0f);
-	SetMesh(pAirplaneMesh);
+	//SetMesh(pAirplaneMesh);
 	pCollision = Collision;
 	//플레이어(비행기) 메쉬를 렌더링할 때 사용할 쉐이더를 생성한다.
-	m_pShader = new CAnimateShader();
-	m_pShader->CreateShader(pd3dDevice);
+	m_pShader = pShader;// new CAnimateShader();
+	//m_pShader->CreateShader(pd3dDevice);
 	//m_pShader->CreateShaderVariables(pd3dDevice);
-	m_pShader->BuildObjects(pd3dDevice);
+	//m_pShader->BuildObjects(pd3dDevice);
 
 	//플레이어를 위한 쉐이더 변수를 생성한다.
 	CreateShaderVariables(pd3dDevice);
@@ -818,7 +818,7 @@ CAirplanePlayer::~CAirplanePlayer()
 void CAirplanePlayer::Render(ID3D11DeviceContext *pd3dDeviceContext)
 {
 	DWORD nCurrentCameraMode = (m_pCamera) ? m_pCamera->GetMode() : 0x00;
-	if ((nCurrentCameraMode == THIRD_PERSON_CAMERA) && m_pMesh)
+	if ((nCurrentCameraMode == THIRD_PERSON_CAMERA))
 	{
 		D3DXMATRIX mtxRotate;
 		/*3인칭 카메라일 때 플레이어 메쉬를 로컬 x-축을 중심으로 +90도 회전하고 렌더링한다. 왜냐하면 비행기 모델 메쉬는 <그림 18>과 같이 y-축 방향이 비행기의 앞쪽이 되도록 모델링이 되었고 이 메쉬를 카메라의 z-축 방향으로 향하도록 그릴 것이기 때문이다.*/
