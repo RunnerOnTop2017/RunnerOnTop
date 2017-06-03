@@ -162,7 +162,7 @@ node_pos_float NodeIndexToPosition(node_pos pos, float dm, D3DXVECTOR2 minMap, D
 
 	float distX = abs(maxMap.x - minMap.x);
 	float distZ = abs(maxMap.y - minMap.y);
-	std::cout << "DIST : " << distX<< ", " << distZ << std::endl;
+	
 	float m_dx = (distX / dm);
 	float m_dz = (distZ / dm);
 

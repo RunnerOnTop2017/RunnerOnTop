@@ -151,73 +151,88 @@ void CPlayer::Move(const D3DXVECTOR3& d3dxvShift, bool bUpdateVelocity)
 		//D3DXMatrixTranslation(&m_d3dxmtxWorld, d3dxvPosition.x, d3dxvPosition.y, d3dxvPosition.z);
 
 		//플레이어의 위치가 변경되었으므로 카메라의 위치도 d3dxvShift 벡터 만큼 이동한다.
-		m_pCamera->Move(d3dxvShift);
+		if(m_pCamera) m_pCamera->Move(d3dxvShift);
 	}
 }
 
 void CPlayer::Rotate(float x, float y, float z)
 {
 	D3DXMATRIX mtxRotate;
-	DWORD nCurrentCameraMode = m_pCamera->GetMode();
-
-	//1인칭 카메라 또는 3인칭 카메라의 경우 플레이어의 회전은 약간의 제약이 따른다.
-	if ((nCurrentCameraMode == FIRST_PERSON_CAMERA) || (nCurrentCameraMode == THIRD_PERSON_CAMERA))
+	if (m_pCamera)
 	{
-		/*로컬 x-축을 중심으로 회전하는 것은 고개를 앞뒤로 숙이는 동작에 해당한다. 그러므로 x-축을 중심으로 회전하는 각도는 -89.0~+89.0도 사이로 제한한다. x는 현재의 m_fPitch에서 실제 회전하는 각도이므로 x만큼 회전한 다음 Pitch가 +89도 보다 크거나 -89도 보다 작으면 m_fPitch가 +89도 또는 -89도가 되도록 회전각도(x)를 수정한다.*/
-		if (x != 0.0f)
-		{
-			m_fPitch += x;
-			if (m_fPitch > +89.0f) { x -= (m_fPitch - 89.0f); m_fPitch = +89.0f; }
-			if (m_fPitch < -89.0f) { x -= (m_fPitch + 89.0f); m_fPitch = -89.0f; }
-		}
-		//로컬 y-축을 중심으로 회전하는 것은 몸통을 돌리는 것이므로 회전 각도의 제한이 없다.
-		if (y != 0.0f)
-		{
-			m_fYaw += y;
-			if (m_fYaw > 360.0f) m_fYaw -= 360.0f;
-			if (m_fYaw < 0.0f) m_fYaw += 360.0f;
-		}
-		/*로컬 z-축을 중심으로 회전하는 것은 몸통을 좌우로 기울이는 것이므로 회전 각도는 -20.0~+20.0도 사이로 제한된다. z는 현재의 m_fRoll에서 실제 회전하는 각도이므로 z만큼 회전한 다음 m_fRoll이 +20도 보다 크거나 -20도보다 작으면 m_fRoll이 +20도 또는 -20도가 되도록 회전각도(z)를 수정한다.*/
-		if (z != 0.0f)
-		{
-			m_fRoll += z;
-			if (m_fRoll > +20.0f) { z -= (m_fRoll - 20.0f); m_fRoll = +20.0f; }
-			if (m_fRoll < -20.0f) { z -= (m_fRoll + 20.0f); m_fRoll = -20.0f; }
-		}
-		//카메라를 x, y, z 만큼 회전한다. 플레이어를 회전하면 카메라가 회전하게 된다.
-		m_pCamera->Rotate(x, y, z);
+		DWORD nCurrentCameraMode = m_pCamera->GetMode();
 
-		/*플레이어를 회전한다. 1인칭 카메라 또는 3인칭 카메라에서 플레이어의 회전은 로컬 y-축에서만 일어난다. 플레이어의 로컬 y-축(Up 벡터)을 기준으로 로컬 z-축(Look 벡터)와 로컬 x-축(Right 벡터)을 회전시킨다. 기본적으로 Up 벡터를 기준으로 회전하는 것은 플레이어가 똑바로 서있는 것을 가정한다는 의미이다.*/
+		//1인칭 카메라 또는 3인칭 카메라의 경우 플레이어의 회전은 약간의 제약이 따른다.
+		if ((nCurrentCameraMode == FIRST_PERSON_CAMERA) || (nCurrentCameraMode == THIRD_PERSON_CAMERA))
+		{
+			/*로컬 x-축을 중심으로 회전하는 것은 고개를 앞뒤로 숙이는 동작에 해당한다. 그러므로 x-축을 중심으로 회전하는 각도는 -89.0~+89.0도 사이로 제한한다. x는 현재의 m_fPitch에서 실제 회전하는 각도이므로 x만큼 회전한 다음 Pitch가 +89도 보다 크거나 -89도 보다 작으면 m_fPitch가 +89도 또는 -89도가 되도록 회전각도(x)를 수정한다.*/
+			if (x != 0.0f)
+			{
+				m_fPitch += x;
+				if (m_fPitch > +89.0f) { x -= (m_fPitch - 89.0f); m_fPitch = +89.0f; }
+				if (m_fPitch < -89.0f) { x -= (m_fPitch + 89.0f); m_fPitch = -89.0f; }
+			}
+			//로컬 y-축을 중심으로 회전하는 것은 몸통을 돌리는 것이므로 회전 각도의 제한이 없다.
+			if (y != 0.0f)
+			{
+				m_fYaw += y;
+				if (m_fYaw > 360.0f) m_fYaw -= 360.0f;
+				if (m_fYaw < 0.0f) m_fYaw += 360.0f;
+			}
+			/*로컬 z-축을 중심으로 회전하는 것은 몸통을 좌우로 기울이는 것이므로 회전 각도는 -20.0~+20.0도 사이로 제한된다. z는 현재의 m_fRoll에서 실제 회전하는 각도이므로 z만큼 회전한 다음 m_fRoll이 +20도 보다 크거나 -20도보다 작으면 m_fRoll이 +20도 또는 -20도가 되도록 회전각도(z)를 수정한다.*/
+			if (z != 0.0f)
+			{
+				m_fRoll += z;
+				if (m_fRoll > +20.0f) { z -= (m_fRoll - 20.0f); m_fRoll = +20.0f; }
+				if (m_fRoll < -20.0f) { z -= (m_fRoll + 20.0f); m_fRoll = -20.0f; }
+			}
+			//카메라를 x, y, z 만큼 회전한다. 플레이어를 회전하면 카메라가 회전하게 된다.
+			m_pCamera->Rotate(x, y, z);
+
+			/*플레이어를 회전한다. 1인칭 카메라 또는 3인칭 카메라에서 플레이어의 회전은 로컬 y-축에서만 일어난다. 플레이어의 로컬 y-축(Up 벡터)을 기준으로 로컬 z-축(Look 벡터)와 로컬 x-축(Right 벡터)을 회전시킨다. 기본적으로 Up 벡터를 기준으로 회전하는 것은 플레이어가 똑바로 서있는 것을 가정한다는 의미이다.*/
+			if (y != 0.0f)
+			{
+				D3DXMatrixRotationAxis(&mtxRotate, &m_d3dxvUp, (float)D3DXToRadian(y));
+				D3DXVec3TransformNormal(&m_d3dxvLook, &m_d3dxvLook, &mtxRotate);
+				D3DXVec3TransformNormal(&m_d3dxvRight, &m_d3dxvRight, &mtxRotate);
+			}
+		}
+		else if (nCurrentCameraMode == SPACESHIP_CAMERA)
+		{
+			/*스페이스-쉽 카메라에서 플레이어의 회전은 회전 각도의 제한이 없다. 그리고 모든 축을 중심으로 회전을 할 수 있다.*/
+			m_pCamera->Rotate(x, y, z);
+			if (x != 0.0f)
+			{
+				D3DXMatrixRotationAxis(&mtxRotate, &m_d3dxvRight, (float)D3DXToRadian(x));
+				D3DXVec3TransformNormal(&m_d3dxvLook, &m_d3dxvLook, &mtxRotate);
+				D3DXVec3TransformNormal(&m_d3dxvUp, &m_d3dxvUp, &mtxRotate);
+			}
+			if (y != 0.0f)
+			{
+				D3DXMatrixRotationAxis(&mtxRotate, &m_d3dxvUp, (float)D3DXToRadian(y));
+				D3DXVec3TransformNormal(&m_d3dxvLook, &m_d3dxvLook, &mtxRotate);
+				D3DXVec3TransformNormal(&m_d3dxvRight, &m_d3dxvRight, &mtxRotate);
+			}
+			if (z != 0.0f)
+			{
+				D3DXMatrixRotationAxis(&mtxRotate, &m_d3dxvLook, (float)D3DXToRadian(z));
+				D3DXVec3TransformNormal(&m_d3dxvUp, &m_d3dxvUp, &mtxRotate);
+				D3DXVec3TransformNormal(&m_d3dxvRight, &m_d3dxvRight, &mtxRotate);
+			}
+		}
+	}
+	else
+	{
+
 		if (y != 0.0f)
 		{
 			D3DXMatrixRotationAxis(&mtxRotate, &m_d3dxvUp, (float)D3DXToRadian(y));
 			D3DXVec3TransformNormal(&m_d3dxvLook, &m_d3dxvLook, &mtxRotate);
 			D3DXVec3TransformNormal(&m_d3dxvRight, &m_d3dxvRight, &mtxRotate);
 		}
+
 	}
-	else if (nCurrentCameraMode == SPACESHIP_CAMERA)
-	{
-		/*스페이스-쉽 카메라에서 플레이어의 회전은 회전 각도의 제한이 없다. 그리고 모든 축을 중심으로 회전을 할 수 있다.*/
-		m_pCamera->Rotate(x, y, z);
-		if (x != 0.0f)
-		{
-			D3DXMatrixRotationAxis(&mtxRotate, &m_d3dxvRight, (float)D3DXToRadian(x));
-			D3DXVec3TransformNormal(&m_d3dxvLook, &m_d3dxvLook, &mtxRotate);
-			D3DXVec3TransformNormal(&m_d3dxvUp, &m_d3dxvUp, &mtxRotate);
-		}
-		if (y != 0.0f)
-		{
-			D3DXMatrixRotationAxis(&mtxRotate, &m_d3dxvUp, (float)D3DXToRadian(y));
-			D3DXVec3TransformNormal(&m_d3dxvLook, &m_d3dxvLook, &mtxRotate);
-			D3DXVec3TransformNormal(&m_d3dxvRight, &m_d3dxvRight, &mtxRotate);
-		}
-		if (z != 0.0f)
-		{
-			D3DXMatrixRotationAxis(&mtxRotate, &m_d3dxvLook, (float)D3DXToRadian(z));
-			D3DXVec3TransformNormal(&m_d3dxvUp, &m_d3dxvUp, &mtxRotate);
-			D3DXVec3TransformNormal(&m_d3dxvRight, &m_d3dxvRight, &mtxRotate);
-		}
-	}
+	
 
 	/*회전으로 인해 플레이어의 로컬 x-축, y-축, z-축이 서로 직교하지 않을 수 있으므로 z-축(LookAt 벡터)을 기준으로 하여 서로 직교하고 단위벡터가 되도록 한다.*/
 	D3DXVec3Normalize(&m_d3dxvLook, &m_d3dxvLook);
@@ -244,31 +259,45 @@ void CPlayer::Update(float fTimeElapsed)
 	fLength = sqrtf(m_d3dxvVelocity.y * m_d3dxvVelocity.y);
 	if (fLength > m_fMaxVelocityY) m_d3dxvVelocity.y *= (m_fMaxVelocityY / fLength);
 
-	DWORD nCurrentCameraMode = m_pCamera->GetMode();
-	
-	
-	if(nCurrentCameraMode != SPACESHIP_CAMERA)
-	/*플레이어의 위치가 변경될 때 추가로 수행할 작업을 수행한다. 예를 들어, 플레이어의 위치가 변경되었지만 플레이어 객체에는 지형(Terrain)의 정보가 없다. 플레이어의 새로운 위치가 유효한 위치가 아닐 수도 있고 또는 플레이어의 충돌 검사 등을 수행할 필요가 있다. 이러한 상황에서 플레이어의 위치를 유효한 위치로 다시 변경할 수 있다.*/
-	if (m_pPlayerUpdatedContext) OnPlayerUpdated(fTimeElapsed);
-
-	/*플레이어를 속도 벡터 만큼 이동한다. 속도 벡터에 fTimeElapsed를 곱하는 것은 속도를 시간에 비례하도록 적용한다는 의미이다.*/
-	Move(m_d3dxvVelocity * fTimeElapsed, false);
-
-
-	
-	//플레이어의 위치가 변경되었으므로 카메라의 상태를 갱신한다.
-	if (nCurrentCameraMode == THIRD_PERSON_CAMERA) m_pCamera->Update(fTimeElapsed);
-	//카메라의 위치가 변경될 때 추가로 수행할 작업을 수행한다. 
-	if (m_pCameraUpdatedContext) OnCameraUpdated(fTimeElapsed);
-	//카메라가 3인칭 카메라이면 카메라가 변경된 플레이어 위치를 바라보도록 한다.
-	if (nCurrentCameraMode == THIRD_PERSON_CAMERA)
+	if (m_pCamera)
 	{
-		D3DXVECTOR3 look = m_d3dxvPosition;
-		look.y += 90.0f;
-		m_pCamera->SetLookAt(look);//m_d3dxvPosition);
+		DWORD nCurrentCameraMode = m_pCamera->GetMode();
+
+
+
+		if (nCurrentCameraMode != SPACESHIP_CAMERA)
+			/*플레이어의 위치가 변경될 때 추가로 수행할 작업을 수행한다. 예를 들어, 플레이어의 위치가 변경되었지만 플레이어 객체에는 지형(Terrain)의 정보가 없다. 플레이어의 새로운 위치가 유효한 위치가 아닐 수도 있고 또는 플레이어의 충돌 검사 등을 수행할 필요가 있다. 이러한 상황에서 플레이어의 위치를 유효한 위치로 다시 변경할 수 있다.*/
+			if (m_pPlayerUpdatedContext) OnPlayerUpdated(fTimeElapsed);
+
+		/*플레이어를 속도 벡터 만큼 이동한다. 속도 벡터에 fTimeElapsed를 곱하는 것은 속도를 시간에 비례하도록 적용한다는 의미이다.*/
+		Move(m_d3dxvVelocity * fTimeElapsed, false);
+
+
+
+		//플레이어의 위치가 변경되었으므로 카메라의 상태를 갱신한다.
+		if (nCurrentCameraMode == THIRD_PERSON_CAMERA) m_pCamera->Update(fTimeElapsed);
+		//카메라의 위치가 변경될 때 추가로 수행할 작업을 수행한다. 
+
+
+		if (m_pCameraUpdatedContext) OnCameraUpdated(fTimeElapsed);
+		//카메라가 3인칭 카메라이면 카메라가 변경된 플레이어 위치를 바라보도록 한다.
+		if (nCurrentCameraMode == THIRD_PERSON_CAMERA)
+		{
+			D3DXVECTOR3 look = m_d3dxvPosition;
+			look.y += 90.0f;
+			m_pCamera->SetLookAt(look);//m_d3dxvPosition);
+		}
+		//카메라의 카메라 변환 행렬을 다시 생성한다.
+		if (m_pCamera) m_pCamera->RegenerateViewMatrix();
 	}
-	//카메라의 카메라 변환 행렬을 다시 생성한다.
-	m_pCamera->RegenerateViewMatrix();
+	else
+	{
+		if (m_pPlayerUpdatedContext) OnPlayerUpdated(fTimeElapsed);
+
+		
+		Move(m_d3dxvVelocity * fTimeElapsed, false);
+
+	}
 
 	/*플레이어의 속도 벡터가 마찰력 때문에 감속이 되어야 한다면 감속 벡터를 생성한다. 속도 벡터의 반대 방향 벡터를 구하고 단위 벡터로 만든다. 마찰 계수를 시간에 비례하도록 하여 마찰력을 구한다. 단위 벡터에 마찰력을 곱하여 감속 벡터를 구한다. 속도 벡터에 감속 벡터를 더하여 속도 벡터를 줄인다. 마찰력이 속력보다 크면 속력은 0이 될 것이다.*/
 	D3DXVECTOR3 d3dxvDeceleration = -m_d3dxvVelocity;
@@ -345,7 +374,6 @@ void CPlayer::Render(ID3D11DeviceContext *pd3dDeviceContext)
 {
 	if (m_pShader)
 	{
-
 		m_pShader->m_ppObjects[0]->m_d3dxmtxWorld = m_d3dxmtxWorld;
 		D3DXMATRIX matrix;
 		D3DXMatrixTranslation(&matrix, 50.0f, 0.0f, 0.0f);
@@ -394,139 +422,139 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 	D3DXVECTOR3 d3dxv_cMin = { minX, minY, minZ };
 	D3DXVECTOR3 d3dxv_center = (d3dxv_cMax + d3dxv_cMin) / 2.0f;
 
-	if (currentPos.x == -1 && currentPos.y == -1)
-	{
-		CreateNodeMap(map, minMap, maxMap, (CDiffusedShader*)m_pPlayerUpdatedContext, 2, FLOOR_CNT, true);
-		for (int i = 0; i < map_size_m; ++i)
-		{
-			for (int j = 0; j < map_size_n; ++j)
-			{
-				if (map[j][i] == 1) map[j][i] = 0;
-				else map[j][i] = 1;
-			}
-		}
+	//if (currentPos.x == -1 && currentPos.y == -1)
+	//{
+	//	CreateNodeMap(map, minMap, maxMap, (CDiffusedShader*)m_pPlayerUpdatedContext, 2, FLOOR_CNT, true);
+	//	for (int i = 0; i < map_size_m; ++i)
+	//	{
+	//		for (int j = 0; j < map_size_n; ++j)
+	//		{
+	//			if (map[j][i] == 1) map[j][i] = 0;
+	//			else map[j][i] = 1;
+	//		}
+	//	}
 
-		map[13][7] = 1;
-		map[11][3] = 1;
-		map[9][13] = 1;
-		map[12][13] = 1;
-		map[10][13] = 1;
-		map[12][14] = 1;
-		map[12][13] = 0;
-		map[11][12] = 1;
-		map[12][12] = 1;
-		//map[14][7] = 1;
-		//map[13][8] = 1;
-		//map[14][8] = 1;
-		map[14][6] = 1;
- 		NPCDirection = 3;
-	}
+	//	map[13][7] = 1;
+	//	map[11][3] = 1;
+	//	map[9][13] = 1;
+	//	map[12][13] = 1;
+	//	map[10][13] = 1;
+	//	map[12][14] = 1;
+	//	map[12][13] = 0;
+	//	map[11][12] = 1;
+	//	map[12][12] = 1;
+	//	//map[14][7] = 1;
+	//	//map[13][8] = 1;
+	//	//map[14][8] = 1;
+	//	map[14][6] = 1;
+ //		NPCDirection = 3;
+	//}
 
 
 
-	node_pos pos = PositionToNodeIndex(d3dxv_center.x, d3dxv_center.z, 20, minMap, maxMap);
-	static node_pos_float tmp;
-	static float degree;
-	static std::string path;
-	if (pos.x != currentPos.x || pos.y != currentPos.y)
-	{
-		path = pathFind(pos.x, pos.y, 15, 3, map);
-		route.clear();
-		route = PathStringToNodeIndex(path, pos);
-		D3DXVECTOR3 look = GetLookVector();
-		
-		XMVECTOR v1 = { look.x, look.z };
-		if(route.size()!= 0 )
-			tmp = NodeIndexToPosition(route[0], 20, minMap, maxMap);
-		XMVECTOR v2 = {tmp.x -  d3dxv_center.x ,tmp.y - d3dxv_center.z};
-		XMVECTOR angle = XMVector2AngleBetweenVectors(v2, v1);
-		
+	//node_pos pos = PositionToNodeIndex(d3dxv_center.x, d3dxv_center.z, 20, minMap, maxMap);
+	//static node_pos_float tmp;
+	//static float degree;
+	//static std::string path;
+	//if (pos.x != currentPos.x || pos.y != currentPos.y)
+	//{
+	//	path = pathFind(pos.x, pos.y, 15, 3, map);
+	//	route.clear();
+	//	route = PathStringToNodeIndex(path, pos);
+	//	D3DXVECTOR3 look = GetLookVector();
+	//	
+	//	XMVECTOR v1 = { look.x, look.z };
+	//	if(route.size()!= 0 )
+	//		tmp = NodeIndexToPosition(route[0], 20, minMap, maxMap);
+	//	XMVECTOR v2 = {tmp.x -  d3dxv_center.x ,tmp.y - d3dxv_center.z};
+	//	XMVECTOR angle = XMVector2AngleBetweenVectors(v2, v1);
+	//	
 
-		float rad = XMVectorGetX(angle);
-		degree = XMConvertToDegrees(rad);
-		if (path.length() !=0)
-		{
-			if (path.at(0) == '0')
-			{
-				if (NPCDirection == 3)
-				{
-					Rotate(0.0f, -90.0f, 0.0f);
-					NPCDirection = 0;
-				}
-				else if (NPCDirection == 1)
-				{
-					Rotate(0.0f, 90.0f, 0.0f);
-					NPCDirection = 0;
-				}
-				else if (NPCDirection == 2)
-				{
-					Rotate(0.0f, 180.0f, 0.0f);
-					NPCDirection = 0;
-				}
-			}
-			else if (path.at(0) == '3')
-			{
-				if (NPCDirection == 0)
-				{
-					Rotate(0.0f, 90.0f, 0.0f);
-					NPCDirection = 3;
-				}
-				else if (NPCDirection == 1)
-				{
-					Rotate(0.0f, 180.0f, 0.0f);
-					NPCDirection = 3;
-				}
-				else if (NPCDirection == 2)
-				{
-					Rotate(0.0f, -90.0f, 0.0f);
-					NPCDirection = 3;
-				}
-			}
-			else if (path.at(0) == '2')
-			{
-				if (NPCDirection == 3)
-				{
-					Rotate(0.0f, 90.0f, 0.0f);
-					NPCDirection = 0;
-				}
-				else if (NPCDirection == 1)
-				{
-					Rotate(0.0f, -90.0f, 0.0f);
-					NPCDirection = 0;
-				}
-				else if (NPCDirection == 0)
-				{
-					Rotate(0.0f, 180.0f, 0.0f);
-					NPCDirection = 0;
-				}
-			}
-			else if (path.at(0) == '1')
-			{
-				if (NPCDirection == 0)
-				{
-					Rotate(0.0f, -90.0f, 0.0f);
-					NPCDirection = 3;
-				}
-				else if (NPCDirection == 3)
-				{
-					Rotate(0.0f, 180.0f, 0.0f);
-					NPCDirection = 3;
-				}
-				else if (NPCDirection == 2)
-				{
-					Rotate(0.0f, 90.0f, 0.0f);
-					NPCDirection = 3;
-				}
-			}
-			
-				
-		}
-		//Rotate(0.0f, degree, 0.0f);
-		//Rotate(D3DXVECTOR3(0.0f,1.0f,0.0f), degree);
-		//printf("NodeIndex : %d, %d\n", pos.x, pos.y);
-		currentPos.x = pos.x;
-		currentPos.y = pos.y;
-	}
+	//	float rad = XMVectorGetX(angle);
+	//	degree = XMConvertToDegrees(rad);
+	//	if (path.length() !=0)
+	//	{
+	//		if (path.at(0) == '0')
+	//		{
+	//			if (NPCDirection == 3)
+	//			{
+	//				Rotate(0.0f, -90.0f, 0.0f);
+	//				NPCDirection = 0;
+	//			}
+	//			else if (NPCDirection == 1)
+	//			{
+	//				Rotate(0.0f, 90.0f, 0.0f);
+	//				NPCDirection = 0;
+	//			}
+	//			else if (NPCDirection == 2)
+	//			{
+	//				Rotate(0.0f, 180.0f, 0.0f);
+	//				NPCDirection = 0;
+	//			}
+	//		}
+	//		else if (path.at(0) == '3')
+	//		{
+	//			if (NPCDirection == 0)
+	//			{
+	//				Rotate(0.0f, 90.0f, 0.0f);
+	//				NPCDirection = 3;
+	//			}
+	//			else if (NPCDirection == 1)
+	//			{
+	//				Rotate(0.0f, 180.0f, 0.0f);
+	//				NPCDirection = 3;
+	//			}
+	//			else if (NPCDirection == 2)
+	//			{
+	//				Rotate(0.0f, -90.0f, 0.0f);
+	//				NPCDirection = 3;
+	//			}
+	//		}
+	//		else if (path.at(0) == '2')
+	//		{
+	//			if (NPCDirection == 3)
+	//			{
+	//				Rotate(0.0f, 90.0f, 0.0f);
+	//				NPCDirection = 0;
+	//			}
+	//			else if (NPCDirection == 1)
+	//			{
+	//				Rotate(0.0f, -90.0f, 0.0f);
+	//				NPCDirection = 0;
+	//			}
+	//			else if (NPCDirection == 0)
+	//			{
+	//				Rotate(0.0f, 180.0f, 0.0f);
+	//				NPCDirection = 0;
+	//			}
+	//		}
+	//		else if (path.at(0) == '1')
+	//		{
+	//			if (NPCDirection == 0)
+	//			{
+	//				Rotate(0.0f, -90.0f, 0.0f);
+	//				NPCDirection = 3;
+	//			}
+	//			else if (NPCDirection == 3)
+	//			{
+	//				Rotate(0.0f, 180.0f, 0.0f);
+	//				NPCDirection = 3;
+	//			}
+	//			else if (NPCDirection == 2)
+	//			{
+	//				Rotate(0.0f, 90.0f, 0.0f);
+	//				NPCDirection = 3;
+	//			}
+	//		}
+	//		
+	//			
+	//	}
+	//	//Rotate(0.0f, degree, 0.0f);
+	//	//Rotate(D3DXVECTOR3(0.0f,1.0f,0.0f), degree);
+	//	//printf("NodeIndex : %d, %d\n", pos.x, pos.y);
+	//	currentPos.x = pos.x;
+	//	currentPos.y = pos.y;
+	//}
 
 	
 #ifdef _DEBUG
@@ -820,12 +848,15 @@ void CAirplanePlayer::Render(ID3D11DeviceContext *pd3dDeviceContext)
 	DWORD nCurrentCameraMode = (m_pCamera) ? m_pCamera->GetMode() : 0x00;
 	if ((nCurrentCameraMode == THIRD_PERSON_CAMERA))
 	{
-		D3DXMATRIX mtxRotate;
-		/*3인칭 카메라일 때 플레이어 메쉬를 로컬 x-축을 중심으로 +90도 회전하고 렌더링한다. 왜냐하면 비행기 모델 메쉬는 <그림 18>과 같이 y-축 방향이 비행기의 앞쪽이 되도록 모델링이 되었고 이 메쉬를 카메라의 z-축 방향으로 향하도록 그릴 것이기 때문이다.*/
-		//D3DXMatrixRotationYawPitchRoll(&mtxRotate, 0.0f, (float)D3DXToRadian(90.0f), 0.0f);
-		m_d3dxmtxWorld = /*mtxRotate * */m_d3dxmtxWorld;
+		if (m_pShader)
+		{
+			m_pShader->m_ppObjects[0]->m_d3dxmtxWorld = m_d3dxmtxWorld;
+			//D3DXMATRIX matrix;
+			//D3DXMatrixTranslation(&matrix, 50.0f, 0.0f, 0.0f);
+			//m_pShader->m_ppObjects[1]->m_d3dxmtxWorld = matrix*m_d3dxmtxWorld;
 
-		CPlayer::Render(pd3dDeviceContext);
+			m_pShader->Render(pd3dDeviceContext, NULL, 0);
+		}
 	}
 }
 
@@ -880,4 +911,484 @@ void CAirplanePlayer::ChangeCamera(ID3D11Device *pd3dDevice, DWORD nNewCameraMod
 	}
 	//카메라 정보를 시간에 따라 갱신한다.
 	Update(fTimeElapsed);
+}
+
+
+
+CNPC::CNPC(ID3D11Device *pd3dDevice, CAnimateShader *pShader)
+{
+	m_pCamera = NULL;
+	//비행기 메쉬를 생성한다.
+	//CMesh *pAirplaneMesh = new CCharacterMesh(pd3dDevice, "Police01");
+	CCubeMesh *Collision = new CCubeMesh(pd3dDevice, -15.0f, 15.0f, 0.0f, 75.0f, -15.0f, 15.0f);
+	//SetMesh(pAirplaneMesh);
+	pCollision = Collision;
+	//플레이어(비행기) 메쉬를 렌더링할 때 사용할 쉐이더를 생성한다.
+	m_pShader = pShader;
+
+						//플레이어를 위한 쉐이더 변수를 생성한다.
+	CreateShaderVariables(pd3dDevice);
+
+	m_pShader->m_ppObjects[1]->m_pState = m_pState;
+}
+
+CNPC::~CNPC()
+{
+	if (m_pShader) delete m_pShader;
+}
+
+void CNPC::Render(ID3D11DeviceContext *pd3dDeviceContext)
+{
+	
+	if (m_pShader)
+	{
+		m_pShader->m_ppObjects[1]->m_d3dxmtxWorld = m_d3dxmtxWorld;
+		std::cout << GetPosition().x << std::endl;
+		//D3DXMATRIX matrix;
+		//D3DXMatrixTranslation(&matrix, 50.0f, 0.0f, 0.0f);
+		//m_pShader->m_ppObjects[1]->m_d3dxmtxWorld = matrix*m_d3dxmtxWorld;
+
+		m_pShader->Render(pd3dDeviceContext, NULL, 1);
+	}
+}
+
+void CNPC::SetState(CState * pState)
+{
+	m_pState = pState;
+
+	m_pShader->m_ppObjects[1]->m_pState = pState;
+}
+
+void CNPC::ChangeCamera(ID3D11Device *pd3dDevice, DWORD nNewCameraMode, float fTimeElapsed)
+{
+	
+}
+bool CNPC::OnPlayerUpdated(float fTimeElapsed)
+{
+	std::cout << "Called" << m_d3dxvVelocity.y <<std::endl;
+	// 이동 거리
+	D3DXVECTOR3 dxvShift = m_d3dxvVelocity *fTimeElapsed;
+
+	//캐릭터 xyz min,max 구하기;
+	CDiffuseNormalVertex * cVertex = pCollision->pVertices;
+	D3DXVECTOR4 cPosition[8];
+	D3DXVECTOR4 m_Pos;
+	D3DXVECTOR3 d3dxv_cPosition = GetPosition();
+
+	D3DXVec3Transform(&m_Pos, &d3dxv_cPosition, &m_d3dxmtxWorld);
+	d3dxv_cPosition = { m_Pos.x, m_Pos.y, m_Pos.z };
+
+	for (int i = 0; i < 8; ++i)
+	{
+		D3DXVec3Transform(&cPosition[i], &cVertex[i].m_d3dxvPosition, &m_d3dxmtxWorld);
+	}
+
+
+	float minX = cPosition[0].x, minY = cPosition[0].y, minZ = cPosition[0].z;
+	float maxX = cPosition[0].x, maxY = cPosition[0].y, maxZ = cPosition[0].z;
+
+	for (int i = 1; i < 8; ++i)
+	{
+		if (cPosition[i].x > maxX) maxX = cPosition[i].x;
+		if (cPosition[i].x < minX) minX = cPosition[i].x;
+		if (cPosition[i].y > maxY) maxY = cPosition[i].y;
+		if (cPosition[i].y < minY) minY = cPosition[i].y;
+		if (cPosition[i].z > maxZ) maxZ = cPosition[i].z;
+		if (cPosition[i].z < minZ) minZ = cPosition[i].z;
+	}
+
+	D3DXVECTOR3 d3dxv_cMax = { maxX, maxY, maxZ };
+	D3DXVECTOR3 d3dxv_cMin = { minX, minY, minZ };
+	D3DXVECTOR3 d3dxv_center = (d3dxv_cMax + d3dxv_cMin) / 2.0f;
+
+	if (currentPos.x == -1 && currentPos.y == -1)
+	{
+		CreateNodeMap(map, minMap, maxMap, (CDiffusedShader*)m_pPlayerUpdatedContext, 2, FLOOR_CNT, true);
+		for (int i = 0; i < map_size_m; ++i)
+		{
+			for (int j = 0; j < map_size_n; ++j)
+			{
+				if (map[j][i] == 1) map[j][i] = 0;
+				else map[j][i] = 1;
+			}
+		}
+
+		map[13][7] = 1;
+		map[11][3] = 1;
+		map[9][13] = 1;
+		map[12][13] = 1;
+		map[10][13] = 1;
+		map[12][14] = 1;
+		map[12][13] = 0;
+		map[11][12] = 1;
+		map[12][12] = 1;
+		//map[14][7] = 1;
+		//map[13][8] = 1;
+		//map[14][8] = 1;
+		map[14][6] = 1;
+		NPCDirection = 3;
+	}
+
+
+
+	node_pos pos = PositionToNodeIndex(d3dxv_center.x, d3dxv_center.z, 20, minMap, maxMap);
+	static node_pos_float tmp;
+	static float degree;
+	static std::string path;
+	if (pos.x != currentPos.x || pos.y != currentPos.y)
+	{
+		path = pathFind(pos.x, pos.y, 15, 3, map);
+		route.clear();
+		route = PathStringToNodeIndex(path, pos);
+		D3DXVECTOR3 look = GetLookVector();
+
+		XMVECTOR v1 = { look.x, look.z };
+		if (route.size() != 0)
+			tmp = NodeIndexToPosition(route[0], 20, minMap, maxMap);
+		XMVECTOR v2 = { tmp.x - d3dxv_center.x ,tmp.y - d3dxv_center.z };
+		XMVECTOR angle = XMVector2AngleBetweenVectors(v2, v1);
+
+
+		float rad = XMVectorGetX(angle);
+		degree = XMConvertToDegrees(rad);
+		if (path.length() != 0)
+		{
+			if (path.at(0) == '0')
+			{
+				if (NPCDirection == 3)
+				{
+					Rotate(0.0f, -90.0f, 0.0f);
+					NPCDirection = 0;
+				}
+				else if (NPCDirection == 1)
+				{
+					Rotate(0.0f, 90.0f, 0.0f);
+					NPCDirection = 0;
+				}
+				else if (NPCDirection == 2)
+				{
+					Rotate(0.0f, 180.0f, 0.0f);
+					NPCDirection = 0;
+				}
+			}
+			else if (path.at(0) == '3')
+			{
+				if (NPCDirection == 0)
+				{
+					Rotate(0.0f, 90.0f, 0.0f);
+					NPCDirection = 3;
+				}
+				else if (NPCDirection == 1)
+				{
+					Rotate(0.0f, 180.0f, 0.0f);
+					NPCDirection = 3;
+				}
+				else if (NPCDirection == 2)
+				{
+					Rotate(0.0f, -90.0f, 0.0f);
+					NPCDirection = 3;
+				}
+			}
+			else if (path.at(0) == '2')
+			{
+				if (NPCDirection == 3)
+				{
+					Rotate(0.0f, 90.0f, 0.0f);
+					NPCDirection = 0;
+				}
+				else if (NPCDirection == 1)
+				{
+					Rotate(0.0f, -90.0f, 0.0f);
+					NPCDirection = 0;
+				}
+				else if (NPCDirection == 0)
+				{
+					Rotate(0.0f, 180.0f, 0.0f);
+					NPCDirection = 0;
+				}
+			}
+			else if (path.at(0) == '1')
+			{
+				if (NPCDirection == 0)
+				{
+					Rotate(0.0f, -90.0f, 0.0f);
+					NPCDirection = 3;
+				}
+				else if (NPCDirection == 3)
+				{
+					Rotate(0.0f, 180.0f, 0.0f);
+					NPCDirection = 3;
+				}
+				else if (NPCDirection == 2)
+				{
+					Rotate(0.0f, 90.0f, 0.0f);
+					NPCDirection = 3;
+				}
+			}
+
+
+		}
+		//Rotate(0.0f, degree, 0.0f);
+		//Rotate(D3DXVECTOR3(0.0f,1.0f,0.0f), degree);
+		//printf("NodeIndex : %d, %d\n", pos.x, pos.y);
+		currentPos.x = pos.x;
+		currentPos.y = pos.y;
+	}
+
+
+#ifdef _DEBUG
+	system("cls");
+	//printf("MAX[ %f | %f | %f ]\n", maxX, maxY, maxZ);
+	//printf("MIN[ %f | %f | %f ]\n", minX, minY, minZ);
+	bool b = false;
+	for (int y = 0; y < map_size_m; ++y)
+	{
+		for (int x = 0; x < map_size_n; ++x)
+		{
+			b = false;
+			for (int i = 0; i < route.size(); ++i)
+			{
+				if (route[i].x == x && route[i].y == y)
+				{
+					b = true;
+
+					break;
+				}
+			}
+			if (x == pos.x && y == pos.y) std::cout << "⊙";
+			else if (b) 	std::cout << "◎";
+			else if (map[x][y] == 0) std::cout << "○";
+			else if (map[x][y] == 1) std::cout << "●";
+
+
+		}
+		std::cout << std::endl;
+	}
+
+	printf("Position : %f, %f, %f\n", d3dxv_center.x, d3dxv_center.y, d3dxv_center.z);
+	printf("Node Pos : %d, %d\n", pos.x, pos.y);
+	printf("Current Node Pos : %d, %d\n", currentPos.x, currentPos.y);
+	printf("Node Center : %f, %f\n", tmp.x, tmp.y);
+	printf("Degree : %f\n", degree);
+	std::cout << path << std::endl;
+	//std::cout << route[0].x<<", "<<route[0].y << std::endl;
+#endif
+	CDiffusedShader *pShader = (CDiffusedShader*)m_pPlayerUpdatedContext;
+
+	int nObjects = pShader->m_nObjects;
+
+
+
+
+	// 바닥 충돌 체크
+	for (int i = 0; i < FLOOR_CNT; ++i)
+	{
+		CDiffuseNormalVertex *mVertices = ((CCubeMesh*)pShader->m_ppObjects[i]->m_pMesh)->pVertices; //(8개)
+
+		D3DXVECTOR3 d3dxvMax = { mVertices[1].m_d3dxvPosition.x , mVertices[4].m_d3dxvPosition.y, mVertices[2].m_d3dxvPosition.z };
+		D3DXVECTOR3 d3dxvMin = { mVertices[0].m_d3dxvPosition.x , mVertices[0].m_d3dxvPosition.y,  mVertices[0].m_d3dxvPosition.z };
+
+
+
+		bool x, y, z;
+		CollisionCheck(d3dxv_cMax, d3dxv_cMin, d3dxvMax, d3dxvMin, dxvShift, x, y, z);
+		OBJECTTAG tag = ((CCubeMesh*)pShader->m_ppObjects[i]->m_pMesh)->m_tag;
+
+		if (tag == FALL)
+		{
+			if ((-1 != lastFloorIndex) && (x || y || z))
+			{
+				CDiffuseNormalVertex *vertices = ((CCubeMesh*)pShader->m_ppObjects[lastFloorIndex]->m_pMesh)->pVertices;
+
+				D3DXVECTOR3 dMax = { vertices[1].m_d3dxvPosition.x , vertices[4].m_d3dxvPosition.y, vertices[2].m_d3dxvPosition.z };
+				D3DXVECTOR3 dMin = { vertices[0].m_d3dxvPosition.x , vertices[0].m_d3dxvPosition.y,  vertices[0].m_d3dxvPosition.z };
+				D3DXVECTOR3 vec = (dMax + dMin) / 2.0f;
+				vec.y = dMax.y + 0.1f;
+				SetPosition(vec);
+				m_d3dxvVelocity.x = 0.0f;
+				m_d3dxvVelocity.y = 0.0f;
+				m_d3dxvVelocity.z = 0.0f;
+
+			}
+		}
+		else
+		{
+			if (m_pState->GetState() == STATE_RUNJUMP && (x || z))
+			{
+				if (lastFloorIndex != i)
+				{
+
+					float maxY = d3dxv_cMin.y;
+
+					if (abs(maxY - d3dxvMax.y) < 20.0f)
+					{
+						m_d3dxvVelocity.y = 0.0f;
+						D3DXVECTOR3 vec = GetPosition();
+						vec.y = d3dxvMax.y + 0.1f;
+						SetPosition(vec);
+					}
+					else
+					{
+
+						m_d3dxvVelocity.x = 0.0f;
+						m_d3dxvVelocity.y = 0.0f;
+						m_d3dxvVelocity.z = 0.0f;
+
+					}
+				}
+				else
+				{
+					m_d3dxvVelocity.y = 0.0f;
+					D3DXVECTOR3 vec = GetPosition();
+					vec.y = d3dxvMax.y + 0.1f;
+					SetPosition(vec);
+				}
+			}
+			else if (x)
+			{
+				m_d3dxvVelocity.x = 0.0f;
+			}
+			else if (z)
+			{
+				m_d3dxvVelocity.z = 0.0f;
+			}
+			else if (y == true)
+			{
+				m_d3dxvVelocity.y = 0.0f;
+				D3DXVECTOR3 vec = GetPosition();
+				vec.y = d3dxvMax.y + 0.1f;
+				SetPosition(vec);
+				if (lastFloorIndex != i)
+				{
+					lastFloorIndex = i;
+				}
+			}
+		}
+
+
+
+		if (y) {
+			//std::cout << "[" << lastFloorIndex << "]" << std::endl;
+		}
+	}
+
+	if (m_pState->GetState() == STATE_RUNJUMP)
+	{
+		//m_d3dxvVelocity.y = 0.0f;
+	}
+
+
+	// 건물 충돌체크
+	for (int i = FLOOR_CNT; i < nObjects; ++i)
+	{
+		CDiffuseNormalVertex *mVertices = ((CCubeMesh*)pShader->m_ppObjects[i]->m_pMesh)->pVertices; //(8개)
+		D3DXVECTOR3 d3dxvMax = { mVertices[1].m_d3dxvPosition.x , mVertices[4].m_d3dxvPosition.y, mVertices[2].m_d3dxvPosition.z };
+		D3DXVECTOR3 d3dxvMin = { mVertices[0].m_d3dxvPosition.x , mVertices[0].m_d3dxvPosition.y,  mVertices[0].m_d3dxvPosition.z };
+		bool x, y, z;
+
+		if (true == CollisionCheck(d3dxv_cMax, d3dxv_cMin, d3dxvMax, d3dxvMin, dxvShift, x, y, z))
+		{
+			OBJECTTAG tag = ((CCubeMesh*)pShader->m_ppObjects[i]->m_pMesh)->m_tag;
+			// 문?
+			if (DOOR == tag)
+			{
+				if (bInteraction)
+				{
+					if (pShader->m_ppObjects[i]->ref != NULL && pShader->m_ppObjects[i]->ref->bInteracted == false && Interacted_OBJ == NULL)
+					{
+						m_pState->SetSubState(STATE_SMASH);
+						Interacted_OBJ = pShader->m_ppObjects[i];
+						//pShader->m_ppObjects[i]->ref->bInteracted = true;
+					}
+				}
+			}
+			else if (REALDOOR == tag)
+			{
+				if (NULL != pShader->m_ppObjects[i]->ref && false == pShader->m_ppObjects[i]->ref->bInteracted)
+				{
+					m_pState->SetState(STATE_FALLBACK);
+					pShader->m_ppObjects[i]->ref->bInteracted = true;
+					if (NULL != Interacted_OBJ)
+					{
+						Interacted_OBJ->ref->bInteracted = true;
+						Interacted_OBJ = NULL;
+						EndAnimation = false;
+					}
+
+				}
+			}
+			else if (FENCE == tag)
+			{
+				/*if (m_pState->GetState() != STATE_SLIDE)
+				{
+				if (x == true)
+				m_d3dxvVelocity.x *= -1.0f;
+
+				if (y == true)
+				m_d3dxvVelocity.y *= -1.0f;
+
+				if (z == true)
+				m_d3dxvVelocity.z *= -1.0f;
+				m_pState->SetState(STATE_FALLBACK);
+				}*/
+			}
+			else if (FENCEHOLE == tag)
+			{
+				if (bInteraction)
+				{
+					if (pShader->m_ppObjects[i]->ref != NULL && Interacted_OBJ == NULL)
+					{
+						Interacted_OBJ = pShader->m_ppObjects[i];
+						m_pState->SetState(STATE_SLIDE);
+						bInteraction = false;
+					}
+				}
+			}
+			else if (PIPE == tag)
+			{
+				if (m_pState->GetState() != STATE_RUNJUMP &&Interacted_OBJ == NULL)
+				{
+					m_pState->SetState(STATE_FALLFRONT);
+					Interacted_OBJ = pShader->m_ppObjects[i];
+				}
+			}
+			else if (CONDITIONER == tag)
+			{
+				m_d3dxvVelocity.x += 5.0f;
+			}
+			else
+			{
+				std::cout << "WALL : " << i << std::endl;
+				if (x == true)
+					m_d3dxvVelocity.x *= -1.0f;
+
+				if (y == true)
+					m_d3dxvVelocity.y *= -1.0f;
+
+				if (z == true)
+					m_d3dxvVelocity.z *= -1.0f;
+			}
+
+		}
+	}
+	if (EndAnimation)
+	{
+		if (m_pState->GetPrevState() == STATE_FALLFRONT)
+		{
+			D3DXVECTOR3 vec = GetPosition();
+			D3DXVECTOR3 look = GetLookAt();
+
+			vec += look*100.0f;
+
+			SetPosition(vec);
+		}
+
+		if (Interacted_OBJ)
+		{
+			Interacted_OBJ->ref->bInteracted = true;
+			Interacted_OBJ = NULL;
+		}
+		EndAnimation = false;
+	}
+	return true;
 }

@@ -329,7 +329,7 @@ void CGameFramework::BuildObjects()
 	CAirplanePlayer *pAirplanePlyer = new CAirplanePlayer(m_pd3dDevice, m_pScene->m_pCharacters);
 	//플레이어의 카메라를 스페이스-쉽 카메라로 변경한다.
 	pAirplanePlyer->ChangeCamera(m_pd3dDevice, THIRD_PERSON_CAMERA, m_GameTimer.GetTimeElapsed());
-	//pAirplanePlyer->Scale(0.1f);
+
 	CCamera *pCamera = pAirplanePlyer->GetCamera();
 	pCamera->SetViewport(m_pd3dDeviceContext, 0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
 	pCamera->GenerateProjectionMatrix(1.01f, 500000.0f, ASPECT_RATIO, 45.0f);
@@ -344,7 +344,7 @@ void CGameFramework::BuildObjects()
 	CAnimationClip *pAnimationClip = new CAnimationClip();
 
 	pAnimationClip->LoadAnimation("idle");
-	pAnimationClip->LoadAnimation("run2");
+	pAnimationClip->LoadAnimation("run");
 	pAnimationClip->LoadAnimation("left");
 	pAnimationClip->LoadAnimation("right");
 	pAnimationClip->LoadAnimation("backward");
@@ -365,8 +365,36 @@ void CGameFramework::BuildObjects()
 	pAirplanePlyer->SetState(pState);
 	m_ppPlayers[0] = pAirplanePlyer;
 
-	
+	m_pNPC = new CNPC(m_pd3dDevice, m_pScene->m_pCharacters);
+	m_pNPC->SetFriction(250.0f);
+	m_pNPC->SetGravity(D3DXVECTOR3(0.0f, -400.0f, 0.0f));
+	m_pNPC->SetMaxVelocityXZ(125.0f);
+	m_pNPC->SetMaxVelocityY(400.0f);
+	m_pNPC->SetPosition(D3DXVECTOR3(300.0f, 3500.0f, 3500.0f));
+	m_pNPC->Rotate(0.0f, 180.0f, 0.0f);
+	pState = new CState();
+	pAnimationClip = new CAnimationClip();
 
+	pAnimationClip->LoadAnimation("idle");
+	pAnimationClip->LoadAnimation("run2");
+	pAnimationClip->LoadAnimation("left");
+	pAnimationClip->LoadAnimation("right");
+	pAnimationClip->LoadAnimation("backward");
+	pAnimationClip->LoadAnimation("jump", 40);
+	pAnimationClip->LoadAnimation("jumping");
+	pAnimationClip->LoadAnimation("slide");
+	pAnimationClip->LoadAnimation("smash");
+	pAnimationClip->LoadAnimation("fallback");
+	pAnimationClip->LoadAnimation("standup");
+	pAnimationClip->LoadAnimation("fallfront");
+
+
+	pState->SetPlayer(m_pNPC);
+
+
+	pState->SetAnimationClip(pAnimationClip);
+	pState->SetTimer(&m_GameTimer);
+	m_pNPC->SetState(pState);
 }
 
 void CGameFramework::ReleaseObjects()
@@ -431,9 +459,28 @@ void CGameFramework::ProcessInput()
 			/*플레이어를 dwDirection 방향으로 이동한다(실제로는 속도 벡터를 변경한다). 이동 거리는 시간에 비례하도록 한다. 플레이어의 이동 속력은 500/초로 가정한다. 만약 플레이어의 이동 속력이 있다면 그 값을 사용한다.*/
 			if (dwDirection) m_ppPlayers[0]->Move(dwDirection, 500.0f * m_GameTimer.GetTimeElapsed(), true);
 		}
+
+		dwDirection = 0;
+		m_pNPC->bInteraction = false;
+
+		if (true)
+		{
+			if (m_pNPC->m_pState->GetState() == STATE_RUN || m_pNPC->m_pState->GetState() == STATE_RUNJUMP || m_pNPC->m_pState->GetState() == STATE_SLIDE) dwDirection |= DIR_FORWARD;
+			if (pKeyBuffer[VK_DOWN] & 0xF0 || pKeyBuffer[VkKeyScan('s')] & 0xF0) dwDirection |= DIR_BACKWARD;
+			if (pKeyBuffer[VK_LEFT] & 0xF0 || pKeyBuffer[VkKeyScan('a')] & 0xF0) dwDirection |= DIR_LEFT;
+			if (pKeyBuffer[VK_RIGHT] & 0xF0 || pKeyBuffer[VkKeyScan('d')] & 0xF0) dwDirection |= DIR_RIGHT;
+			if (pKeyBuffer[VK_SPACE] & 0xF0 || pKeyBuffer[VkKeyScan('r')] & 0xF0) dwDirection |= DIR_UP;
+			if (pKeyBuffer[VK_NEXT] & 0xF0 || pKeyBuffer[VkKeyScan('f')] & 0xF0) dwDirection |= DIR_DOWN;
+			if (pKeyBuffer[VkKeyScan('e')] & 0xF0) m_pNPC->bInteraction = true;
+		}
+		if (dwDirection) m_pNPC->Move(dwDirection, 500.0f * m_GameTimer.GetTimeElapsed(), true);
 	}
 	//플레이어를 실제로 이동하고 카메라를 갱신한다. 중력과 마찰력의 영향을 속도 벡터에 적용한다.
-	m_ppPlayers[0]->Update(m_GameTimer.GetTimeElapsed());
+	float timeElapsed = m_GameTimer.GetTimeElapsed();
+	m_ppPlayers[0]->Update(timeElapsed);
+	m_pNPC->Update(timeElapsed);
+	std::cout << "Ftime = " << timeElapsed << std::endl;
+
 }
 
 void CGameFramework::AnimateObjects()
@@ -446,7 +493,7 @@ void CGameFramework::FrameAdvance()
 	m_GameTimer.Tick(60.0f);
 
 	ProcessInput();
-
+	
 	AnimateObjects();
 
 	
@@ -464,11 +511,22 @@ void CGameFramework::FrameAdvance()
 			pCamera = m_ppPlayers[i]->GetCamera();
 			m_ppPlayers[i]->SetPlayerUpdatedContext(m_pScene->m_ppShaders[3]);
 		}
+		
 		//3인칭 카메라일 때 플레이어를 렌더링한다.
 		for (int j = 0; j < m_nPlayers; j++) if (m_ppPlayers[j]) m_ppPlayers[j]->Render(m_pd3dDeviceContext);
+
 		
-		if (m_pScene) m_pScene->Render(m_pd3dDeviceContext, pCamera);
 	}
+
+	if (m_pNPC)
+	{
+		m_pNPC->UpdateShaderVariables(m_pd3dDeviceContext);
+		
+		m_pNPC->SetPlayerUpdatedContext(m_pScene->m_ppShaders[3]);
+		m_pNPC->Render(m_pd3dDeviceContext);
+	}
+	if (m_pScene) m_pScene->Render(m_pd3dDeviceContext, pCamera);
+
 
 
 	m_pd3dDeviceContext->OMSetDepthStencilState(m_pd3dDepthDisableStencilState, 1);

@@ -49,7 +49,7 @@ public:
 	virtual void BuildObjects(ID3D11Device *pd3dDevice);
 	virtual void ReleaseObjects();
 	virtual void AnimateObjects(ID3D11Device *pd3dDevice, float fTimeElapsed);
-	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamera = NULL);
+	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamera = NULL, int index = -1);
 public:
 	CGameObject* GetGameObject(int index);
 
@@ -101,7 +101,7 @@ public:
 	
 	virtual void BuildObjects(ID3D11Device *pd3dDevice);
 	virtual void ReleaseObjects();
-	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamera = NULL);
+	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamera = NULL, int index=-1);
 };
 
 class CAnimateShader : public CTextureShader
@@ -151,7 +151,7 @@ public:
 
 	virtual void BuildObjects(ID3D11Device *pd3dDevice);
 	virtual void ReleaseObjects();
-	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamera = NULL);
+	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamera = NULL, int index = -1);
 };
 
 class CItemShader_Alpha : public CTextureShader
@@ -168,7 +168,7 @@ public:
 
 	virtual void BuildObjects(ID3D11Device *pd3dDevice);
 	virtual void ReleaseObjects();
-	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamera = NULL);
+	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamera = NULL, int index = -1);
 };
 class CItemShader_Door : public CTextureShader
 {
@@ -185,7 +185,7 @@ public:
 
 	virtual void BuildObjects(ID3D11Device *pd3dDevice);
 	virtual void ReleaseObjects();
-	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamera = NULL);
+	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamera = NULL, int index= -1);
 };
 
 class CUIShader : public CShader {
@@ -197,7 +197,7 @@ public:
 
 	virtual void BuildObjects(ID3D11Device *pd3dDevice);
 	virtual void ReleaseObjects();
-	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamera = NULL);
+	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamera = NULL, int index = -1);
 };
 
 

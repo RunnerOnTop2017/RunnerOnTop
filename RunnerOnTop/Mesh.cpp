@@ -433,7 +433,7 @@ CCubeMesh::CCubeMesh(ID3D11Device *pd3dDevice, float minX , float maxX, float mi
 	}
 	else if (tag  == REALDOOR || tag == FENCE)
 	{
-		mColor = D3DXCOLOR(0.0f, 0.0f, 1.0f, 1.0f);
+		mColor = D3DXCOLOR(1.0f, 0.0f, 1.0f, 1.0f);
 	}
 	else {
 		mColor = D3DXCOLOR(1.0f, 1.0f, 0.0f, 1.0f);

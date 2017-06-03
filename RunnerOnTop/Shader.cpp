@@ -168,46 +168,83 @@ void CShader::UpdateShaderVariables(ID3D11DeviceContext *pd3dDeviceContext, D3DX
 {
 }
 
-void CShader::Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamera)
+void CShader::Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamera, int index)
 {
 	pd3dDeviceContext->IASetInputLayout(m_pd3dVertexLayout);
 	pd3dDeviceContext->VSSetShader(m_pd3dVertexShader, NULL, 0);
 	pd3dDeviceContext->PSSetShader(m_pd3dPixelShader, NULL, 0);
-
-	for (int j = 0; j < m_nObjects; j++)
+	if (index == -1)
 	{
-		if (m_ppObjects[j])
+		for (int j = 0; j < m_nObjects; j++)
 		{
-			UpdateShaderVariables(pd3dDeviceContext, &m_ppObjects[j]->m_d3dxmtxWorld);
-			//객체의 물질 정보를 쉐이더 프로그램으로 전달한다.
-			if (m_ppObjects[j]->m_pMaterial) UpdateShaderVariables(pd3dDeviceContext, &m_ppObjects[j]->m_pMaterial->m_Material);
-			if (m_ppObjects[j]->m_pTexture)
+			if (m_ppObjects[j])
 			{
-				UpdateShaderVariables(pd3dDeviceContext, m_ppObjects[j]->m_pTexture);
-			}
-			if (m_ppObjects[j]->m_pBump)
-			{
-				pd3dDeviceContext->PSSetShaderResources(0x09, m_ppObjects[j]->m_pBump->m_nTextures, m_ppObjects[j]->m_pBump->m_ppd3dsrvTextures);
-				pd3dDeviceContext->PSSetSamplers(0x01, 1, &m_ppObjects[j]->m_pBump->m_ppd3dSamplerStates[0]);
-			}
+				UpdateShaderVariables(pd3dDeviceContext, &m_ppObjects[j]->m_d3dxmtxWorld);
+				//객체의 물질 정보를 쉐이더 프로그램으로 전달한다.
+				if (m_ppObjects[j]->m_pMaterial) UpdateShaderVariables(pd3dDeviceContext, &m_ppObjects[j]->m_pMaterial->m_Material);
+				if (m_ppObjects[j]->m_pTexture)
+				{
+					UpdateShaderVariables(pd3dDeviceContext, m_ppObjects[j]->m_pTexture);
+				}
+				if (m_ppObjects[j]->m_pBump)
+				{
+					pd3dDeviceContext->PSSetShaderResources(0x09, m_ppObjects[j]->m_pBump->m_nTextures, m_ppObjects[j]->m_pBump->m_ppd3dsrvTextures);
+					pd3dDeviceContext->PSSetSamplers(0x01, 1, &m_ppObjects[j]->m_pBump->m_ppd3dSamplerStates[0]);
+				}
 
-			if (m_ppObjects[j]->m_pAlpha)
-			{
-				pd3dDeviceContext->PSSetShaderResources(0x09, m_ppObjects[j]->m_pAlpha->m_nTextures, m_ppObjects[j]->m_pAlpha->m_ppd3dsrvTextures);
-				pd3dDeviceContext->PSSetSamplers(0x02, 1, &m_ppObjects[j]->m_pAlpha->m_ppd3dSamplerStates[0]);
-			
-			}
-			
+				if (m_ppObjects[j]->m_pAlpha)
+				{
+					pd3dDeviceContext->PSSetShaderResources(0x09, m_ppObjects[j]->m_pAlpha->m_nTextures, m_ppObjects[j]->m_pAlpha->m_ppd3dsrvTextures);
+					pd3dDeviceContext->PSSetSamplers(0x02, 1, &m_ppObjects[j]->m_pAlpha->m_ppd3dSamplerStates[0]);
 
-			if (m_ppObjects[j]->m_pState)
-			{
+				}
 
-				m_ppObjects[j]->transform = m_ppObjects[j]->m_pState->GetAnimation();
-				UpdateShaderVariables(pd3dDeviceContext, m_ppObjects[j]->transform, m_ppObjects[j]->m_pState->GetBoneSize());
+
+				if (m_ppObjects[j]->m_pState)
+				{
+
+					m_ppObjects[j]->transform = m_ppObjects[j]->m_pState->GetAnimation();
+					UpdateShaderVariables(pd3dDeviceContext, m_ppObjects[j]->transform, m_ppObjects[j]->m_pState->GetBoneSize());
+				}
+				m_ppObjects[j]->Render(pd3dDeviceContext);
 			}
-			m_ppObjects[j]->Render(pd3dDeviceContext);
 		}
 	}
+	else
+	{
+		if (m_ppObjects[index])
+		{
+			UpdateShaderVariables(pd3dDeviceContext, &m_ppObjects[index]->m_d3dxmtxWorld);
+			//객체의 물질 정보를 쉐이더 프로그램으로 전달한다.
+			if (m_ppObjects[index]->m_pMaterial) UpdateShaderVariables(pd3dDeviceContext, &m_ppObjects[index]->m_pMaterial->m_Material);
+			if (m_ppObjects[index]->m_pTexture)
+			{
+				UpdateShaderVariables(pd3dDeviceContext, m_ppObjects[index]->m_pTexture);
+			}
+			if (m_ppObjects[index]->m_pBump)
+			{
+				pd3dDeviceContext->PSSetShaderResources(0x09, m_ppObjects[index]->m_pBump->m_nTextures, m_ppObjects[index]->m_pBump->m_ppd3dsrvTextures);
+				pd3dDeviceContext->PSSetSamplers(0x01, 1, &m_ppObjects[index]->m_pBump->m_ppd3dSamplerStates[0]);
+			}
+
+			if (m_ppObjects[index]->m_pAlpha)
+			{
+				pd3dDeviceContext->PSSetShaderResources(0x09, m_ppObjects[index]->m_pAlpha->m_nTextures, m_ppObjects[index]->m_pAlpha->m_ppd3dsrvTextures);
+				pd3dDeviceContext->PSSetSamplers(0x02, 1, &m_ppObjects[index]->m_pAlpha->m_ppd3dSamplerStates[0]);
+
+			}
+
+
+			if (m_ppObjects[index]->m_pState)
+			{
+
+				m_ppObjects[index]->transform = m_ppObjects[index]->m_pState->GetAnimation();
+				UpdateShaderVariables(pd3dDeviceContext, m_ppObjects[index]->transform, m_ppObjects[index]->m_pState->GetBoneSize());
+			}
+			m_ppObjects[index]->Render(pd3dDeviceContext);
+		}
+	}
+	
 }
 
 CGameObject * CShader::GetGameObject(int index)
@@ -374,7 +411,8 @@ void CDiffusedShader::BuildObjects(ID3D11Device *pd3dDevice)
 
 	m_ppObjects[n++] = pRotatingObject;
 
-	pCubeMesh = new CCubeMesh(pd3dDevice, 625.0f, 1280.0f, 2918.0f, 3143.0f, 490.0f, 810.0f);
+	
+	pCubeMesh = new CCubeMesh(pd3dDevice, 625.0f, 1280.0f, 2918.0f, 3143.0f, 490.0f, 810.0f);//index =  15
 	pRotatingObject = new CGameObject();
 
 	pRotatingObject->SetMesh(pCubeMesh);
@@ -495,7 +533,7 @@ void CDiffusedShader::BuildObjects(ID3D11Device *pd3dDevice)
 
 	m_ppObjects[n++] = pRotatingObject;
 
-	pCubeMesh = new CCubeMesh(pd3dDevice, 1115.0f, 1290.0f, 3188.0f, 3234.0f, 810.0f, 900.0f, OBJ);
+	pCubeMesh = new CCubeMesh(pd3dDevice, 1115.0f, 1290.0f, 3188.0f, 3234.0f, 810.0f, 900.0f, OBJ); // index = 30
 	pRotatingObject = new CGameObject();
 
 	pRotatingObject->SetMesh(pCubeMesh);
@@ -722,7 +760,7 @@ void CDiffusedShader::BuildObjects(ID3D11Device *pd3dDevice)
 	m_ppObjects[n++] = pRotatingObject;
 
 	// 첫번째 문 인터랙트 영역
-	pCubeMesh = new CCubeMesh(pd3dDevice, 270.0f, 330.0f, 3275.0f, 3360.0f, 3140.0f, 3180.0f, DOOR);
+	pCubeMesh = new CCubeMesh(pd3dDevice, 270.0f, 330.0f, 3275.0f, 3360.0f, 3140.0f, 3180.0f, DOOR); // index = 58
 	pRotatingObject = new CGameObject();
 
 	pRotatingObject->SetMesh(pCubeMesh);
@@ -731,7 +769,7 @@ void CDiffusedShader::BuildObjects(ID3D11Device *pd3dDevice)
 	m_ppObjects[n++] = pRotatingObject;
 
 	// 첫번째 문 
-	pCubeMesh = new CCubeMesh(pd3dDevice, 270.0f, 330.0f, 3275.0f, 3360.0f, 3100.0f, 3110.0f, REALDOOR);
+	pCubeMesh = new CCubeMesh(pd3dDevice, 270.0f, 330.0f, 3275.0f, 3360.0f, 3100.0f, 3110.0f, REALDOOR); // index = 59
 	pRotatingObject = new CGameObject();
 
 	pRotatingObject->SetMesh(pCubeMesh);
@@ -941,9 +979,9 @@ void CTextureShader::ReleaseObjects()
 {
 }
 
-void CTextureShader::Render(ID3D11DeviceContext * pd3dDeviceContext, CCamera * pCamera)
+void CTextureShader::Render(ID3D11DeviceContext * pd3dDeviceContext, CCamera * pCamera, int index)
 {
-	CShader::Render(pd3dDeviceContext, pCamera);
+	CShader::Render(pd3dDeviceContext, pCamera, index);
 }
 
 CAnimateShader::CAnimateShader()
@@ -1414,7 +1452,7 @@ void CItemShader::ReleaseObjects()
 	CTextureShader::ReleaseObjects();
 }
 
-void CItemShader::Render(ID3D11DeviceContext * pd3dDeviceContext, CCamera * pCamera)
+void CItemShader::Render(ID3D11DeviceContext * pd3dDeviceContext, CCamera * pCamera, int index)
 {
 	
 	CTextureShader::Render(pd3dDeviceContext, pCamera);
@@ -1679,7 +1717,7 @@ void CItemShader_Alpha::ReleaseObjects()
 	CTextureShader::ReleaseObjects();
 }
 
-void CItemShader_Alpha::Render(ID3D11DeviceContext * pd3dDeviceContext, CCamera * pCamera)
+void CItemShader_Alpha::Render(ID3D11DeviceContext * pd3dDeviceContext, CCamera * pCamera, int index)
 {
 
 	CTextureShader::Render(pd3dDeviceContext, pCamera);
@@ -1794,15 +1832,16 @@ void CItemShader_Door::ReleaseObjects()
 	CTextureShader::ReleaseObjects();
 }
 
-void CItemShader_Door::Render(ID3D11DeviceContext * pd3dDeviceContext, CCamera * pCamera)
+void CItemShader_Door::Render(ID3D11DeviceContext * pd3dDeviceContext, CCamera * pCamera, int index)
 {
+	int n = 0;
 	if (m_ppObjects[0]->bInteracted && m_ppObjects[0]->fAngeYaw >= -90.0f)
 	{
 		m_ppObjects[0]->MoveStrafe(30.0f);
 		m_ppObjects[0]->Rotate(&D3DXVECTOR3(0.0f, 0.0f, 1.0f), -5.0f);
 		m_ppObjects[0]->MoveStrafe(-30.0f);
 	}
-	CTextureShader::Render(pd3dDeviceContext, pCamera);
+	CTextureShader::Render(pd3dDeviceContext, pCamera, index);
 
 }
 
@@ -1836,7 +1875,7 @@ void CUIShader::ReleaseObjects()
 	delete m_pUI;
 }
 
-void CUIShader::Render(ID3D11DeviceContext * pd3dDeviceContext, CCamera * pCamera)
+void CUIShader::Render(ID3D11DeviceContext * pd3dDeviceContext, CCamera * pCamera, int index)
 {
 	pd3dDeviceContext->IASetInputLayout(m_pd3dVertexLayout);
 	pd3dDeviceContext->VSSetShader(m_pd3dVertexShader, NULL, 0);

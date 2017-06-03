@@ -300,7 +300,7 @@ void UIProcessMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			exit(0);
 		if (start_mouse)
 		{
-			SetWindowPos(hWnd, HWND_TOPMOST, 0, 0, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN), 0L);
+			//SetWindowPos(hWnd, HWND_TOPMOST, 0, 0, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN), 0L);
 
 			gameState = INGAME;
 

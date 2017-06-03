@@ -57,6 +57,7 @@ void CScene::BuildObjects(ID3D11Device *pd3dDevice)
 	m_pUIShader = new CUIShader();
 	m_pUIShader->CreateShader(pd3dDevice);
 	m_pUIShader->BuildObjects(pd3dDevice);
+
 	 //문
 	m_ppShaders[3]->m_ppObjects[58]->ref = m_ppShaders[2]->m_ppObjects[0];
 	m_ppShaders[3]->m_ppObjects[59]->ref = m_ppShaders[2]->m_ppObjects[0];
@@ -68,6 +69,7 @@ void CScene::BuildObjects(ID3D11Device *pd3dDevice)
 	//파이프
 	m_ppShaders[3]->m_ppObjects[68]->ref = m_ppShaders[1]->m_ppObjects[1];
 
+	//캐릭터 쉐이더
 	m_pCharacters = new CAnimateShader();
 	m_pCharacters->CreateShader(pd3dDevice);
 	m_pCharacters->BuildObjects(pd3dDevice);

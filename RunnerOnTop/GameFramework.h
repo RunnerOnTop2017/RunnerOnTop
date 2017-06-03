@@ -26,6 +26,7 @@ private:
 	_TCHAR m_pszBuffer[50];
 	int m_nPlayers;
 	CPlayer **m_ppPlayers;
+	CNPC *m_pNPC;
 
 private:
 	ID3D11Texture2D *m_pd3dDepthStencilBuffer;
