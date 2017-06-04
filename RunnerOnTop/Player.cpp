@@ -35,43 +35,15 @@ CPlayer::CPlayer()
 
 	// 테스트용임. 삭제해야 됨
 
-	for(int i = 0; i<20; ++i)
+	for(int i = 0; i<map_size_n; ++i)
 	{ 
-		for (int j = 0; j < 20; ++j)
+		for (int j = 0; j < map_size_m; ++j)
 		{
 			map[i][j] = 0;
 		}
 	}
 
-	map[11][19]	= 0;
-	map[11][18]	= 0;
-	map[11][17]	= 0;
-	map[11][16]	= 0;
-	map[11][15]	= 0;
-	map[11][14]	= 0;
-	map[12][14]	= 0;
-	map[13][12]	= 0;
-	map[13][14]	= 0;
-	map[13][13]	= 0;
-	map[14][14]	= 0;
-	map[15][14]	= 0;
-	map[15][15]	= 0;
-	map[15][16]	= 0;
-	map[15][17]	= 0;
-	map[15][18]	= 0;
-	map[15][19]	= 0;
-	map[12][13]	= 0;
-	map[13][11]	= 0;
-	map[13][10]	= 0;
-	map[13][9]	= 0;
-	map[13][8]	= 0;
-	map[14][8]	= 0;
-	map[15][8]	= 0;
-	map[15][7]	= 0;
-	map[15][6]	= 0;
-	map[15][5]	= 0;
-	map[15][4]	= 0;
-	map[15][3]	= 0;
+
 }
 
 CPlayer::~CPlayer()
@@ -422,177 +394,14 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 	D3DXVECTOR3 d3dxv_cMin = { minX, minY, minZ };
 	D3DXVECTOR3 d3dxv_center = (d3dxv_cMax + d3dxv_cMin) / 2.0f;
 
-	//if (currentPos.x == -1 && currentPos.y == -1)
-	//{
-	//	CreateNodeMap(map, minMap, maxMap, (CDiffusedShader*)m_pPlayerUpdatedContext, 2, FLOOR_CNT, true);
-	//	for (int i = 0; i < map_size_m; ++i)
-	//	{
-	//		for (int j = 0; j < map_size_n; ++j)
-	//		{
-	//			if (map[j][i] == 1) map[j][i] = 0;
-	//			else map[j][i] = 1;
-	//		}
-	//	}
-
-	//	map[13][7] = 1;
-	//	map[11][3] = 1;
-	//	map[9][13] = 1;
-	//	map[12][13] = 1;
-	//	map[10][13] = 1;
-	//	map[12][14] = 1;
-	//	map[12][13] = 0;
-	//	map[11][12] = 1;
-	//	map[12][12] = 1;
-	//	//map[14][7] = 1;
-	//	//map[13][8] = 1;
-	//	//map[14][8] = 1;
-	//	map[14][6] = 1;
- //		NPCDirection = 3;
-	//}
-
-
-
-	//node_pos pos = PositionToNodeIndex(d3dxv_center.x, d3dxv_center.z, 20, minMap, maxMap);
-	//static node_pos_float tmp;
-	//static float degree;
-	//static std::string path;
-	//if (pos.x != currentPos.x || pos.y != currentPos.y)
-	//{
-	//	path = pathFind(pos.x, pos.y, 15, 3, map);
-	//	route.clear();
-	//	route = PathStringToNodeIndex(path, pos);
-	//	D3DXVECTOR3 look = GetLookVector();
-	//	
-	//	XMVECTOR v1 = { look.x, look.z };
-	//	if(route.size()!= 0 )
-	//		tmp = NodeIndexToPosition(route[0], 20, minMap, maxMap);
-	//	XMVECTOR v2 = {tmp.x -  d3dxv_center.x ,tmp.y - d3dxv_center.z};
-	//	XMVECTOR angle = XMVector2AngleBetweenVectors(v2, v1);
-	//	
-
-	//	float rad = XMVectorGetX(angle);
-	//	degree = XMConvertToDegrees(rad);
-	//	if (path.length() !=0)
-	//	{
-	//		if (path.at(0) == '0')
-	//		{
-	//			if (NPCDirection == 3)
-	//			{
-	//				Rotate(0.0f, -90.0f, 0.0f);
-	//				NPCDirection = 0;
-	//			}
-	//			else if (NPCDirection == 1)
-	//			{
-	//				Rotate(0.0f, 90.0f, 0.0f);
-	//				NPCDirection = 0;
-	//			}
-	//			else if (NPCDirection == 2)
-	//			{
-	//				Rotate(0.0f, 180.0f, 0.0f);
-	//				NPCDirection = 0;
-	//			}
-	//		}
-	//		else if (path.at(0) == '3')
-	//		{
-	//			if (NPCDirection == 0)
-	//			{
-	//				Rotate(0.0f, 90.0f, 0.0f);
-	//				NPCDirection = 3;
-	//			}
-	//			else if (NPCDirection == 1)
-	//			{
-	//				Rotate(0.0f, 180.0f, 0.0f);
-	//				NPCDirection = 3;
-	//			}
-	//			else if (NPCDirection == 2)
-	//			{
-	//				Rotate(0.0f, -90.0f, 0.0f);
-	//				NPCDirection = 3;
-	//			}
-	//		}
-	//		else if (path.at(0) == '2')
-	//		{
-	//			if (NPCDirection == 3)
-	//			{
-	//				Rotate(0.0f, 90.0f, 0.0f);
-	//				NPCDirection = 0;
-	//			}
-	//			else if (NPCDirection == 1)
-	//			{
-	//				Rotate(0.0f, -90.0f, 0.0f);
-	//				NPCDirection = 0;
-	//			}
-	//			else if (NPCDirection == 0)
-	//			{
-	//				Rotate(0.0f, 180.0f, 0.0f);
-	//				NPCDirection = 0;
-	//			}
-	//		}
-	//		else if (path.at(0) == '1')
-	//		{
-	//			if (NPCDirection == 0)
-	//			{
-	//				Rotate(0.0f, -90.0f, 0.0f);
-	//				NPCDirection = 3;
-	//			}
-	//			else if (NPCDirection == 3)
-	//			{
-	//				Rotate(0.0f, 180.0f, 0.0f);
-	//				NPCDirection = 3;
-	//			}
-	//			else if (NPCDirection == 2)
-	//			{
-	//				Rotate(0.0f, 90.0f, 0.0f);
-	//				NPCDirection = 3;
-	//			}
-	//		}
-	//		
-	//			
-	//	}
-	//	//Rotate(0.0f, degree, 0.0f);
-	//	//Rotate(D3DXVECTOR3(0.0f,1.0f,0.0f), degree);
-	//	//printf("NodeIndex : %d, %d\n", pos.x, pos.y);
-	//	currentPos.x = pos.x;
-	//	currentPos.y = pos.y;
-	//}
 
 	
 #ifdef _DEBUG
-	system("cls");
-	//printf("MAX[ %f | %f | %f ]\n", maxX, maxY, maxZ);
-	//printf("MIN[ %f | %f | %f ]\n", minX, minY, minZ);
-	bool b = false;
-	for (int y = 0; y < map_size_m; ++y)
-	{
-		for (int x = 0; x < map_size_n; ++x)
-		{
-			b = false;
-			for (int i = 0; i < route.size(); ++i)
-			{
-				if (route[i].x == x && route[i].y == y)
-				{
-					b = true;
-				
-					break;
-				}
-			}
-			if(x == pos.x && y == pos.y) std::cout << "⊙";
-			else if(b) 	std::cout << "◎";
-			else if (map[x][y] == 0) std::cout << "○";
-			else if (map[x][y] == 1) std::cout << "●";
-
-
-		}
-		std::cout << std::endl;
-	}
-
-	printf("Position : %f, %f, %f\n", d3dxv_center.x, d3dxv_center.y, d3dxv_center.z);
-	printf("Node Pos : %d, %d\n", pos.x, pos.y);
-	printf("Current Node Pos : %d, %d\n", currentPos.x, currentPos.y);
-	printf("Node Center : %f, %f\n", tmp.x, tmp.y);
-	printf("Degree : %f\n", degree);
-	std::cout << path << std::endl;
-	//std::cout << route[0].x<<", "<<route[0].y << std::endl;
+	//system("cls");
+	printf("MAX[ %f | %f | %f ]\n", maxX, maxY, maxZ);
+	printf("MIN[ %f | %f | %f ]\n", minX, minY, minZ);
+	//node_pos pos = PositionToNodeIndex(d3dxv_center.x, d3dxv_center.z, D_METER, minMap, maxMap);
+	//std::cout << pos.x << "\t" << pos.y << std::endl;
 #endif
 	CDiffusedShader *pShader = (CDiffusedShader*)m_pPlayerUpdatedContext;
 
@@ -740,7 +549,7 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 			}
 			else if (FENCE == tag)
 			{
-				/*if (m_pState->GetState() != STATE_SLIDE)
+				if (m_pState->GetState() != STATE_SLIDE)
 				{
 					if (x == true)
 						m_d3dxvVelocity.x *= -1.0f;
@@ -751,7 +560,7 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 					if (z == true)
 						m_d3dxvVelocity.z *= -1.0f;
 					m_pState->SetState(STATE_FALLBACK);
-				}*/
+				}
 			}
 			else if (FENCEHOLE == tag)
 			{
@@ -777,9 +586,13 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 			{
 				m_d3dxvVelocity.x += 5.0f;
 			}
+			else if (JUMPAREA == tag)
+			{
+
+			}
 			else
 			{
-				std::cout << "WALL : " << i << std::endl;
+				//std::cout << "WALL : " << i << std::endl;
 				if (x == true)
 					m_d3dxvVelocity.x *= -1.0f;
 
@@ -965,7 +778,7 @@ void CNPC::ChangeCamera(ID3D11Device *pd3dDevice, DWORD nNewCameraMode, float fT
 }
 bool CNPC::OnPlayerUpdated(float fTimeElapsed)
 {
-	std::cout << "Called" << m_d3dxvVelocity.y <<std::endl;
+	//std::cout << "Called" << m_d3dxvVelocity.y <<std::endl;
 	// 이동 거리
 	D3DXVECTOR3 dxvShift = m_d3dxvVelocity *fTimeElapsed;
 
@@ -1003,7 +816,7 @@ bool CNPC::OnPlayerUpdated(float fTimeElapsed)
 
 	if (currentPos.x == -1 && currentPos.y == -1)
 	{
-		CreateNodeMap(map, minMap, maxMap, (CDiffusedShader*)m_pPlayerUpdatedContext, 2, FLOOR_CNT, true);
+		CreateNodeMap(map, minMap, maxMap, (CDiffusedShader*)m_pPlayerUpdatedContext,2, FLOOR_CNT, true);
 		for (int i = 0; i < map_size_m; ++i)
 		{
 			for (int j = 0; j < map_size_n; ++j)
@@ -1013,38 +826,48 @@ bool CNPC::OnPlayerUpdated(float fTimeElapsed)
 			}
 		}
 
-		map[13][7] = 1;
-		map[11][3] = 1;
-		map[9][13] = 1;
-		map[12][13] = 1;
-		map[10][13] = 1;
-		map[12][14] = 1;
-		map[12][13] = 0;
-		map[11][12] = 1;
-		map[12][12] = 1;
-		//map[14][7] = 1;
-		//map[13][8] = 1;
-		//map[14][8] = 1;
-		map[14][6] = 1;
+		//map[13][7] = 1;
+		//map[11][3] = 1;
+		//map[9][13] = 1;
+		//map[12][13] = 1;
+		//map[10][13] = 1;
+		//map[12][14] = 1;
+		//map[12][13] = 0;
+		//map[11][12] = 1;
+		//map[12][12] = 1;
+		//map[13][16] = 1;
+		//map[14][16] = 1;
+		////map[13][8] = 1;
+		////map[14][8] = 1;
+		//map[14][6] = 1;
+		map[24][26] = 1;
+		map[25][26] = 1;
+		map[26][16] = 1;
+		map[27][15] = 1;
+		map[28][15] = 1;
+		//map[29][27] = 1;
+
+		//map[30][27] = 1;
+
 		NPCDirection = 3;
 	}
 
 
 
-	node_pos pos = PositionToNodeIndex(d3dxv_center.x, d3dxv_center.z, 20, minMap, maxMap);
+	node_pos pos = PositionToNodeIndex(d3dxv_center.x, d3dxv_center.z, D_METER, minMap, maxMap);
 	static node_pos_float tmp;
 	static float degree;
 	static std::string path;
 	if (pos.x != currentPos.x || pos.y != currentPos.y)
 	{
-		path = pathFind(pos.x, pos.y, 15, 3, map);
+		path = pathFind(pos.x, pos.y,30 ,6 , map);
 		route.clear();
 		route = PathStringToNodeIndex(path, pos);
 		D3DXVECTOR3 look = GetLookVector();
 
 		XMVECTOR v1 = { look.x, look.z };
 		if (route.size() != 0)
-			tmp = NodeIndexToPosition(route[0], 20, minMap, maxMap);
+			tmp = NodeIndexToPosition(route[0], D_METER, minMap, maxMap);
 		XMVECTOR v2 = { tmp.x - d3dxv_center.x ,tmp.y - d3dxv_center.z };
 		XMVECTOR angle = XMVector2AngleBetweenVectors(v2, v1);
 
@@ -1094,17 +917,17 @@ bool CNPC::OnPlayerUpdated(float fTimeElapsed)
 				if (NPCDirection == 3)
 				{
 					Rotate(0.0f, 90.0f, 0.0f);
-					NPCDirection = 0;
+					NPCDirection = 2;
 				}
 				else if (NPCDirection == 1)
 				{
 					Rotate(0.0f, -90.0f, 0.0f);
-					NPCDirection = 0;
+					NPCDirection = 2;
 				}
 				else if (NPCDirection == 0)
 				{
 					Rotate(0.0f, 180.0f, 0.0f);
-					NPCDirection = 0;
+					NPCDirection = 2;
 				}
 			}
 			else if (path.at(0) == '1')
@@ -1112,17 +935,17 @@ bool CNPC::OnPlayerUpdated(float fTimeElapsed)
 				if (NPCDirection == 0)
 				{
 					Rotate(0.0f, -90.0f, 0.0f);
-					NPCDirection = 3;
+					NPCDirection = 1;
 				}
 				else if (NPCDirection == 3)
 				{
 					Rotate(0.0f, 180.0f, 0.0f);
-					NPCDirection = 3;
+					NPCDirection = 1;
 				}
 				else if (NPCDirection == 2)
 				{
 					Rotate(0.0f, 90.0f, 0.0f);
-					NPCDirection = 3;
+					NPCDirection = 1;
 				}
 			}
 
@@ -1167,7 +990,7 @@ bool CNPC::OnPlayerUpdated(float fTimeElapsed)
 
 	printf("Position : %f, %f, %f\n", d3dxv_center.x, d3dxv_center.y, d3dxv_center.z);
 	printf("Node Pos : %d, %d\n", pos.x, pos.y);
-	printf("Current Node Pos : %d, %d\n", currentPos.x, currentPos.y);
+	printf("Current Path[0] : %c\n", path[0]);
 	printf("Node Center : %f, %f\n", tmp.x, tmp.y);
 	printf("Degree : %f\n", degree);
 	std::cout << path << std::endl;
@@ -1213,6 +1036,8 @@ bool CNPC::OnPlayerUpdated(float fTimeElapsed)
 		}
 		else
 		{
+			if ((x || z) && m_pState->GetState() != STATE_RUNJUMP) m_pState->SetState(STATE_RUNJUMP);
+
 			if (m_pState->GetState() == STATE_RUNJUMP && (x || z))
 			{
 				if (lastFloorIndex != i)
@@ -1355,6 +1180,12 @@ bool CNPC::OnPlayerUpdated(float fTimeElapsed)
 			else if (CONDITIONER == tag)
 			{
 				m_d3dxvVelocity.x += 5.0f;
+			}
+			else if(JUMPAREA == tag)
+			{
+				if(m_pState->GetState() != STATE_RUNJUMP)
+					m_pState->SetState(STATE_RUNJUMP);
+
 			}
 			else
 			{

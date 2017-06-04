@@ -1,8 +1,8 @@
 #pragma once
 
-//#ifdef _DEBUG
+#ifdef _DEBUG
 #pragma comment(linker, "/entry:wWinMainCRTStartup /subsystem:console") 
-//#endif
+#endif
 
 #include "targetver.h"
 
@@ -67,8 +67,9 @@
 
 // 길찾기용 알고리즘
 // 20x20 형태
-const int map_size_n = 20;
-const int map_size_m = 20;
+const int map_size_n = 40;
+const int map_size_m = 40;
+#define D_METER 40
 
 // 첫번째 박스의 max. min, 두번째 박스의 max, min을 인자로 받아 충돌하면 true 아니면 false. 인자로 받은 x,y,z,에 x축과 y축 z축 에 대한 충돌세부사항이 저장된다.
 bool CollisionCheck(D3DXVECTOR3& max1, D3DXVECTOR3& min1, D3DXVECTOR3& max2, D3DXVECTOR3& min2, D3DXVECTOR3& shift, bool& x, bool& y, bool& z);

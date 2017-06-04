@@ -7,7 +7,7 @@
 #include "UIClass.h"
 
 // 바운딩 박스 개수
-#define OBJECT_CNT 69
+#define OBJECT_CNT 70
 
 // 바닥 개수
 #define FLOOR_CNT 28

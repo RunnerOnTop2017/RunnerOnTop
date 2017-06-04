@@ -857,6 +857,14 @@ void CDiffusedShader::BuildObjects(ID3D11Device *pd3dDevice)
 	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
 	m_ppObjects[n++] = pRotatingObject;
 
+	//점프 영역
+	pCubeMesh = new CCubeMesh(pd3dDevice, 1300, 1335.0f, 2900.0f, 3050.0f, -750.0f, -450.0f, JUMPAREA);
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+	m_ppObjects[n++] = pRotatingObject;
+
 
 	CreateShaderVariables(pd3dDevice);
 }

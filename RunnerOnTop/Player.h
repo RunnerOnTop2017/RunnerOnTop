@@ -14,7 +14,7 @@ class CPlayer : public CGameObject
 {
 protected:
 	// 길찾기용
-	int map[20][20];
+	int map[map_size_n][map_size_m];
 	node_pos currentPos;
 	std::vector<node_pos> route;
 	//플레이어의 위치 벡터, x-축(Right), y-축(Up), z-축(Look) 벡터이다.

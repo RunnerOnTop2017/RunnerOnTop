@@ -296,6 +296,7 @@ LRESULT CALLBACK CGameFramework::OnProcessingWindowMessage(HWND hWnd, UINT nMess
 	case WM_KEYUP:
 		OnProcessingKeyboardMessage(hWnd, nMessageID, wParam, lParam);
 		m_ppPlayers[0]->m_pState->ProcessInput(nMessageID, wParam, lParam);
+		//m_pNPC->m_pState->ProcessInput(nMessageID, wParam, lParam);
 		break;
 	}
 	return(0);
@@ -370,7 +371,7 @@ void CGameFramework::BuildObjects()
 	m_pNPC->SetGravity(D3DXVECTOR3(0.0f, -400.0f, 0.0f));
 	m_pNPC->SetMaxVelocityXZ(125.0f);
 	m_pNPC->SetMaxVelocityY(400.0f);
-	m_pNPC->SetPosition(D3DXVECTOR3(300.0f, 3500.0f, 3500.0f));
+	m_pNPC->SetPosition(D3DXVECTOR3(1628.0f, 3260.0f, 3240.0f));
 	m_pNPC->Rotate(0.0f, 180.0f, 0.0f);
 	pState = new CState();
 	pAnimationClip = new CAnimationClip();
