@@ -15,6 +15,7 @@ class CPlayer : public CGameObject
 protected:
 	// 길찾기용
 	int map[map_size_n][map_size_m];
+	int detailmap[map_size_n][map_size_m];
 	node_pos currentPos;
 	std::vector<node_pos> route;
 	//플레이어의 위치 벡터, x-축(Right), y-축(Up), z-축(Look) 벡터이다.
@@ -52,7 +53,7 @@ protected:
 	//3인칭 카메라일 때 플레이어를 그리기 위해 사용하는 쉐이더이다.
 	CAnimateShader *m_pShader;
 
-	CCubeMesh *pCollision;
+
 	int lastFloorIndex;
 public:
 	CPlayer();
@@ -115,6 +116,8 @@ public:
 
 	//플레이어의 카메라가 3인칭 카메라일 때 플레이어 메쉬를 렌더링한다.
 	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext);
+	virtual void ResetUpLookRight();
+	CCubeMesh *pCollision;
 };
 
 class CAirplanePlayer : public CPlayer
@@ -131,6 +134,7 @@ public:
 class CNPC : public CPlayer
 {
 public:
+	CPlayer *enemy;
 	CNPC(ID3D11Device *pd3dDevice, CAnimateShader* pShader);
 	~CNPC();
 

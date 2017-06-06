@@ -83,3 +83,5 @@ std::vector<node_pos> PathStringToNodeIndex(std::string path, node_pos pos);
 
 // 노드맵을 만들어줌 노드맵과 바운딩박스의 충돌여부가 마지막 bool값이면 벽을 만들어줌
 void CreateNodeMap(int map[map_size_n][map_size_m], D3DXVECTOR2 minMap, D3DXVECTOR2 maxMap, CDiffusedShader* pShader, int start_Obj, int cnt_Obj, bool dis);
+
+float GetDistance(float x1, float z1, float x2, float z2);
