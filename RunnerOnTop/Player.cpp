@@ -611,7 +611,7 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 			}
 			else if (CONDITIONER == tag)
 			{
-				m_d3dxvVelocity.x += 5.0f;
+				m_d3dxvVelocity.x += 3.0f;
 			}
 			else if (JUMPAREA == tag)
 			{
@@ -960,20 +960,49 @@ bool CNPC::OnPlayerUpdated(float fTimeElapsed)
 
 	if (pos.x != currentPos.x || pos.y != currentPos.y)
 	{
+		float mdx = (maxMap.x - minMap.x)/ map_size_n;
+		float mdy = (maxMap.y - minMap.y)/ map_size_m;
+		float dMx = (pos.x * mdx) + minMap.x + mdx;
+		float dmx = (pos.x * mdx) + minMap.x;
+
+		float dMz = (pos.y * mdy) + minMap.y + mdy;
+		float dmz = (pos.y * mdy) + minMap.y;
+		
+		for (int i = 0; i < map_size_n; ++i) for (int j = 0; j < map_size_m; ++j)
+			detailmap[i][j] = 0;
+
+		CreateNodeMap(detailmap, { dmx,dmz }, { dMx,dMz }, (CDiffusedShader*)m_pPlayerUpdatedContext, FLOOR_CNT, WALL_CNT, true);
+
+
 		path = pathFind(pos.x, pos.y,epos.x ,epos.y , map);
 		route.clear();
 		route = PathStringToNodeIndex(path, pos);
-		D3DXVECTOR3 look = GetLookVector();
+		
 
-		XMVECTOR v1 = { look.x, look.z };
+		
 		if (route.size() != 0)
 			tmp = NodeIndexToPosition(route[0], D_METER, minMap, maxMap);
-		XMVECTOR v2 = { tmp.x - d3dxv_center.x ,tmp.y - d3dxv_center.z };
-		XMVECTOR angle = XMVector2AngleBetweenVectors(v2, v1);
+		
 
+		if (path.length() != 0) {
+			int d = atoi(&path.at(0));
+			node_pos tpos = { pos.x - dx[d], pos.y - dy[d] };
+			switch (d)
+			{
+			case 0 : // ->
+				break;
+			case 2: // <-
+				break;
+			case 1:  // ¾Æ·¡
+				break;
+			case 3: // À§
+				break;
+			}
+
+
+		}
 	
-		float rad = XMVectorGetX(angle);
-		degree = XMConvertToDegrees(rad);
+		
 		if (path.length() != 0)
 		{
 			if (path.at(0) == '0')
@@ -1023,11 +1052,15 @@ bool CNPC::OnPlayerUpdated(float fTimeElapsed)
 
 
 		}
-		//Rotate(0.0f, degree, 0.0f);
-		//Rotate(D3DXVECTOR3(0.0f,1.0f,0.0f), degree);
-		//printf("NodeIndex : %d, %d\n", pos.x, pos.y);
+		
+
+		
+
 		currentPos.x = pos.x;
 		currentPos.y = pos.y;
+
+
+
 	}
 
 
@@ -1261,7 +1294,7 @@ bool CNPC::OnPlayerUpdated(float fTimeElapsed)
 			}
 			else if (CONDITIONER == tag)
 			{
-				m_d3dxvVelocity.x += 5.0f;
+				m_d3dxvVelocity.x += 3.0f;
 			}
 			else if(JUMPAREA == tag)
 			{

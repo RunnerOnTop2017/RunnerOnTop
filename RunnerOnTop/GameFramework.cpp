@@ -397,6 +397,7 @@ void CGameFramework::BuildObjects()
 	pState->SetTimer(&m_GameTimer);
 	m_pNPC->SetState(pState);
 	m_pNPC->enemy = m_ppPlayers[0];
+	m_pNPC->m_pState->SetState(STATE_RUN);
 }
 
 void CGameFramework::ReleaseObjects()
