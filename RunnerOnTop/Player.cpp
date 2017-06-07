@@ -722,7 +722,7 @@ void CAirplanePlayer::ChangeCamera(ID3D11Device *pd3dDevice, DWORD nNewCameraMod
 		m_pCamera = OnChangeCamera(pd3dDevice, FIRST_PERSON_CAMERA, nCurrentCameraMode);
 		m_pCamera->SetTimeLag(0.0f);
 		m_pCamera->SetOffset(D3DXVECTOR3(0.0f, 20.0f, 0.0f));
-		m_pCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 60.0f);
+		m_pCamera->GenerateProjectionMatrix(1.01f, 500000.0f, ASPECT_RATIO, 60.0f);
 		break;
 	case SPACESHIP_CAMERA:
 		//플레이어의 특성을 스페이스-쉽 카메라 모드에 맞게 변경한다. 중력은 적용하지 않는다.
@@ -985,7 +985,8 @@ bool CNPC::OnPlayerUpdated(float fTimeElapsed)
 		
 
 		if (path.length() != 0) {
-			int d = atoi(&path.at(0));
+			char c = path.at(0);
+			int d = c - '0';
 			node_pos tpos = { pos.x - dx[d], pos.y - dy[d] };
 			switch (d)
 			{
@@ -1232,6 +1233,7 @@ bool CNPC::OnPlayerUpdated(float fTimeElapsed)
 			// 문?
 			if (DOOR == tag)
 			{
+				bInteraction = true;
 				if (bInteraction)
 				{
 					if (pShader->m_ppObjects[i]->ref != NULL && pShader->m_ppObjects[i]->ref->bInteracted == false && Interacted_OBJ == NULL)
