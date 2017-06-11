@@ -35,10 +35,10 @@
 
 
 #include <xnamath.h>
-
+#include"RunnerOnTop.h"
 
 #define FRAME_BUFFER_WIDTH	GetSystemMetrics(SM_CXSCREEN) // 1600
-#define FRAME_BUFFER_HEIGHT	GetSystemMetrics(SM_CYSCREEN)//SM_CYSCREEN//900
+#define FRAME_BUFFER_HEIGHT	GetSystemMetrics(SM_CYSCREEN) //900
 #define VS_SLOT_VIEWPROJECTION_MATRIX	0x00
 #define VS_SLOT_WORLD_MATRIX			0x01
 #define PS_SLOT_COLOR	0x00
@@ -70,7 +70,10 @@
 const int map_size_n = 40;
 const int map_size_m = 40;
 #define D_METER 40
-
+enum GAMESTATENUM {
+	LOBBY, MAPMENU, INGAME, GAMEOVER, YOUWIN
+};
 
 // 첫번째 박스의 max. min, 두번째 박스의 max, min을 인자로 받아 충돌하면 true 아니면 false. 인자로 받은 x,y,z,에 x축과 y축 z축 에 대한 충돌세부사항이 저장된다.
 bool CollisionCheck(D3DXVECTOR3& max1, D3DXVECTOR3& min1, D3DXVECTOR3& max2, D3DXVECTOR3& min2, D3DXVECTOR3& shift, bool& x, bool& y, bool& z);
+

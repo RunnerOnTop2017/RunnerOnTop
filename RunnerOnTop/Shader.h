@@ -7,13 +7,13 @@
 #include "UIClass.h"
 
 // 바운딩 박스 개수
-#define OBJECT_CNT 70
+#define OBJECT_CNT 81
 
 // 바닥 개수
-#define FLOOR_CNT 28
+#define FLOOR_CNT 30
 
 //건물 개수
-#define WALL_CNT 58
+#define WALL_CNT 60
 
 struct VS_CB_WORLD_MATRIX
 {

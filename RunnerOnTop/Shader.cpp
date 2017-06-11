@@ -330,7 +330,24 @@ void CDiffusedShader::BuildObjects(ID3D11Device *pd3dDevice)
 
 	m_ppObjects[n++] = pRotatingObject;
 
-	pCubeMesh = new CCubeMesh(pd3dDevice, -55.0f, 595.0f, 3050.0f, 3275.0f, 1705.0f, 2653.0f);
+
+	pCubeMesh = new CCubeMesh(pd3dDevice, -55.0f, 595.0f, 3050.0f, 3275.0f, 1705.0f, 2025.0f);
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+
+	m_ppObjects[n++] = pRotatingObject;
+
+	pCubeMesh = new CCubeMesh(pd3dDevice, -55.0f, 595.0f, 3050.0f, 3275.0f, 2025.0f, 2333.0f);
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+
+	m_ppObjects[n++] = pRotatingObject;
+
+	pCubeMesh = new CCubeMesh(pd3dDevice, -55.0f, 595.0f, 3050.0f, 3275.0f, 2333.0f, 2653.0f);
 	pRotatingObject = new CGameObject();
 
 	pRotatingObject->SetMesh(pCubeMesh);
@@ -760,7 +777,7 @@ void CDiffusedShader::BuildObjects(ID3D11Device *pd3dDevice)
 	m_ppObjects[n++] = pRotatingObject;
 
 	// Ã¹¹øÂ° ¹® ÀÎÅÍ·¢Æ® ¿µ¿ª
-	pCubeMesh = new CCubeMesh(pd3dDevice, 270.0f, 330.0f, 3275.0f, 3360.0f, 3140.0f, 3180.0f, DOOR); // index = 58
+	pCubeMesh = new CCubeMesh(pd3dDevice, 270.0f, 330.0f, 3275.0f, 3360.0f, 3140.0f, 3180.0f, DOOR); // index = 60
 	pRotatingObject = new CGameObject();
 
 	pRotatingObject->SetMesh(pCubeMesh);
@@ -769,7 +786,7 @@ void CDiffusedShader::BuildObjects(ID3D11Device *pd3dDevice)
 	m_ppObjects[n++] = pRotatingObject;
 
 	// Ã¹¹øÂ° ¹® 
-	pCubeMesh = new CCubeMesh(pd3dDevice, 270.0f, 330.0f, 3275.0f, 3360.0f, 3100.0f, 3110.0f, REALDOOR); // index = 59
+	pCubeMesh = new CCubeMesh(pd3dDevice, 270.0f, 330.0f, 3275.0f, 3360.0f, 3100.0f, 3110.0f, REALDOOR); // index = 61
 	pRotatingObject = new CGameObject();
 
 	pRotatingObject->SetMesh(pCubeMesh);
@@ -850,7 +867,7 @@ void CDiffusedShader::BuildObjects(ID3D11Device *pd3dDevice)
 	
 
 	// ¹® µÚ ÆÄÀÌÇÁ
-	pCubeMesh = new CCubeMesh(pd3dDevice, 240.0f, 360.0f, 3275.0f, 3285.0f, 2995.0f, 3005.0f, PIPE);
+	pCubeMesh = new CCubeMesh(pd3dDevice, 240.0f, 360.0f, 3275.0f, 3285.0f, 2995.0f, 3005.0f, PIPE); // 70
 	pRotatingObject = new CGameObject();
 
 	pRotatingObject->SetMesh(pCubeMesh);
@@ -865,6 +882,79 @@ void CDiffusedShader::BuildObjects(ID3D11Device *pd3dDevice)
 	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
 	m_ppObjects[n++] = pRotatingObject;
 
+	//¹®
+	pCubeMesh = new CCubeMesh(pd3dDevice, 1570.0f, 1630.0f, 2985.0f, 3070.0f, -750.0f, -740.0f, REALDOOR);
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+	m_ppObjects[n++] = pRotatingObject;
+
+	pCubeMesh = new CCubeMesh(pd3dDevice, 1570.0f, 1630.0f, 2985.0f, 3070.0f, -710.0f, -670.0f, DOOR);
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+	m_ppObjects[n++] = pRotatingObject;
+
+	//¹®¿·
+	pCubeMesh = new CCubeMesh(pd3dDevice, 1630.0f, 1890.0f, 2985.0f, 3070.0f, -750.0f, -740.0f, FENCE);
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+	m_ppObjects[n++] = pRotatingObject;
+
+	pCubeMesh = new CCubeMesh(pd3dDevice, 1310.0f, 1570.0f, 2985.0f, 3070.0f, -750.0f, -740.0f, FENCE);
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+	m_ppObjects[n++] = pRotatingObject;
+
+
+
+	//°ñÀÎÁöÁ¡
+	pCubeMesh = new CCubeMesh(pd3dDevice, 1550, 1850.0f, 2700.0f, 2800.0f, -2600.0f, -2500.0f, GOAL);
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+	m_ppObjects[n++] = pRotatingObject;
+
+
+	//Ææ½º
+	pCubeMesh = new CCubeMesh(pd3dDevice, 920.0f, 990.0f, 3230.0f, 3315.0f, 1140.0f, 1180.0f, FENCEHOLE); // 77
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+	m_ppObjects[n++] = pRotatingObject;
+
+	//±¸¸Û¶Õ¸° Ææ½º ¸·Èù ¿µ¿ª
+	pCubeMesh = new CCubeMesh(pd3dDevice, 890.0f, 1020.0f, 3230.0f, 3315.0f, 1120.0f, 1130.0f, FENCE);
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+	m_ppObjects[n++] = pRotatingObject;
+
+	// ±× ¿·µé
+	pCubeMesh = new CCubeMesh(pd3dDevice, 1020.0f, 1280.0f, 3230.0f, 3315.0f, 1120.0f, 1130.0f, FENCE);
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+	m_ppObjects[n++] = pRotatingObject;
+
+	pCubeMesh = new CCubeMesh(pd3dDevice, 630.0f, 890.0f, 3230.0f, 3315.0f, 1120.0f, 1130.0f, FENCE); //80
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+	m_ppObjects[n++] = pRotatingObject;
+
+	
 
 	CreateShaderVariables(pd3dDevice);
 }
@@ -1542,16 +1632,20 @@ void CItemShader_Alpha::BuildObjects(ID3D11Device * pd3dDevice)
 	ID3D11ShaderResourceView *pd3dTexture = NULL;
 
 
-	m_nObjects = 8;
+	m_nObjects = 17;
 	m_ppObjects = new CGameObject*[m_nObjects];
 
 	CGameObject *pObject = NULL;
 
-	CTexture*  p_Texture = new CTexture(1);
+	CTexture*  p_Texture;
+	CMesh *pMesh;
+
+
+	p_Texture= new CTexture(1);
 	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Object\\Texture\\fence_2.png"), NULL, NULL, &pd3dTexture, NULL);
 	p_Texture->SetTexture(0, pd3dTexture, pd3dSamplerState);
 
-	CMesh *pMesh = new CItemMesh(pd3dDevice, "fence.src", true);
+	pMesh = new CItemMesh(pd3dDevice, "fence.src", true);
 
 
 	pObject = new CGameObject();
@@ -1716,6 +1810,199 @@ void CItemShader_Alpha::BuildObjects(ID3D11Device * pd3dDevice)
 
 
 
+	p_Texture = new CTexture(1);
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Object\\Texture\\fence_2.png"), NULL, NULL, &pd3dTexture, NULL);
+	p_Texture->SetTexture(0, pd3dTexture, pd3dSamplerState);
+
+	pMesh = new CItemMesh(pd3dDevice, "fence.src", true);
+
+
+	//µÎ¹øÂ° ±¸¸Û Ææ½º
+	pObject = new CGameObject();
+	pObject->SetMesh(pMesh);
+	pObject->SetMaterial(ppMaterials[0]);
+	pObject->SetTexture(p_Texture);
+	pObject->SetPosition(955.0f, 3230.0f, 1125.0f);
+	pObject->Rotate(&D3DXVECTOR3(1.0f, 0.0f, 0.0f), -90.0f);
+	p_Texture = new CTexture(1);
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Object\\texture\\fence_2_alpha.png"), NULL, NULL, &pd3dTexture, NULL);
+	p_Texture->SetTexture(0, pd3dTexture, pd3dSamplerState);
+	pObject->SetAlphaMap(p_Texture);
+
+	pObject->Scale(2.0f);
+
+	m_ppObjects[8] = pObject;
+
+
+
+	p_Texture = new CTexture(1);
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Object\\Texture\\fence_1.png"), NULL, NULL, &pd3dTexture, NULL);
+	p_Texture->SetTexture(0, pd3dTexture, pd3dSamplerState);
+	p_Texture2 = new CTexture(1);
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Object\\Texture\\fence_alpha.png"), NULL, NULL, &pd3dTexture, NULL);
+	p_Texture2->SetTexture(0, pd3dTexture, pd3dSamplerState);
+	pObject = new CGameObject();
+	pObject->SetMesh(pMesh);
+	pObject->SetMaterial(ppMaterials[0]);
+	//pObject->SetTexture(p_Texture);
+	pObject->SetPosition(825.0f, 3230.0f, 1125.0f);
+	pObject->Rotate(&D3DXVECTOR3(1.0f, 0.0f, 0.0f), -90.0f);
+
+
+	pObject->SetTexture(p_Texture);
+	pObject->SetAlphaMap(p_Texture2);
+	pObject->Scale(2.0f);
+
+	m_ppObjects[9] = pObject;
+
+
+	p_Texture = new CTexture(1);
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Object\\Texture\\fence_1.png"), NULL, NULL, &pd3dTexture, NULL);
+	p_Texture->SetTexture(0, pd3dTexture, pd3dSamplerState);
+	p_Texture2 = new CTexture(1);
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Object\\Texture\\fence_alpha.png"), NULL, NULL, &pd3dTexture, NULL);
+	p_Texture2->SetTexture(0, pd3dTexture, pd3dSamplerState);
+	pObject = new CGameObject();
+	pObject->SetMesh(pMesh);
+	pObject->SetMaterial(ppMaterials[0]);
+	
+	pObject->SetPosition(695.0f, 3230.0f, 1125.0f);
+	pObject->Rotate(&D3DXVECTOR3(1.0f, 0.0f, 0.0f), -90.0f);
+
+
+	pObject->SetTexture(p_Texture);
+	pObject->SetAlphaMap(p_Texture2);
+	pObject->Scale(2.0f);
+
+	m_ppObjects[10] = pObject;
+
+
+
+
+	p_Texture = new CTexture(1);
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Object\\Texture\\fence_1.png"), NULL, NULL, &pd3dTexture, NULL);
+	p_Texture->SetTexture(0, pd3dTexture, pd3dSamplerState);
+	p_Texture2 = new CTexture(1);
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Object\\Texture\\fence_alpha.png"), NULL, NULL, &pd3dTexture, NULL);
+	p_Texture2->SetTexture(0, pd3dTexture, pd3dSamplerState);
+	pObject = new CGameObject();
+	pObject->SetMesh(pMesh);
+	pObject->SetMaterial(ppMaterials[0]);
+
+	pObject->SetPosition(1085.0f, 3230.0f, 1125.0f);
+	pObject->Rotate(&D3DXVECTOR3(1.0f, 0.0f, 0.0f), -90.0f);
+
+
+	pObject->SetTexture(p_Texture);
+	pObject->SetAlphaMap(p_Texture2);
+	pObject->Scale(2.0f);
+
+	m_ppObjects[11] = pObject;
+
+	p_Texture = new CTexture(1);
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Object\\Texture\\fence_1.png"), NULL, NULL, &pd3dTexture, NULL);
+	p_Texture->SetTexture(0, pd3dTexture, pd3dSamplerState);
+	p_Texture2 = new CTexture(1);
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Object\\Texture\\fence_alpha.png"), NULL, NULL, &pd3dTexture, NULL);
+	p_Texture2->SetTexture(0, pd3dTexture, pd3dSamplerState);
+	pObject = new CGameObject();
+	pObject->SetMesh(pMesh);
+	pObject->SetMaterial(ppMaterials[0]);
+
+	pObject->SetPosition(1215.0f, 3230.0f, 1125.0f);
+	pObject->Rotate(&D3DXVECTOR3(1.0f, 0.0f, 0.0f), -90.0f);
+
+
+	pObject->SetTexture(p_Texture);
+	pObject->SetAlphaMap(p_Texture2);
+	pObject->Scale(2.0f);
+
+	m_ppObjects[12] = pObject;
+
+
+	p_Texture = new CTexture(1);
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Object\\Texture\\fence_1.png"), NULL, NULL, &pd3dTexture, NULL);
+	p_Texture->SetTexture(0, pd3dTexture, pd3dSamplerState);
+	p_Texture2 = new CTexture(1);
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Object\\Texture\\fence_alpha.png"), NULL, NULL, &pd3dTexture, NULL);
+	p_Texture2->SetTexture(0, pd3dTexture, pd3dSamplerState);
+	pObject = new CGameObject();
+	pObject->SetMesh(pMesh);
+	pObject->SetMaterial(ppMaterials[0]);
+
+	pObject->SetPosition(1695.0f, 2985.0f, -745.0f);
+	pObject->Rotate(&D3DXVECTOR3(1.0f, 0.0f, 0.0f), -90.0f);
+
+
+	pObject->SetTexture(p_Texture);
+	pObject->SetAlphaMap(p_Texture2);
+	pObject->Scale(2.0f);
+
+	m_ppObjects[13] = pObject;
+
+	p_Texture = new CTexture(1);
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Object\\Texture\\fence_1.png"), NULL, NULL, &pd3dTexture, NULL);
+	p_Texture->SetTexture(0, pd3dTexture, pd3dSamplerState);
+	p_Texture2 = new CTexture(1);
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Object\\Texture\\fence_alpha.png"), NULL, NULL, &pd3dTexture, NULL);
+	p_Texture2->SetTexture(0, pd3dTexture, pd3dSamplerState);
+	pObject = new CGameObject();
+	pObject->SetMesh(pMesh);
+	pObject->SetMaterial(ppMaterials[0]);
+
+	pObject->SetPosition(1375.0f, 2985.0f, -745.0f);
+	pObject->Rotate(&D3DXVECTOR3(1.0f, 0.0f, 0.0f), -90.0f);
+
+
+	pObject->SetTexture(p_Texture);
+	pObject->SetAlphaMap(p_Texture2);
+	pObject->Scale(2.0f);
+
+	m_ppObjects[14] = pObject;
+
+
+	p_Texture = new CTexture(1);
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Object\\Texture\\fence_1.png"), NULL, NULL, &pd3dTexture, NULL);
+	p_Texture->SetTexture(0, pd3dTexture, pd3dSamplerState);
+	p_Texture2 = new CTexture(1);
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Object\\Texture\\fence_alpha.png"), NULL, NULL, &pd3dTexture, NULL);
+	p_Texture2->SetTexture(0, pd3dTexture, pd3dSamplerState);
+	pObject = new CGameObject();
+	pObject->SetMesh(pMesh);
+	pObject->SetMaterial(ppMaterials[0]);
+
+	pObject->SetPosition(1505.0f, 2985.0f, -745.0f);
+	pObject->Rotate(&D3DXVECTOR3(1.0f, 0.0f, 0.0f), -90.0f);
+
+
+	pObject->SetTexture(p_Texture);
+	pObject->SetAlphaMap(p_Texture2);
+	pObject->Scale(2.0f);
+
+	m_ppObjects[15] = pObject;
+
+	p_Texture = new CTexture(1);
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Object\\Texture\\fence_1.png"), NULL, NULL, &pd3dTexture, NULL);
+	p_Texture->SetTexture(0, pd3dTexture, pd3dSamplerState);
+	p_Texture2 = new CTexture(1);
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Object\\Texture\\fence_alpha.png"), NULL, NULL, &pd3dTexture, NULL);
+	p_Texture2->SetTexture(0, pd3dTexture, pd3dSamplerState);
+	pObject = new CGameObject();
+	pObject->SetMesh(pMesh);
+	pObject->SetMaterial(ppMaterials[0]);
+
+	pObject->SetPosition(1825.0f, 2985.0f, -745.0f);
+	pObject->Rotate(&D3DXVECTOR3(1.0f, 0.0f, 0.0f), -90.0f);
+
+
+	pObject->SetTexture(p_Texture);
+	pObject->SetAlphaMap(p_Texture2);
+	pObject->Scale(2.0f);
+
+	m_ppObjects[16] = pObject;
+
+
+
 	CreateShaderVariables(pd3dDevice);
 	delete[] ppMaterials;
 }
@@ -1806,7 +2093,7 @@ void CItemShader_Door::BuildObjects(ID3D11Device * pd3dDevice)
 	ID3D11ShaderResourceView *pd3dTexture = NULL;
 
 
-	m_nObjects = 1;
+	m_nObjects = 2;
 	m_ppObjects = new CGameObject*[m_nObjects];
 	
 	CGameObject *pObject = NULL;
@@ -1828,8 +2115,22 @@ void CItemShader_Door::BuildObjects(ID3D11Device * pd3dDevice)
 	pObject->SetPosition(297.0f, 3260.0f, 3100.0f);
 	pObject->Rotate(&D3DXVECTOR3(1.0f, 0.0f, 0.0f), -90.0f);
 	pObject->Scale(0.5f);
-
+	
 	m_ppObjects[0] = pObject;
+
+
+	pObject = new CGameObject();
+	pObject->SetMesh(pMesh);
+	pObject->SetMaterial(ppMaterials[0]);
+	pObject->SetTexture(p_Texture);
+	pObject->SetPosition(1597.0f, 2970.0f, -750.0f);
+	pObject->Rotate(&D3DXVECTOR3(1.0f, 0.0f, 0.0f), -90.0f);
+	pObject->Scale(0.5f);
+	m_ppObjects[1] = pObject;
+
+
+
+
 
 	CreateShaderVariables(pd3dDevice);
 	delete[] ppMaterials;
@@ -1842,13 +2143,17 @@ void CItemShader_Door::ReleaseObjects()
 
 void CItemShader_Door::Render(ID3D11DeviceContext * pd3dDeviceContext, CCamera * pCamera, int index)
 {
-	int n = 0;
-	if (m_ppObjects[0]->bInteracted && m_ppObjects[0]->fAngeYaw >= -90.0f)
+	//int n = 0;
+	for (int i = 0; i < m_nObjects; ++i)
 	{
-		m_ppObjects[0]->MoveStrafe(30.0f);
-		m_ppObjects[0]->Rotate(&D3DXVECTOR3(0.0f, 0.0f, 1.0f), -5.0f);
-		m_ppObjects[0]->MoveStrafe(-30.0f);
+		if (m_ppObjects[i]->bInteracted && m_ppObjects[i]->fAngeYaw >= -90.0f)
+		{
+			m_ppObjects[i]->MoveStrafe(30.0f);
+			m_ppObjects[i]->Rotate(&D3DXVECTOR3(0.0f, 0.0f, 1.0f), -5.0f);
+			m_ppObjects[i]->MoveStrafe(-30.0f);
+		}
 	}
+
 	CTextureShader::Render(pd3dDeviceContext, pCamera, index);
 
 }

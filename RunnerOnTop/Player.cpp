@@ -2,7 +2,8 @@
 #include "Player.h"
 #include "PathFinder.h"
 
-
+extern GAMESTATENUM gameState;
+extern HWND mHwnd;
 CPlayer::CPlayer()
 {
 	m_pCamera = NULL;
@@ -424,9 +425,9 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 
 	
 #ifdef _DEBUG
-	//system("cls");
-	//printf("MAX[ %f | %f | %f ]\n", maxX, maxY, maxZ);
-	//printf("MIN[ %f | %f | %f ]\n", minX, minY, minZ);
+	system("cls");
+	printf("MAX[ %f | %f | %f ]\n", maxX, maxY, maxZ);
+	printf("MIN[ %f | %f | %f ]\n", minX, minY, minZ);
 	//node_pos pos = PositionToNodeIndex(d3dxv_center.x, d3dxv_center.z, D_METER, minMap, maxMap);
 	//std::cout << pos.x << "\t" << pos.y << std::endl;
 #endif
@@ -615,6 +616,13 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 			}
 			else if (JUMPAREA == tag)
 			{
+
+			}
+			else if (GOAL == tag)
+			{
+				gameState = YOUWIN;
+				InvalidateRect(mHwnd, NULL, false);
+				ReleaseCapture();
 
 			}
 			else
@@ -908,7 +916,7 @@ bool CNPC::OnPlayerUpdated(float fTimeElapsed)
 		map[29][31] = 1;
 		map[29][30] = 1;
 		map[29][29] = 1;
-
+		map[29][17] = 1;
 
 
 
@@ -952,6 +960,9 @@ bool CNPC::OnPlayerUpdated(float fTimeElapsed)
 	if( 50.0f>GetDistance(d3dxv_center.x, d3dxv_center.z, d3dxv_eCenter.x, d3dxv_eCenter.z))
 	{
 		if (m_pState->GetState() == STATE_RUN) m_pState->SetState(STATE_IDLE);
+		gameState = GAMEOVER;
+		InvalidateRect(mHwnd, NULL, false);
+		ReleaseCapture();
 	}
 	else
 	{
@@ -1068,7 +1079,7 @@ bool CNPC::OnPlayerUpdated(float fTimeElapsed)
 
 
 #ifdef _DEBUG
-	system("cls");
+	//system("cls");
 	//printf("MAX[ %f | %f | %f ]\n", maxX, maxY, maxZ);
 	//printf("MIN[ %f | %f | %f ]\n", minX, minY, minZ);
 	std::string str = "";
@@ -1104,13 +1115,13 @@ bool CNPC::OnPlayerUpdated(float fTimeElapsed)
 		str.append("\n");
 	}
 	//std::cout << str << std::endl;
-	printf("Position : %f, %f, %f\n", d3dxv_center.x, d3dxv_center.y, d3dxv_center.z);
-	printf("Node Pos : %d, %d\n", pos.x, pos.y);
-	printf("Current Path[0] : %c\n", path[0]);
-	printf("Node Center : %f, %f\n", tmp.x, tmp.y);
-	printf("Degree : %f\n", degree);
-	std::cout << path << std::endl;
-	std::cout << epos.x<<", "<< epos.y << std::endl;
+	//printf("Position : %f, %f, %f\n", d3dxv_center.x, d3dxv_center.y, d3dxv_center.z);
+	//printf("Node Pos : %d, %d\n", pos.x, pos.y);
+	//printf("Current Path[0] : %c\n", path[0]);
+	//printf("Node Center : %f, %f\n", tmp.x, tmp.y);
+	//printf("Degree : %f\n", degree);
+	//std::cout << path << std::endl;
+	//std::cout << epos.x<<", "<< epos.y << std::endl;
 #endif
 	CDiffusedShader *pShader = (CDiffusedShader*)m_pPlayerUpdatedContext;
 
@@ -1276,7 +1287,13 @@ bool CNPC::OnPlayerUpdated(float fTimeElapsed)
 			}
 			else if (FENCEHOLE == tag)
 			{
-				if (bInteraction)
+				if (pShader->m_ppObjects[i]->ref != NULL && Interacted_OBJ == NULL)
+				{
+					Interacted_OBJ = pShader->m_ppObjects[i];
+					m_pState->SetState(STATE_SLIDE);
+					
+				}
+				/*if (bInteraction)
 				{
 					if (pShader->m_ppObjects[i]->ref != NULL && Interacted_OBJ == NULL)
 					{
@@ -1284,7 +1301,7 @@ bool CNPC::OnPlayerUpdated(float fTimeElapsed)
 						m_pState->SetState(STATE_SLIDE);
 						bInteraction = false;
 					}
-				}
+				}*/
 			}
 			else if (PIPE == tag)
 			{
@@ -1306,7 +1323,7 @@ bool CNPC::OnPlayerUpdated(float fTimeElapsed)
 			}
 			else
 			{
-				std::cout << "WALL : " << i << std::endl;
+			
 				if (x == true)
 					m_d3dxvVelocity.x *= -1.0f;
 

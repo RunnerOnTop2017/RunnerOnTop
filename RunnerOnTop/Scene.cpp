@@ -59,15 +59,22 @@ void CScene::BuildObjects(ID3D11Device *pd3dDevice)
 	m_pUIShader->BuildObjects(pd3dDevice);
 
 	 //문
-	m_ppShaders[3]->m_ppObjects[58]->ref = m_ppShaders[2]->m_ppObjects[0];
-	m_ppShaders[3]->m_ppObjects[59]->ref = m_ppShaders[2]->m_ppObjects[0];
+	m_ppShaders[3]->m_ppObjects[60]->ref = m_ppShaders[2]->m_ppObjects[0];
+	m_ppShaders[3]->m_ppObjects[61]->ref = m_ppShaders[2]->m_ppObjects[0];
+
+	m_ppShaders[3]->m_ppObjects[72]->ref = m_ppShaders[2]->m_ppObjects[1];
+	m_ppShaders[3]->m_ppObjects[73]->ref = m_ppShaders[2]->m_ppObjects[1];
+
 
 	//펜스
-	m_ppShaders[3]->m_ppObjects[63]->ref = m_ppShaders[4]->m_ppObjects[0];
-	m_ppShaders[3]->m_ppObjects[64]->ref = m_ppShaders[4]->m_ppObjects[0];
+	m_ppShaders[3]->m_ppObjects[65]->ref = m_ppShaders[4]->m_ppObjects[0];
+	m_ppShaders[3]->m_ppObjects[66]->ref = m_ppShaders[4]->m_ppObjects[0];
+
+	m_ppShaders[3]->m_ppObjects[77]->ref = m_ppShaders[4]->m_ppObjects[8];
+	m_ppShaders[3]->m_ppObjects[78]->ref = m_ppShaders[4]->m_ppObjects[8];
 
 	//파이프
-	m_ppShaders[3]->m_ppObjects[68]->ref = m_ppShaders[1]->m_ppObjects[1];
+	m_ppShaders[3]->m_ppObjects[70]->ref = m_ppShaders[1]->m_ppObjects[1];
 
 	//캐릭터 쉐이더
 	m_pCharacters = new CAnimateShader();

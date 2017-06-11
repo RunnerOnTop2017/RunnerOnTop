@@ -226,7 +226,7 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 	case WM_LBUTTONUP:
 	case WM_RBUTTONUP:
 		//마우스 캡쳐를 해제한다.
-		ReleaseCapture();
+		//ReleaseCapture();
 		break;
 	}
 }

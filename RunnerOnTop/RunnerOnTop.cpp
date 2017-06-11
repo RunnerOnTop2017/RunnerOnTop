@@ -7,16 +7,17 @@
 
 
 #define MAX_LOADSTRING 100
-enum GAMESTATENUM {
-	LOBBY,MAPMENU ,INGAME
-};
+
 // 전역 변수:
 HINSTANCE hInst;								// 현재 인스턴스입니다.
 TCHAR szTitle[MAX_LOADSTRING];					// 제목 표시줄 텍스트입니다.
 TCHAR szWindowClass[MAX_LOADSTRING];			// 기본 창 클래스 이름입니다.
 CGameFramework gGameFramework;
 HINSTANCE ghInstance;
+
 GAMESTATENUM gameState;
+HWND mHwnd;
+
 // 이 코드 모듈에 들어 있는 함수의 정방향 선언입니다.
 ATOM				MyRegisterClass(HINSTANCE hInstance);
 BOOL				InitInstance(HINSTANCE, int);
@@ -52,7 +53,7 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
 	// 기본 메시지 루프입니다.
 	while (1)
 	{
-		if (gameState == LOBBY || gameState == MAPMENU)
+		if (gameState != INGAME)
 		{
 			if (::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 			{
@@ -158,6 +159,8 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 static HBITMAP bmp_background;
 static HBITMAP bmp_menu;
 static HBITMAP bmp_Map1;
+static HBITMAP bmp_over;
+static HBITMAP bmp_win;
 
 
 static BOOL start_mouse;
@@ -172,7 +175,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	int wmId, wmEvent;
 	PAINTSTRUCT ps;
 	HDC hdc;
-
+	mHwnd = hWnd;
 	
 	HDC hMemDC, hOldMemDC;
 	HBITMAP hBitmap, hOldBitmap;
@@ -203,6 +206,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		bmp_background = (HBITMAP)LoadImage(NULL, L"Data\\UI\\background.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);// (HBITMAP)LoadBitmap(g_hInstance, MAKEINTRESOURCE(IDB_BITMAP2));
 		bmp_menu = (HBITMAP)LoadImage(NULL, L"Data\\UI\\menu2.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 		bmp_Map1 = (HBITMAP)LoadImage(NULL, L"Data\\UI\\map1.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+		bmp_over = (HBITMAP)LoadImage(NULL, L"Data\\UI\\gameover.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+		bmp_win = (HBITMAP)LoadImage(NULL, L"Data\\UI\\youwin.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 
 		//InvalidateRect(hWnd, NULL, false);
 
@@ -289,6 +294,61 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 			DeleteDC(hMemDC);
 		}
+
+		else if (gameState == GAMEOVER)
+		{
+			GetClientRect(hWnd, &rt);
+
+			hMemDC = CreateCompatibleDC(hdc);
+			hBitmap = CreateCompatibleBitmap(hdc, 1280, 720);
+			hOldBitmap = (HBITMAP)SelectObject(hMemDC, hBitmap);
+
+			hOldMemDC = CreateCompatibleDC(hdc);
+
+			FillRect(hMemDC, &rt, WHITE_BRUSH);
+
+			// map1 그림 출력
+			SelectObject(hOldMemDC, bmp_over);
+			StretchBlt(hMemDC, 0, 0, 1280, 720, hOldMemDC, 0, 0, 1280, 720, SRCCOPY);
+
+		
+			DeleteDC(hOldMemDC);
+
+
+			StretchBlt(hdc, 0, 0, rt.right, rt.bottom, hMemDC, 0, 0, 1280, 720, SRCCOPY);
+
+			SelectObject(hMemDC, hOldBitmap);
+			DeleteObject(hBitmap);
+
+			DeleteDC(hMemDC);
+		}
+		else if (gameState == YOUWIN)
+		{
+			GetClientRect(hWnd, &rt);
+
+			hMemDC = CreateCompatibleDC(hdc);
+			hBitmap = CreateCompatibleBitmap(hdc, 1280, 720);
+			hOldBitmap = (HBITMAP)SelectObject(hMemDC, hBitmap);
+
+			hOldMemDC = CreateCompatibleDC(hdc);
+
+			FillRect(hMemDC, &rt, WHITE_BRUSH);
+
+			// map1 그림 출력
+			SelectObject(hOldMemDC, bmp_win);
+			StretchBlt(hMemDC, 0, 0, 1280, 720, hOldMemDC, 0, 0, 1280, 720, SRCCOPY);
+
+
+			DeleteDC(hOldMemDC);
+
+
+			StretchBlt(hdc, 0, 0, rt.right, rt.bottom, hMemDC, 0, 0, 1280, 720, SRCCOPY);
+
+			SelectObject(hMemDC, hOldBitmap);
+			DeleteObject(hBitmap);
+
+			DeleteDC(hMemDC);
+		}
 		EndPaint(hWnd, &ps);
 	}
 		
@@ -304,9 +364,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	case WM_MOUSEMOVE:
 	case WM_KEYDOWN:
 	case WM_KEYUP:
-		if(gameState == LOBBY || gameState == MAPMENU)
+		if(gameState != INGAME)
 			UIProcessMessage(hWnd, message, wParam, lParam);
-		else if(gameState == INGAME)
+		else
 			gGameFramework.OnProcessingWindowMessage(hWnd, message, wParam, lParam);
 		break;
 	default:
@@ -372,6 +432,11 @@ void UIProcessMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			{
 				gameState = LOBBY;
 			}
+		}
+		else if (gameState == GAMEOVER || gameState == YOUWIN)
+		{
+			gGameFramework.OnCreate(hInst, hWnd);
+			gameState = LOBBY;
 		}
 	
 		InvalidateRect(hWnd, NULL, false);
