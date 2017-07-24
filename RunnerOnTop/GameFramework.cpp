@@ -482,7 +482,7 @@ void CGameFramework::ProcessInput()
 	float timeElapsed = m_GameTimer.GetTimeElapsed();
 	m_ppPlayers[0]->Update(timeElapsed);
 	m_pNPC->Update(timeElapsed);
-	std::cout << "Ftime = " << timeElapsed << std::endl;
+	//std::cout << "Ftime = " << timeElapsed << std::endl;
 
 }
 

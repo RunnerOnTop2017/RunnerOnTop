@@ -425,9 +425,9 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 
 	
 #ifdef _DEBUG
-	system("cls");
+	/*system("cls");
 	printf("MAX[ %f | %f | %f ]\n", maxX, maxY, maxZ);
-	printf("MIN[ %f | %f | %f ]\n", minX, minY, minZ);
+	printf("MIN[ %f | %f | %f ]\n", minX, minY, minZ);*/
 	//node_pos pos = PositionToNodeIndex(d3dxv_center.x, d3dxv_center.z, D_METER, minMap, maxMap);
 	//std::cout << pos.x << "\t" << pos.y << std::endl;
 #endif
@@ -791,7 +791,7 @@ void CNPC::Render(ID3D11DeviceContext *pd3dDeviceContext)
 	if (m_pShader)
 	{
 		m_pShader->m_ppObjects[1]->m_d3dxmtxWorld = m_d3dxmtxWorld;
-		std::cout << GetPosition().x << std::endl;
+		//std::cout << GetPosition().x << std::endl;
 		//D3DXMATRIX matrix;
 		//D3DXMatrixTranslation(&matrix, 50.0f, 0.0f, 0.0f);
 		//m_pShader->m_ppObjects[1]->m_d3dxmtxWorld = matrix*m_d3dxmtxWorld;
@@ -932,11 +932,20 @@ bool CNPC::OnPlayerUpdated(float fTimeElapsed)
 	
 
 	node_pos pos = PositionToNodeIndex(d3dxv_center.x, d3dxv_center.z, D_METER, minMap, maxMap);
+
+	D3DXVECTOR4 minmax = NodeIndexToMinMax(pos, minMap, maxMap);
+
 	node_pos epos = PositionToNodeIndex(d3dxv_eCenter.x, d3dxv_eCenter.z, D_METER, minMap, maxMap);
 
 	static node_pos_float tmp;
 	static float degree;
 	static std::string path;
+	static std::string detailpath;
+	static int ex, ey;
+	static int detailPathIndex;
+	static node_pos dPos;
+	static bool detailcheck;
+	static node_pos start;
 
 	if( (pos.x == epos.x && pos.y == epos.y) && (pos.x != currentPos.x || pos.y != currentPos.y))
 	{
@@ -971,53 +980,48 @@ bool CNPC::OnPlayerUpdated(float fTimeElapsed)
 
 	if (pos.x != currentPos.x || pos.y != currentPos.y)
 	{
-		float mdx = (maxMap.x - minMap.x)/ map_size_n;
-		float mdy = (maxMap.y - minMap.y)/ map_size_m;
+		float mdx = (maxMap.x - minMap.x) / map_size_n;
+		float mdy = (maxMap.y - minMap.y) / map_size_m;
 		float dMx = (pos.x * mdx) + minMap.x + mdx;
 		float dmx = (pos.x * mdx) + minMap.x;
 
 		float dMz = (pos.y * mdy) + minMap.y + mdy;
 		float dmz = (pos.y * mdy) + minMap.y;
-		
+
 		for (int i = 0; i < map_size_n; ++i) for (int j = 0; j < map_size_m; ++j)
-			detailmap[i][j] = 0;
-
-		CreateNodeMap(detailmap, { dmx,dmz }, { dMx,dMz }, (CDiffusedShader*)m_pPlayerUpdatedContext, FLOOR_CNT, WALL_CNT, true);
+			detailmap[i][j] = 1;
 
 
-		path = pathFind(pos.x, pos.y,epos.x ,epos.y , map);
+
+		CreateNodeDetailMap(detailmap, { minmax.x,minmax.y }, { minmax.z, minmax.w }, (CDiffusedShader*)m_pPlayerUpdatedContext, WALL_CNT, OBJECT_CNT);
+
+
+		path = pathFind(pos.x, pos.y, epos.x, epos.y, map);
 		route.clear();
 		route = PathStringToNodeIndex(path, pos);
-		
-
-		
-		if (route.size() != 0)
-			tmp = NodeIndexToPosition(route[0], D_METER, minMap, maxMap);
-		
 
 		if (path.length() != 0) {
 			char c = path.at(0);
 			int d = c - '0';
-			node_pos tpos = { pos.x - dx[d], pos.y - dy[d] };
-			switch (d)
-			{
-			case 0 : // ->
-				break;
-			case 2: // <-
-				break;
-			case 1:  // ¾Æ·¡
-				break;
-			case 3: // À§
-				break;
-			}
+			FindEndPoint(ex, ey, d, detailmap);
+			currentPos.x = pos.x;
+			currentPos.y = pos.y;
+			start = PositionToNodeIndex(d3dxv_center.x, d3dxv_center.y, 40, { minmax.x, minmax.y }, { minmax.z, minmax.w });
 
-
+			detailpath = detailpathFind(start.x, start.y, ex, ey, detailmap);
+			detailPathIndex = 0;
+			dPos = start;
+			detailcheck = false;
 		}
+	}
 	
-		
-		if (path.length() != 0)
+	node_pos ndPos = PositionToNodeIndex(d3dxv_center.x, d3dxv_center.y, 40, { minmax.x, minmax.y }, { minmax.z, minmax.w });
+	if (dPos != ndPos || !detailcheck)
+	{
+		detailcheck = true;
+		if (detailpath.length() != 0)
 		{
-			if (path.at(0) == '0')
+			if (detailpath.at(detailPathIndex) == '0')
 			{
 				if (NPCDirection != 0)
 				{
@@ -1026,9 +1030,9 @@ bool CNPC::OnPlayerUpdated(float fTimeElapsed)
 					NPCDirection = 0;
 
 				}
-			
+
 			}
-			else if (path.at(0) == '3')
+			else if (detailpath.at(detailPathIndex) == '3')
 			{
 				if (NPCDirection != 3)
 				{
@@ -1037,9 +1041,9 @@ bool CNPC::OnPlayerUpdated(float fTimeElapsed)
 					NPCDirection = 3;
 
 				}
-			
+
 			}
-			else if (path.at(0) == '2')
+			else if (detailpath.at(detailPathIndex) == '2')
 			{
 				if (NPCDirection != 2)
 				{
@@ -1048,9 +1052,9 @@ bool CNPC::OnPlayerUpdated(float fTimeElapsed)
 					NPCDirection = 2;
 
 				}
-		
+
 			}
-			else if (path.at(0) == '1')
+			else if (detailpath.at(detailPathIndex) == '1')
 			{
 				if (NPCDirection != 1)
 				{
@@ -1059,29 +1063,27 @@ bool CNPC::OnPlayerUpdated(float fTimeElapsed)
 					NPCDirection = 1;
 
 				}
-			
+
 			}
-
-
 		}
-		
-
-		
-
-		currentPos.x = pos.x;
-		currentPos.y = pos.y;
-
-
-
+		dPos = ndPos;
+		detailPathIndex++;
 	}
+
+		
 
 
 
 
 #ifdef _DEBUG
-	//system("cls");
+	system("cls");
 	//printf("MAX[ %f | %f | %f ]\n", maxX, maxY, maxZ);
 	//printf("MIN[ %f | %f | %f ]\n", minX, minY, minZ);
+	printf("NPOS : %d, %d\n", pos.x, pos.y);
+	printf("DPOS : %d, %d\n", dPos.x, dPos.y);
+	printf("STAT : %d, %d\n", start.x, start.y);
+
+
 	std::string str = "";
 	
 	bool b = false;
@@ -1104,10 +1106,10 @@ bool CNPC::OnPlayerUpdated(float fTimeElapsed)
 			else if (b) 	std::cout << "¡Ý";
 			else if (map[x][y] == 0) std::cout << "¡Û";
 			else if (map[x][y] == 1) std::cout << "  ";*/
-			if (x == pos.x && y == pos.y) str.append("¢Á");
-			else if (b) 	str.append("¡Ý");
-			else if (map[x][y] == 0) str.append("¡Û");
-			else if (map[x][y] == 1) str.append("¡Ü");
+			if (x == dPos.x && y == dPos.y) str.append("¢Á");
+			//else if (b) 	str.append("¡Ý");
+			else if (detailmap[x][y] == 0) str.append("¡Û");
+			else if (detailmap[x][y] == 1) str.append("¡Ü");
 
 
 		}
