@@ -1006,7 +1006,7 @@ bool CNPC::OnPlayerUpdated(float fTimeElapsed)
 			FindEndPoint(ex, ey, d, detailmap);
 			currentPos.x = pos.x;
 			currentPos.y = pos.y;
-			start = PositionToNodeIndex(d3dxv_center.x, d3dxv_center.y, 40, { minmax.x, minmax.y }, { minmax.z, minmax.w });
+			start = PositionToNodeIndex(d3dxv_center.x, d3dxv_center.z, 40, { minmax.x, minmax.y }, { minmax.z, minmax.w });
 
 			detailpath = detailpathFind(start.x, start.y, ex, ey, detailmap);
 			detailPathIndex = 0;
@@ -1015,11 +1015,11 @@ bool CNPC::OnPlayerUpdated(float fTimeElapsed)
 		}
 	}
 	
-	node_pos ndPos = PositionToNodeIndex(d3dxv_center.x, d3dxv_center.y, 40, { minmax.x, minmax.y }, { minmax.z, minmax.w });
+	node_pos ndPos = PositionToNodeIndex(d3dxv_center.x, d3dxv_center.z, 40, { minmax.x, minmax.y }, { minmax.z, minmax.w });
 	if (dPos != ndPos || !detailcheck)
 	{
 		detailcheck = true;
-		if (detailpath.length() != 0)
+		if (detailpath.length() != 0 && detailPathIndex < detailpath.length())
 		{
 			if (detailpath.at(detailPathIndex) == '0')
 			{
@@ -1274,7 +1274,7 @@ bool CNPC::OnPlayerUpdated(float fTimeElapsed)
 			}
 			else if (FENCE == tag)
 			{
-				/*if (m_pState->GetState() != STATE_SLIDE)
+				if (m_pState->GetState() != STATE_SLIDE)
 				{
 				if (x == true)
 				m_d3dxvVelocity.x *= -1.0f;
@@ -1285,7 +1285,7 @@ bool CNPC::OnPlayerUpdated(float fTimeElapsed)
 				if (z == true)
 				m_d3dxvVelocity.z *= -1.0f;
 				m_pState->SetState(STATE_FALLBACK);
-				}*/
+				}
 			}
 			else if (FENCEHOLE == tag)
 			{

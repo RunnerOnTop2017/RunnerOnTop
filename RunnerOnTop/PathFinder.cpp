@@ -427,6 +427,7 @@ void CreateNodeDetailMap(int map[map_size_n][map_size_m], D3DXVECTOR2 minMap, D3
 			aabb1.Center = { centerx,2000.0f, centery };
 			aabb1.Extents = { m_dx / 2.0f, 1500.0f, m_dz / 2.0f };
 			int i = 0;
+			bool collisionCheck = false;
 			for (i = start_Obj; i < cnt_Obj; ++i)
 			{
 				OBJECTTAG tag = ((CCubeMesh*)Obj[i]->m_pMesh)->m_tag;
@@ -455,9 +456,23 @@ void CreateNodeDetailMap(int map[map_size_n][map_size_m], D3DXVECTOR2 minMap, D3
 
 					}
 				}
+				else if (tag == CONDITIONER)
+				{
+					if (true == XNA::IntersectAxisAlignedBoxAxisAlignedBox(&aabb1, &aabb2))
+					{
+						map[x][y] = 0;
+						break;
+
+					}
+				}
+				else if (true == XNA::IntersectAxisAlignedBoxAxisAlignedBox(&aabb1, &aabb2))
+				{
+					collisionCheck = true;
+				}
+				
 
 			}
-			if (i == cnt_Obj )
+			if (i == cnt_Obj && !collisionCheck)
 			{
 				map[x][y] = 0;
 			}
