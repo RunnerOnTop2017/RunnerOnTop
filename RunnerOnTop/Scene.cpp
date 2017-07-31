@@ -2,7 +2,7 @@
 #include "Scene.h"
 
 
-CScene::CScene()
+CScene::CScene(int mapNum)
 {
 	m_ppShaders = NULL;
 	m_nShaders = 0;
@@ -10,6 +10,7 @@ CScene::CScene()
 	//m_nObjects = 0;
 	m_pLights = NULL;
 	m_pSkybox = NULL;
+	MapNumber = mapNum;
 }
 
 
@@ -26,7 +27,8 @@ void CScene::BuildObjects(ID3D11Device *pd3dDevice)
 	// 맵
 	m_ppShaders[0] = new CTextureShader();
 	m_ppShaders[0]->CreateShader(pd3dDevice);
-	m_ppShaders[0]->BuildObjects(pd3dDevice);
+	m_ppShaders[0]->BuildObjects(pd3dDevice, MapNumber);
+	printf("%d", MapNumber);
 
 	//기타 아이템
 	m_ppShaders[1] = new CItemShader();
@@ -41,7 +43,7 @@ void CScene::BuildObjects(ID3D11Device *pd3dDevice)
 	// 바운딩박스
 	m_ppShaders[3] = new CDiffusedShader();
 	m_ppShaders[3]->CreateShader(pd3dDevice);
-	m_ppShaders[3]->BuildObjects(pd3dDevice);
+	m_ppShaders[3]->BuildObjects(pd3dDevice, MapNumber);
 
 	// 마지막 알파맵
 	m_ppShaders[4] = new CItemShader_Alpha();
@@ -57,6 +59,9 @@ void CScene::BuildObjects(ID3D11Device *pd3dDevice)
 	m_pUIShader = new CUIShader();
 	m_pUIShader->CreateShader(pd3dDevice);
 	m_pUIShader->BuildObjects(pd3dDevice);
+
+	if (MapNumber == 1)
+	{
 
 	 //문
 	m_ppShaders[3]->m_ppObjects[60]->ref = m_ppShaders[2]->m_ppObjects[0];
@@ -75,6 +80,7 @@ void CScene::BuildObjects(ID3D11Device *pd3dDevice)
 
 	//파이프
 	m_ppShaders[3]->m_ppObjects[70]->ref = m_ppShaders[1]->m_ppObjects[1];
+	}
 
 	//캐릭터 쉐이더
 	m_pCharacters = new CAnimateShader();

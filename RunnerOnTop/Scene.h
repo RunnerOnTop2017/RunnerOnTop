@@ -40,11 +40,11 @@ class CScene
 {
 private:
 	
-
+	int MapNumber;
 	//CGameObject **m_ppObjects;
 	//int m_nObjects;
 public:
-	CScene();
+	CScene(int mapNum = 1);
 	~CScene();
 	bool OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 	bool OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);

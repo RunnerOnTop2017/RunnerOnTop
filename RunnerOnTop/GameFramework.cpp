@@ -27,16 +27,16 @@ CGameFramework::~CGameFramework()
 }
 
 //다음 함수는 응용 프로그램이 실행되면 호출된다는 것에 유의하라. 
-bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hMainWnd)
+bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hMainWnd, int MapNumber)
 {
 	m_hInstance = hInstance;
 	m_hWnd = hMainWnd;
 
 	//Direct3D 디바이스, 디바이스 컨텍스트, 스왑 체인 등을 생성하는 함수를 호출한다. 
 	if (!CreateDirect3DDisplay()) return(false);
-
+	
 	//렌더링할 객체(게임 월드 객체)를 생성한다. 
-	BuildObjects();
+	BuildObjects(MapNumber);
 
 	return(true);
 }
@@ -316,9 +316,9 @@ void CGameFramework::OnDestroy()
 	if (m_pd3dDevice) m_pd3dDevice->Release();
 }
 
-void CGameFramework::BuildObjects()
+void CGameFramework::BuildObjects(int mapNum)
 {
-	m_pScene = new CScene();
+	m_pScene = new CScene(mapNum);
 	if (m_pScene)
 	{
 		m_pScene->BuildObjects(m_pd3dDevice);
@@ -525,7 +525,7 @@ void CGameFramework::FrameAdvance()
 	{
 		m_pNPC->UpdateShaderVariables(m_pd3dDeviceContext);
 		
-		m_pNPC->SetPlayerUpdatedContext(m_pScene->m_ppShaders[3]);
+		//m_pNPC->SetPlayerUpdatedContext(m_pScene->m_ppShaders[3]);
 		m_pNPC->Render(m_pd3dDeviceContext);
 	}
 	if (m_pScene) m_pScene->Render(m_pd3dDeviceContext, pCamera);

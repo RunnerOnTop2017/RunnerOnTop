@@ -306,14 +306,18 @@ void CMeshIlluminated::Render(ID3D11DeviceContext *pd3dImmediateDeviceContext)
 	CMesh::Render(pd3dImmediateDeviceContext);
 }
 
-CMeshTextured::CMeshTextured(ID3D11Device *pd3dDevice, float fWidth, float fHeight, float fDepth) : CMeshIlluminated(pd3dDevice)
+CMeshTextured::CMeshTextured(ID3D11Device *pd3dDevice, int mapNum) : CMeshIlluminated(pd3dDevice)
 {
 	//m_nVertices;
 	m_nStride = sizeof(CTexturedNormalVertexUVW);
 	m_nOffset = 0;
 	m_d3dPrimitiveTopology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-
-	FILE *fp = fopen("Data\\Maps\\map01.src", "rb");
+	
+	FILE *fp;
+	if (mapNum == 1)
+		fp = fopen("Data\\Maps\\map01.src", "rb");
+	else
+		fp = fopen("Data\\Maps\\map02.src", "rb");
 	int size;
 	fread((char*)&size, sizeof(int), 1, fp);
 	m_pVertices = new CTexturedNormalVertexUVW[size];

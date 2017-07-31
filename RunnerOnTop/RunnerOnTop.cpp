@@ -159,6 +159,8 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 static HBITMAP bmp_background;
 static HBITMAP bmp_menu;
 static HBITMAP bmp_Map1;
+static HBITMAP bmp_Map2;
+
 static HBITMAP bmp_over;
 static HBITMAP bmp_win;
 
@@ -206,6 +208,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		bmp_background = (HBITMAP)LoadImage(NULL, L"Data\\UI\\background.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);// (HBITMAP)LoadBitmap(g_hInstance, MAKEINTRESOURCE(IDB_BITMAP2));
 		bmp_menu = (HBITMAP)LoadImage(NULL, L"Data\\UI\\menu2.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 		bmp_Map1 = (HBITMAP)LoadImage(NULL, L"Data\\UI\\map1.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+		bmp_Map2 = (HBITMAP)LoadImage(NULL, L"Data\\UI\\1_map2.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 		bmp_over = (HBITMAP)LoadImage(NULL, L"Data\\UI\\gameover.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 		bmp_win = (HBITMAP)LoadImage(NULL, L"Data\\UI\\youwin.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 
@@ -270,6 +273,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			// map2 그림 출력 (현재는 없음)
 			RECT bm2 = { 750, 100,  1150,500 };
 			FillRect(hMemDC, &bm2, CreateSolidBrush(BLACK_BRUSH));
+
+			SelectObject(hOldMemDC, bmp_Map2);
+			StretchBlt(hMemDC, 750, 100, 400, 400, hOldMemDC, 0, 0, 400, 400, SRCCOPY);
 
 			SelectObject(hOldMemDC, bmp_menu);
 
@@ -420,11 +426,14 @@ void UIProcessMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			//map1
 			if ((rt.right * (220.0f / 1280.0f) < mx && mx < rt.right * (350.0f / 1280.0f)) && (rt.bottom * (540.0f / 720.0f) < my && my < rt.bottom * (600.0f / 720.0f)))
 			{
+				gGameFramework.OnCreate(hInst, hWnd, 1);
 				gameState = INGAME;
 			}
 			//map2
 			else if ((rt.right * (900.0f / 1280.0f) < mx && mx < rt.right * (1030.0f / 1280.0f)) && (rt.bottom * (540.0f / 720.0f) < my && my < rt.bottom * (600.0f / 720.0f)))
 			{
+				gGameFramework.OnCreate(hInst, hWnd,2);
+				gameState = INGAME;
 
 			}
 			// back
@@ -435,7 +444,7 @@ void UIProcessMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		}
 		else if (gameState == GAMEOVER || gameState == YOUWIN)
 		{
-			gGameFramework.OnCreate(hInst, hWnd);
+		
 			gameState = LOBBY;
 		}
 	

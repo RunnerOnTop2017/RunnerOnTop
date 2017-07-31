@@ -6,14 +6,7 @@
 #include"GameObject.h"
 #include "UIClass.h"
 
-// 바운딩 박스 개수
-#define OBJECT_CNT 81
 
-// 바닥 개수
-#define FLOOR_CNT 30
-
-//건물 개수
-#define WALL_CNT 60
 
 struct VS_CB_WORLD_MATRIX
 {
@@ -47,6 +40,8 @@ public:
 	virtual void UpdateShaderVariables(ID3D11DeviceContext *pd3dDeviceContext, D3DXMATRIX *pd3dTransform, int AnimationSize);
 
 	virtual void BuildObjects(ID3D11Device *pd3dDevice);
+	virtual void BuildObjects(ID3D11Device *pd3dDevice, int a) {};
+
 	virtual void ReleaseObjects();
 	virtual void AnimateObjects(ID3D11Device *pd3dDevice, float fTimeElapsed);
 	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamera = NULL, int index = -1);
@@ -77,11 +72,22 @@ class CDiffusedShader : public CShader
 public:
 	CDiffusedShader();
 	~CDiffusedShader();
+	// 바운딩 박스 개수
+	int OBJECT_CNT; 
+		// 바닥 개수
+	int FLOOR_CNT; 
+
+		//건물 개수
+	int WALL_CNT; 
+
 
 	virtual void CreateShader(ID3D11Device *pd3dDevice);
 	virtual void CreateShaderVariables(ID3D11Device *pd3dDevice);
 	virtual void UpdateShaderVariables(ID3D11DeviceContext *pd3dDeviceContext, D3DXMATRIX *pd3dxmtxWorld = NULL);
-	virtual void BuildObjects(ID3D11Device *pd3dDevice);
+	virtual void BuildObjects(ID3D11Device *pd3dDevice, int mapNumber=1);
+	void BuildMap1(ID3D11Device *pd3dDevice);
+	void BuildMap2(ID3D11Device *pd3dDevice);
+
 	virtual void ReleaseObjects();
 	virtual void AnimateObjects(ID3D11Device *pd3dDevice, float fTimeElapsed);
 	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamera = NULL);
@@ -99,7 +105,7 @@ public:
 	virtual void UpdateShaderVariables(ID3D11DeviceContext *pd3dDeviceContext, MATERIAL *pMaterial = NULL);
 	virtual void UpdateShaderVariables(ID3D11DeviceContext *pd3dDeviceContext, CTexture *pTexture);
 	
-	virtual void BuildObjects(ID3D11Device *pd3dDevice);
+	virtual void BuildObjects(ID3D11Device *pd3dDevice, int mapNumber = 1);
 	virtual void ReleaseObjects();
 	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamera = NULL, int index=-1);
 };

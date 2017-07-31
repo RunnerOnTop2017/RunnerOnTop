@@ -425,9 +425,9 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 
 	
 #ifdef _DEBUG
-	/*system("cls");
+	system("cls");
 	printf("MAX[ %f | %f | %f ]\n", maxX, maxY, maxZ);
-	printf("MIN[ %f | %f | %f ]\n", minX, minY, minZ);*/
+	printf("MIN[ %f | %f | %f ]\n", minX, minY, minZ);
 	//node_pos pos = PositionToNodeIndex(d3dxv_center.x, d3dxv_center.z, D_METER, minMap, maxMap);
 	//std::cout << pos.x << "\t" << pos.y << std::endl;
 #endif
@@ -435,7 +435,9 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 
 	int nObjects = pShader->m_nObjects;
 	
-
+	int OBJECT_CNT = pShader->OBJECT_CNT;
+	int FLOOR_CNT = pShader->FLOOR_CNT;
+	int WALL_CNT = pShader->WALL_CNT;
 
 
 	// 바닥 충돌 체크
@@ -875,6 +877,10 @@ bool CNPC::OnPlayerUpdated(float fTimeElapsed)
 	D3DXVECTOR3 d3dxv_eMin = { minX, minY, minZ };
 	D3DXVECTOR3 d3dxv_eCenter = (d3dxv_eMax + d3dxv_eMin) / 2.0f;
 
+	CDiffusedShader *pShader = (CDiffusedShader*)m_pPlayerUpdatedContext;
+	int OBJECT_CNT = pShader->OBJECT_CNT;
+	int FLOOR_CNT = pShader->FLOOR_CNT;
+	int WALL_CNT = pShader->WALL_CNT;
 
 	if (currentPos.x == -1 && currentPos.y == -1)
 	{
@@ -975,7 +981,8 @@ bool CNPC::OnPlayerUpdated(float fTimeElapsed)
 	}
 	else
 	{
-		if (m_pState->GetState() == STATE_IDLE) m_pState->SetState(STATE_RUN);
+		
+		if (m_pState->GetState() == STATE_IDLE && detailpath.length() != 0) m_pState->SetState(STATE_RUN);
 	}
 
 	if (pos.x != currentPos.x || pos.y != currentPos.y)
@@ -1007,8 +1014,17 @@ bool CNPC::OnPlayerUpdated(float fTimeElapsed)
 			currentPos.x = pos.x;
 			currentPos.y = pos.y;
 			start = PositionToNodeIndex(d3dxv_center.x, d3dxv_center.z, 40, { minmax.x, minmax.y }, { minmax.z, minmax.w });
-
 			detailpath = detailpathFind(start.x, start.y, ex, ey, detailmap);
+
+			if (detailpath.length() == 0)
+			{
+				d = (d + 1) % 4;
+				FindEndPoint(ex, ey, d, detailmap);
+				start = PositionToNodeIndex(d3dxv_center.x, d3dxv_center.z, 40, { minmax.x, minmax.y }, { minmax.z, minmax.w });
+				detailpath = detailpathFind(start.x, start.y, ex, ey, detailmap);
+				
+			}
+
 			detailPathIndex = 0;
 			dPos = start;
 			detailcheck = false;
@@ -1066,6 +1082,10 @@ bool CNPC::OnPlayerUpdated(float fTimeElapsed)
 
 			}
 		}
+		else
+		{
+			m_pState->SetState(STATE_IDLE);
+		}
 		dPos = ndPos;
 		detailPathIndex++;
 	}
@@ -1076,12 +1096,12 @@ bool CNPC::OnPlayerUpdated(float fTimeElapsed)
 
 
 #ifdef _DEBUG
-	system("cls");
+	//system("cls");
 	//printf("MAX[ %f | %f | %f ]\n", maxX, maxY, maxZ);
 	//printf("MIN[ %f | %f | %f ]\n", minX, minY, minZ);
-	printf("NPOS : %d, %d\n", pos.x, pos.y);
-	printf("DPOS : %d, %d\n", dPos.x, dPos.y);
-	printf("STAT : %d, %d\n", start.x, start.y);
+	//printf("NPOS : %d, %d\n", pos.x, pos.y);
+	//printf("DPOS : %d, %d\n", dPos.x, dPos.y);
+	//printf("STAT : %d, %d\n", start.x, start.y);
 
 
 	std::string str = "";
@@ -1125,7 +1145,7 @@ bool CNPC::OnPlayerUpdated(float fTimeElapsed)
 	//std::cout << path << std::endl;
 	//std::cout << epos.x<<", "<< epos.y << std::endl;
 #endif
-	CDiffusedShader *pShader = (CDiffusedShader*)m_pPlayerUpdatedContext;
+	//CDiffusedShader *pShader = (CDiffusedShader*)m_pPlayerUpdatedContext;
 
 	int nObjects = pShader->m_nObjects;
 

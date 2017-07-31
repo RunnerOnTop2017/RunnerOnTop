@@ -27,7 +27,7 @@ private:
 	int m_nPlayers;
 	CPlayer **m_ppPlayers;
 	CNPC *m_pNPC;
-
+	int mNum;
 private:
 	ID3D11Texture2D *m_pd3dDepthStencilBuffer;
 	ID3D11DepthStencilView *m_pd3dDepthStencilView;
@@ -40,7 +40,7 @@ public:
 	CGameFramework();
 	~CGameFramework();
 
-	bool OnCreate(HINSTANCE hInstance, HWND hMainWnd);
+	bool OnCreate(HINSTANCE hInstance, HWND hMainWnd, int MapNumber = 1);
 	void OnDestroy();
 
 	//디바이스, 스왑 체인, 디바이스 컨텍스트, 디바이스와 관련된 뷰를 생성하는 함수이다. 
@@ -50,7 +50,7 @@ public:
 	bool CreateDirect3DDisplay();
 
 	//렌더링할 메쉬, 객체를 생성하고 소멸하는 함수이다. 
-	void BuildObjects();
+	void BuildObjects(int mapNum = 1);
 	void ReleaseObjects();
 
 	//프레임워크의 핵심(사용자 입력, 애니메이션, 렌더링)을 구성하는 함수이다. 

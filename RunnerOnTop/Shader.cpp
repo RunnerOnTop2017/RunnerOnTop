@@ -255,6 +255,9 @@ CGameObject * CShader::GetGameObject(int index)
 
 CDiffusedShader::CDiffusedShader()
 {
+	OBJECT_CNT = 81;
+	FLOOR_CNT = 30;
+	WALL_CNT = 60;
 }
 
 CDiffusedShader::~CDiffusedShader()
@@ -284,21 +287,42 @@ void CDiffusedShader::UpdateShaderVariables(ID3D11DeviceContext *pd3dDeviceConte
 	CShader::UpdateShaderVariables(pd3dDeviceContext, pd3dxmtxWorld);
 }
 
-void CDiffusedShader::BuildObjects(ID3D11Device *pd3dDevice)
+void CDiffusedShader::BuildObjects(ID3D11Device *pd3dDevice, int mapNumber)
 {
-	
-	m_nObjects = OBJECT_CNT;
+	if (mapNumber == 1)
+	{
+		OBJECT_CNT = 81;
+		FLOOR_CNT = 30;
+		WALL_CNT = 60;
+		m_nObjects = OBJECT_CNT;
+		BuildMap1(pd3dDevice);
+	}
+	else
+	{
+		OBJECT_CNT = 3;
+		FLOOR_CNT = 3;
+		WALL_CNT = 3;
+		m_nObjects = OBJECT_CNT;
+		BuildMap2(pd3dDevice);
+
+	}
+
+	CreateShaderVariables(pd3dDevice);
+}
+
+void CDiffusedShader::BuildMap1(ID3D11Device *pd3dDevice)
+{
 	m_ppObjects = new CGameObject*[m_nObjects];
 	int n = 0;
 	CGameObject *pRotatingObject = new CGameObject();
-	CMesh *pCubeMesh = new CCubeMesh(pd3dDevice, -3000.0f, 3000.0f, 0.0f, 3050.0f, 0.0f, 3800.0f,FALL);
+	CMesh *pCubeMesh = new CCubeMesh(pd3dDevice, -3000.0f, 3000.0f, 0.0f, 3050.0f, 0.0f, 3800.0f, FALL);
 
 	pRotatingObject->SetMesh(pCubeMesh);
 	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
 
 	m_ppObjects[n++] = pRotatingObject;
 
-	pCubeMesh = new CCubeMesh(pd3dDevice, -3000.0f, 3000.0f, 0.0f, 2580.0f, -3800.0f, 0.0f,FALL);
+	pCubeMesh = new CCubeMesh(pd3dDevice, -3000.0f, 3000.0f, 0.0f, 2580.0f, -3800.0f, 0.0f, FALL);
 	pRotatingObject = new CGameObject();
 
 	pRotatingObject->SetMesh(pCubeMesh);
@@ -428,7 +452,7 @@ void CDiffusedShader::BuildObjects(ID3D11Device *pd3dDevice)
 
 	m_ppObjects[n++] = pRotatingObject;
 
-	
+
 	pCubeMesh = new CCubeMesh(pd3dDevice, 625.0f, 1280.0f, 2918.0f, 3143.0f, 490.0f, 810.0f);//index =  15
 	pRotatingObject = new CGameObject();
 
@@ -558,7 +582,7 @@ void CDiffusedShader::BuildObjects(ID3D11Device *pd3dDevice)
 
 	m_ppObjects[n++] = pRotatingObject;
 
-	pCubeMesh = new CCubeMesh(pd3dDevice, 635.0f, 810.0f, 3143.0f, 3189.0f, 720.0f, 810.0f,OBJ);
+	pCubeMesh = new CCubeMesh(pd3dDevice, 635.0f, 810.0f, 3143.0f, 3189.0f, 720.0f, 810.0f, OBJ);
 	pRotatingObject = new CGameObject();
 
 	pRotatingObject->SetMesh(pCubeMesh);
@@ -566,7 +590,7 @@ void CDiffusedShader::BuildObjects(ID3D11Device *pd3dDevice)
 
 	m_ppObjects[n++] = pRotatingObject;
 
-	pCubeMesh = new CCubeMesh(pd3dDevice, 635.0f, 810.0f, 3078.0f, 3124.0f, 83.0f, 173.0f,OBJ);
+	pCubeMesh = new CCubeMesh(pd3dDevice, 635.0f, 810.0f, 3078.0f, 3124.0f, 83.0f, 173.0f, OBJ);
 	pRotatingObject = new CGameObject();
 
 	pRotatingObject->SetMesh(pCubeMesh);
@@ -825,7 +849,7 @@ void CDiffusedShader::BuildObjects(ID3D11Device *pd3dDevice)
 	//±¸¸Û¶Õ¸° Ææ½º ÀÎÅÍ·¢Æ¼ºê ¿µ¿ª
 
 	//¾Õ
-	pCubeMesh = new CCubeMesh(pd3dDevice, 220.0f, 290.0f, 3275.0f, 3360.0f, 2020.0f, 2050.0f, FENCEHOLE);
+	pCubeMesh = new CCubeMesh(pd3dDevice, 230.0f, 280.0f, 3275.0f, 3360.0f, 2020.0f, 2050.0f, FENCEHOLE);
 	pRotatingObject = new CGameObject();
 
 	pRotatingObject->SetMesh(pCubeMesh);
@@ -833,12 +857,16 @@ void CDiffusedShader::BuildObjects(ID3D11Device *pd3dDevice)
 	m_ppObjects[n++] = pRotatingObject;
 
 	//µÚ
-	pCubeMesh = new CCubeMesh(pd3dDevice, 220.0f, 290.0f, 3275.0f, 3360.0f, 1950.0f, 1980.0f, FENCEHOLE);
+	pCubeMesh = new CCubeMesh(pd3dDevice, 230.0f, 280.0f, 3275.0f, 3360.0f, 1950.0f, 1980.0f, FENCEHOLE);
 	pRotatingObject = new CGameObject();
 
 	pRotatingObject->SetMesh(pCubeMesh);
 	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
 	m_ppObjects[n++] = pRotatingObject;
+
+	m_ppObjects[n - 1]->ref = m_ppObjects[n - 2];
+	m_ppObjects[n - 2]->ref = m_ppObjects[n - 1];
+
 
 
 	//±¸¸Û¶Õ¸° Ææ½º ¸·Èù ¿µ¿ª
@@ -864,7 +892,7 @@ void CDiffusedShader::BuildObjects(ID3D11Device *pd3dDevice)
 	pRotatingObject->SetMesh(pCubeMesh);
 	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
 	m_ppObjects[n++] = pRotatingObject;
-	
+
 
 	// ¹® µÚ ÆÄÀÌÇÁ
 	pCubeMesh = new CCubeMesh(pd3dDevice, 240.0f, 360.0f, 3275.0f, 3285.0f, 2995.0f, 3005.0f, PIPE); // 70
@@ -953,10 +981,36 @@ void CDiffusedShader::BuildObjects(ID3D11Device *pd3dDevice)
 	pRotatingObject->SetMesh(pCubeMesh);
 	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
 	m_ppObjects[n++] = pRotatingObject;
+}
 
-	
+void CDiffusedShader::BuildMap2(ID3D11Device * pd3dDevice)
+{
+	m_ppObjects = new CGameObject*[m_nObjects];
+	int n = 0;
+	CGameObject *pRotatingObject = new CGameObject();
+	CMesh *pCubeMesh = new CCubeMesh(pd3dDevice, -3000.0f, 3000.0f, 0.0f, 3050.0f, 0.0f, 3800.0f, FALL);
 
-	CreateShaderVariables(pd3dDevice);
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+
+	m_ppObjects[n++] = pRotatingObject;
+
+	pCubeMesh = new CCubeMesh(pd3dDevice, -3000.0f, 3000.0f, 0.0f, 2580.0f, -3800.0f, 0.0f, FALL);
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+
+	m_ppObjects[n++] = pRotatingObject;
+
+	pCubeMesh = new CCubeMesh(pd3dDevice, -55.0f, 590.0f, 3050.0f, 3275.0f, 3300.0f, 3605.0f);
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+
+	m_ppObjects[n++] = pRotatingObject;
+
 }
 
 void CDiffusedShader::ReleaseObjects()
@@ -1018,7 +1072,7 @@ void CTextureShader::UpdateShaderVariables(ID3D11DeviceContext * pd3dDeviceConte
 {
 	CShader::UpdateShaderVariables(pd3dDeviceContext, pMaterial);
 }
-void CTextureShader::BuildObjects(ID3D11Device * pd3dDevice)
+void CTextureShader::BuildObjects(ID3D11Device * pd3dDevice, int mapNumber)
 {
 	CMaterial **ppMaterials = new CMaterial*[1];
 	ppMaterials[0] = new CMaterial();
@@ -1041,15 +1095,38 @@ void CTextureShader::BuildObjects(ID3D11Device * pd3dDevice)
 
 	ID3D11ShaderResourceView *pd3dTexture = NULL;
 
-	CTexture *p_Texture = new CTexture(3);
+	CTexture *p_Texture;
+	if (mapNumber == 1)
+	{
+
+	p_Texture = new CTexture(3);
 	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Maps\\Texture\\map01_3.png"), NULL, NULL, &pd3dTexture, NULL);
 	p_Texture->SetTexture(0, pd3dTexture, pd3dSamplerState);
 	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Maps\\Texture\\map01_1.png"), NULL, NULL, &pd3dTexture, NULL);
 	p_Texture->SetTexture(1, pd3dTexture, pd3dSamplerState);
 	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Maps\\Texture\\map01_2.png"), NULL, NULL, &pd3dTexture, NULL);
 	p_Texture->SetTexture(2, pd3dTexture, pd3dSamplerState);
+	}
+	else
+	{
+		p_Texture = new CTexture(7);
+		D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Maps\\Texture\\build7.png"), NULL, NULL, &pd3dTexture, NULL);
+		p_Texture->SetTexture(0, pd3dTexture, pd3dSamplerState);
+		D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Maps\\Texture\\build3.jpg"), NULL, NULL, &pd3dTexture, NULL);
+		p_Texture->SetTexture(1, pd3dTexture, pd3dSamplerState);
+		D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Maps\\Texture\\build9.jpg"), NULL, NULL, &pd3dTexture, NULL);
+		p_Texture->SetTexture(2, pd3dTexture, pd3dSamplerState);
+		D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Maps\\Texture\\build8.png"), NULL, NULL, &pd3dTexture, NULL);
+		p_Texture->SetTexture(3, pd3dTexture, pd3dSamplerState);
+		D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Maps\\Texture\\build6.png"), NULL, NULL, &pd3dTexture, NULL);
+		p_Texture->SetTexture(4, pd3dTexture, pd3dSamplerState);
+		D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Maps\\Texture\\build10.jpg"), NULL, NULL, &pd3dTexture, NULL);
+		p_Texture->SetTexture(5, pd3dTexture, pd3dSamplerState);
+		D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Maps\\Texture\\build11.jpg"), NULL, NULL, &pd3dTexture, NULL);
+		p_Texture->SetTexture(6, pd3dTexture, pd3dSamplerState);
+	}
 	
-	CMesh *pMeshIlluminatedTextured = new CMeshTextured(pd3dDevice, 12.0f, 12.0f, 12.0f);//CCubeMeshIlluminatedTextured(pd3dDevice, 12.0f, 12.0f, 12.0f);
+	CMesh *pMeshIlluminatedTextured = new CMeshTextured(pd3dDevice, mapNumber);//CCubeMeshIlluminatedTextured(pd3dDevice, 12.0f, 12.0f, 12.0f);
 
 	int i = 0, nObjectTypes = 2;
 	m_nObjects = 1;//((xObjects * 2) + 1) * ((yObjects * 2) + 1) * ((zObjects * 2) + 1);
@@ -1060,10 +1137,20 @@ void CTextureShader::BuildObjects(ID3D11Device * pd3dDevice)
 	pObject->SetMaterial(ppMaterials[0]);
 	pObject->SetTexture(p_Texture);
 
-	pObject->SetPosition(0.0f, 0.0f, 0.0f);
-	//pObject->Rotate(&D3DXVECTOR3(1.0f, 0.0f, 0.0f), -90.0f);
+	
 	//pRotatingObject->
-	pObject->Scale(1000.0f);
+	if (mapNumber == 1)
+	{
+		pObject->Scale(1000.0f);
+	}
+	else
+	{
+		pObject->SetPosition(0.0f, 1850.0f, 4500.0f);
+		pObject->Rotate(&D3DXVECTOR3(0.0f, 1.0f, 0.0f), 90.0f);
+		pObject->Scale(4.0f);
+
+	}
+
 	m_ppObjects[i++] = pObject;
 
 
@@ -1488,7 +1575,7 @@ void CItemShader::BuildObjects(ID3D11Device * pd3dDevice)
 	ID3D11ShaderResourceView *pd3dTexture = NULL;
 
 
-	m_nObjects = 2;
+	m_nObjects = 3;
 	m_ppObjects = new CGameObject*[m_nObjects];
 
 	CGameObject *pObject = NULL;
@@ -1539,6 +1626,25 @@ void CItemShader::BuildObjects(ID3D11Device * pd3dDevice)
 
 	pObject->Scale(0.4f);
 	m_ppObjects[1] = pObject;
+
+
+
+
+	CTexture * pBoxTexture = new CTexture(1);
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Object\\texture\\box.jpg"), NULL, NULL, &pd3dTexture, NULL);
+	pBoxTexture->SetTexture(0, pd3dTexture, pd3dSamplerState);
+
+	pMesh = new CItemMesh(pd3dDevice, "box.src");
+
+	pObject = new CGameObject();
+	pObject->SetMesh(pMesh);
+	pObject->SetMaterial(ppMaterials[0]);
+	pObject->SetTexture(pBoxTexture);
+	pObject->Rotate(&D3DXVECTOR3(0.0f, 1.0f, 0.0f), 90.0f);
+	pObject->SetPosition(300.0f, 3280.0f, 3000.0f);
+
+	pObject->Scale(1.3f);
+	m_ppObjects[2] = pObject;
 
 
 	CreateShaderVariables(pd3dDevice);

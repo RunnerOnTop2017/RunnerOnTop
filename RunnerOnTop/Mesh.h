@@ -5,7 +5,7 @@
 #include "Bone.h"
 #define RANDOM_COLOR D3DXCOLOR((rand() * 0xFFFFFF) / RAND_MAX)
 
-enum OBJECTTAG{ MAP, DOOR, CONDITIONER, FENCE, FENCEHOLE ,PIPE, REALDOOR, FALL, OBJ, JUMPAREA, GOAL };
+enum OBJECTTAG{ MAP, DOOR, CONDITIONER, FENCE, FENCEHOLE ,PIPE, REALDOOR, FALL, OBJ, JUMPAREA, GOAL, BOX };
 
 class CVertex
 {
@@ -250,7 +250,7 @@ public:
 class CMeshTextured : public CMeshIlluminated
 {
 public:
-	CMeshTextured(ID3D11Device *pd3dDevice, float fWidth = 2.0f, float fHeight = 2.0f, float fDepth = 2.0f);
+	CMeshTextured(ID3D11Device *pd3dDevice, int mapNumber = 1);
 	virtual ~CMeshTextured();
 
 	virtual void SetRasterizerState(ID3D11Device *pd3dDevice);
@@ -292,6 +292,14 @@ public:
 	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext);
 };
 
+class CPhysics {
+public:
+	D3DXVECTOR3 powersource;
+	float gravity;
+	float weight;
+	float friction;
+};
+
 class CItemMesh : public CMeshTextured
 {
 public:
@@ -300,4 +308,6 @@ public:
 
 	virtual void SetRasterizerState(ID3D11Device *pd3dDevice);
 	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext);
+
+	CPhysics physics;
 };
