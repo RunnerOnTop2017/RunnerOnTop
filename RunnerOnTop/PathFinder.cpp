@@ -376,7 +376,7 @@ void CreateNodeMap(int map[map_size_n][map_size_m], D3DXVECTOR2 minMap, D3DXVECT
 
 			for (int i = start_Obj; i < cnt_Obj; ++i)
 			{
-				OBJECTTAG tag = ((CCubeMesh*)Obj[i]->m_pMesh)->m_tag;
+				OBJECTTAG tag = (Obj[i]->m_pMesh)->GetTag();
 				CDiffuseNormalVertex *mVertices = ((CCubeMesh*)Obj[i]->m_pMesh)->pVertices;
 				D3DXVECTOR3 d3dxvMax = { mVertices[1].m_d3dxvPosition.x , mVertices[4].m_d3dxvPosition.y, mVertices[2].m_d3dxvPosition.z };
 				D3DXVECTOR3 d3dxvMin = { mVertices[0].m_d3dxvPosition.x , mVertices[0].m_d3dxvPosition.y,  mVertices[0].m_d3dxvPosition.z };
@@ -430,7 +430,7 @@ void CreateNodeDetailMap(int map[map_size_n][map_size_m], D3DXVECTOR2 minMap, D3
 			bool collisionCheck = false;
 			for (i = start_Obj; i < cnt_Obj; ++i)
 			{
-				OBJECTTAG tag = ((CCubeMesh*)Obj[i]->m_pMesh)->m_tag;
+				OBJECTTAG tag = (Obj[i]->m_pMesh)->GetTag();
 				CDiffuseNormalVertex *mVertices = ((CCubeMesh*)Obj[i]->m_pMesh)->pVertices;
 				D3DXVECTOR3 d3dxvMax = { mVertices[1].m_d3dxvPosition.x , mVertices[4].m_d3dxvPosition.y, mVertices[2].m_d3dxvPosition.z };
 				D3DXVECTOR3 d3dxvMin = { mVertices[0].m_d3dxvPosition.x , mVertices[0].m_d3dxvPosition.y,  mVertices[0].m_d3dxvPosition.z };

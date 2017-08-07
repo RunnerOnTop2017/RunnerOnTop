@@ -11,6 +11,7 @@ CMesh::CMesh() {
 	m_nIndices = 0;
 	m_nStartIndex = 0;
 	m_nBaseVertex = 0;
+	m_tag = NONE;
 }
 
 CMesh::CMesh(ID3D11Device *pd3dDevice)
@@ -25,7 +26,7 @@ CMesh::CMesh(ID3D11Device *pd3dDevice)
 	m_nIndices = 0;
 	m_nStartIndex = 0;
 	m_nBaseVertex = 0;
-
+	m_tag = NONE;
 }
 
 CMesh::~CMesh()
@@ -438,6 +439,10 @@ CCubeMesh::CCubeMesh(ID3D11Device *pd3dDevice, float minX , float maxX, float mi
 	else if (tag  == REALDOOR || tag == FENCE)
 	{
 		mColor = D3DXCOLOR(1.0f, 0.0f, 1.0f, 1.0f);
+	}
+	else if (tag == REALBOX)
+	{
+		mColor = D3DXCOLOR(0.0f, 0.0f, 1.0f, 1.0f);
 	}
 	else {
 		mColor = D3DXCOLOR(1.0f, 1.0f, 0.0f, 1.0f);

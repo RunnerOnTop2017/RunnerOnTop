@@ -80,6 +80,11 @@ void CScene::BuildObjects(ID3D11Device *pd3dDevice)
 
 	//파이프
 	m_ppShaders[3]->m_ppObjects[70]->ref = m_ppShaders[1]->m_ppObjects[1];
+
+	//박스
+	m_ppShaders[3]->m_ppObjects[81]->ref = m_ppShaders[1]->m_ppObjects[2];
+	m_ppShaders[3]->m_ppObjects[82]->ref = m_ppShaders[1]->m_ppObjects[2];
+	m_ppShaders[1]->m_ppObjects[2]->collisionShader = m_ppShaders[3];
 	}
 
 	//캐릭터 쉐이더

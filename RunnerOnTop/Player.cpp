@@ -425,9 +425,9 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 
 	
 #ifdef _DEBUG
-	system("cls");
-	printf("MAX[ %f | %f | %f ]\n", maxX, maxY, maxZ);
-	printf("MIN[ %f | %f | %f ]\n", minX, minY, minZ);
+	//system("cls");
+	//printf("MAX[ %f | %f | %f ]\n", maxX, maxY, maxZ);
+	//printf("MIN[ %f | %f | %f ]\n", minX, minY, minZ);
 	//node_pos pos = PositionToNodeIndex(d3dxv_center.x, d3dxv_center.z, D_METER, minMap, maxMap);
 	//std::cout << pos.x << "\t" << pos.y << std::endl;
 #endif
@@ -626,6 +626,29 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 				InvalidateRect(mHwnd, NULL, false);
 				ReleaseCapture();
 
+			}
+			else if (REALBOX == tag)
+			{
+				if (m_pState->GetState() != STATE_RUNJUMP)
+				{
+					m_pState->SetState(STATE_FALLFRONT);
+				}
+			}
+			else if (BOX == tag)
+			{
+				if (true == bInteraction)
+				{
+					if (pShader->m_ppObjects[i]->ref)
+					{
+						if (pShader->m_ppObjects[i]->ref->m_physics.isValid == false)
+						{
+							pShader->m_ppObjects[i]->ref->m_physics.isValid = true;
+							D3DXVECTOR3 look = GetLookAt();
+							pShader->m_ppObjects[i]->ref->m_physics.velocity = { look.x, 400.0f, -1 * look.z };
+						}
+						//std::cout << "BOX!![" << i<<"]" << std::endl;
+					}
+				}
 			}
 			else
 			{
@@ -1097,7 +1120,7 @@ bool CNPC::OnPlayerUpdated(float fTimeElapsed)
 
 #ifdef _DEBUG
 	//system("cls");
-	//printf("MAX[ %f | %f | %f ]\n", maxX, maxY, maxZ);
+	//.printf("MAX[ %f | %f | %f ]\n", maxX, maxY, maxZ);
 	//printf("MIN[ %f | %f | %f ]\n", minX, minY, minZ);
 	//printf("NPOS : %d, %d\n", pos.x, pos.y);
 	//printf("DPOS : %d, %d\n", dPos.x, dPos.y);

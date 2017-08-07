@@ -13,6 +13,7 @@ CShader::CShader()
 	m_isAlphaBlend = NULL;
 	m_ppObjects = NULL;
 	m_nObjects = 0;
+	
 }
 
 
@@ -179,7 +180,16 @@ void CShader::Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamera, i
 		{
 			if (m_ppObjects[j])
 			{
-				UpdateShaderVariables(pd3dDeviceContext, &m_ppObjects[j]->m_d3dxmtxWorld);
+				if (m_ppObjects[j]->m_pMesh->m_tag == REALBOX)
+				{
+					UpdateShaderVariables(pd3dDeviceContext, &m_ppObjects[j]->ref->m_d3dxmtxWorld);
+
+				}
+				else
+				{
+
+					UpdateShaderVariables(pd3dDeviceContext, &m_ppObjects[j]->m_d3dxmtxWorld);
+				}
 				//객체의 물질 정보를 쉐이더 프로그램으로 전달한다.
 				if (m_ppObjects[j]->m_pMaterial) UpdateShaderVariables(pd3dDeviceContext, &m_ppObjects[j]->m_pMaterial->m_Material);
 				if (m_ppObjects[j]->m_pTexture)
@@ -214,7 +224,9 @@ void CShader::Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamera, i
 	{
 		if (m_ppObjects[index])
 		{
-			UpdateShaderVariables(pd3dDeviceContext, &m_ppObjects[index]->m_d3dxmtxWorld);
+			
+				UpdateShaderVariables(pd3dDeviceContext, &m_ppObjects[index]->m_d3dxmtxWorld);
+			
 			//객체의 물질 정보를 쉐이더 프로그램으로 전달한다.
 			if (m_ppObjects[index]->m_pMaterial) UpdateShaderVariables(pd3dDeviceContext, &m_ppObjects[index]->m_pMaterial->m_Material);
 			if (m_ppObjects[index]->m_pTexture)
@@ -291,7 +303,7 @@ void CDiffusedShader::BuildObjects(ID3D11Device *pd3dDevice, int mapNumber)
 {
 	if (mapNumber == 1)
 	{
-		OBJECT_CNT = 81;
+		OBJECT_CNT = 83;
 		FLOOR_CNT = 30;
 		WALL_CNT = 60;
 		m_nObjects = OBJECT_CNT;
@@ -981,6 +993,23 @@ void CDiffusedShader::BuildMap1(ID3D11Device *pd3dDevice)
 	pRotatingObject->SetMesh(pCubeMesh);
 	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
 	m_ppObjects[n++] = pRotatingObject;
+
+	//박스
+	pCubeMesh = new CCubeMesh(pd3dDevice, 250.0f, 350.0f, 3230.0f, 3310.0f, 2950.0f, 3050.0f, BOX); // 81
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+	m_ppObjects[n++] = pRotatingObject;
+
+	pCubeMesh = new CCubeMesh(pd3dDevice, -15.0f, 15.0f, -15.0f, 15.0f, 0.0f, 30.0f, REALBOX); //82
+	pRotatingObject = new CGameObject();
+
+	pRotatingObject->SetMesh(pCubeMesh);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+	m_ppObjects[n++] = pRotatingObject;
+
+
 }
 
 void CDiffusedShader::BuildMap2(ID3D11Device * pd3dDevice)
@@ -1550,6 +1579,21 @@ void CItemShader::UpdateShaderVariables(ID3D11DeviceContext * pd3dDeviceContext,
 
 }
 
+void CItemShader::AnimateObjects(ID3D11Device * pd3dDevice, float fTimeElapsed)
+{
+
+	for (int i = 0; i < m_nObjects; ++i)
+	{
+		if (m_ppObjects[i]->m_physics.isValid)
+		{
+			m_ppObjects[i]->Animate(pd3dDevice, fTimeElapsed);
+		}
+	}
+
+	
+
+}
+
 void CItemShader::BuildObjects(ID3D11Device * pd3dDevice)
 {
 
@@ -1641,9 +1685,9 @@ void CItemShader::BuildObjects(ID3D11Device * pd3dDevice)
 	pObject->SetMaterial(ppMaterials[0]);
 	pObject->SetTexture(pBoxTexture);
 	pObject->Rotate(&D3DXVECTOR3(0.0f, 1.0f, 0.0f), 90.0f);
-	pObject->SetPosition(300.0f, 3280.0f, 3000.0f);
+	pObject->SetPosition(300.0f, 3290.0f, 3000.0f);
 
-	pObject->Scale(1.3f);
+	pObject->Scale(1.2f);
 	m_ppObjects[2] = pObject;
 
 

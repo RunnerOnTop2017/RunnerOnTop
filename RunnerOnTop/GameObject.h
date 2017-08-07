@@ -15,6 +15,7 @@
 #define DIR_UP		0x10
 #define DIR_DOWN	0x20
 
+class CShader;
 
 struct MATERIAL
 {
@@ -36,6 +37,20 @@ public:
 
 	MATERIAL m_Material;
 };
+
+class CPhysics {
+public:
+	CPhysics();
+	~CPhysics() {};
+public:
+	bool isValid;
+	D3DXVECTOR3 velocity;
+	D3DXVECTOR3 powersource;
+	float gravity;
+	float weight;
+	float friction;
+};
+
 
 class CTexture
 {
@@ -114,7 +129,7 @@ public:
 public:
 	CMaterial *m_pMaterial;
 	void SetMaterial(CMaterial *pMaterial);
-
+	CShader *collisionShader;
 public:
 	CTexture *m_pTexture;
 	void SetTexture(CTexture *pTexture);
@@ -124,6 +139,8 @@ public:
 
 	CTexture *m_pAlpha;
 	void SetAlphaMap(CTexture *pAlpha);
+
+	CPhysics m_physics;
 };
 
 class CRotatingObject : public CGameObject

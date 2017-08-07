@@ -5,7 +5,7 @@
 #include "Bone.h"
 #define RANDOM_COLOR D3DXCOLOR((rand() * 0xFFFFFF) / RAND_MAX)
 
-enum OBJECTTAG{ MAP, DOOR, CONDITIONER, FENCE, FENCEHOLE ,PIPE, REALDOOR, FALL, OBJ, JUMPAREA, GOAL, BOX };
+enum OBJECTTAG{NONE, MAP, DOOR, CONDITIONER, FENCE, FENCEHOLE ,PIPE, REALDOOR, FALL, OBJ, JUMPAREA, GOAL, BOX, REALBOX };
 
 class CVertex
 {
@@ -173,10 +173,20 @@ protected:
 
 	//정점 데이터가 어떤 프리미티브를 표현하고 있는 가를 나타내는 멤버변수를 선언한다.
 	D3D11_PRIMITIVE_TOPOLOGY m_d3dPrimitiveTopology;
+
+
+	// 메쉬 태그
+	
+
 public:
 	CTexturedNormalVertexUVW *m_pVertices;
 	UINT m_nVertices;		//개수
 	UINT m_nIndices;
+
+public:
+	OBJECTTAG m_tag;
+	OBJECTTAG GetTag() { return m_tag; }
+	void SetTag(OBJECTTAG tag) { m_tag = tag; }
 public:
 	//랜더링하는 메소드
 	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext);
@@ -212,7 +222,7 @@ public:
 class CCubeMesh : public CMesh
 {
 public:
-	OBJECTTAG m_tag;
+	
 	CDiffuseNormalVertex pVertices[8];
 	CCubeMesh(ID3D11Device *pd3dDevice, float minX =-1.0f, float maxX = 1.0f, float minY = -1.0f, float maxY = 1.0f, float minZ = -1.0f, float maxZ=1.0f, OBJECTTAG tag = MAP);
 	~CCubeMesh();
@@ -292,13 +302,6 @@ public:
 	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext);
 };
 
-class CPhysics {
-public:
-	D3DXVECTOR3 powersource;
-	float gravity;
-	float weight;
-	float friction;
-};
 
 class CItemMesh : public CMeshTextured
 {
@@ -308,6 +311,4 @@ public:
 
 	virtual void SetRasterizerState(ID3D11Device *pd3dDevice);
 	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext);
-
-	CPhysics physics;
 };

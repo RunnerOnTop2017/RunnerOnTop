@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "GameObject.h"
-
+#include "Shader.h"
 
 CGameObject::CGameObject()
 {
@@ -16,6 +16,7 @@ CGameObject::CGameObject()
 	ref = NULL;
 	bInteracted = false;
 	fAngeYaw = fAngePitch = fAngeRoll = 0.0f;
+	collisionShader = NULL;
 }
 
 CGameObject::~CGameObject()
@@ -48,6 +49,56 @@ void CGameObject::SetMesh(CMesh *pMesh)
 void CGameObject::Animate(ID3D11Device *pd3dDevice,float fTimeElapsed)
 {
 	//MoveForward(100.0f);
+	if (m_physics.isValid == true)
+	{
+		D3DXMATRIX move;
+		D3DXVECTOR3 vel = fTimeElapsed*m_physics.velocity;
+		D3DXMatrixTranslation(&move, vel.x, vel.y, vel.z);
+
+		//이동 거리 계산
+		//move *= fTimeElapsed;
+
+		// 이동
+		m_d3dxmtxWorld = move * m_d3dxmtxWorld;
+
+		// 다음 이동 준비
+		float weight = m_physics.weight;
+		m_physics.velocity -= weight * D3DXVECTOR3(m_physics.friction , m_physics.gravity, m_physics.friction);
+		D3DXVECTOR3 pos = { 0.0f, 0.0f ,0.0f };// GetPosition();
+		D3DXVECTOR4 mPos;
+		D3DXVec3Transform(&mPos, &pos, &m_d3dxmtxWorld);
+		pos = { mPos.x, mPos.y, mPos.z };
+		//충돌체크
+		if (collisionShader)
+		{
+			CDiffusedShader *pShader = (CDiffusedShader *)collisionShader;
+			int floor = pShader->FLOOR_CNT;
+			for (int i = 0; i < floor; ++i)
+			{
+				CDiffuseNormalVertex *mVertices = ((CCubeMesh*)pShader->m_ppObjects[i]->m_pMesh)->pVertices; //(8개)
+
+				D3DXVECTOR3 d3dxvMax = { mVertices[1].m_d3dxvPosition.x , mVertices[4].m_d3dxvPosition.y, mVertices[2].m_d3dxvPosition.z };
+				D3DXVECTOR3 d3dxvMin = { mVertices[0].m_d3dxvPosition.x , mVertices[0].m_d3dxvPosition.y,  mVertices[0].m_d3dxvPosition.z };
+
+
+				D3DXVECTOR3 max = { 15.0f, 15.0f, 30.0f };
+				D3DXVECTOR3 min = { -15.0f, -15.0f, 0.0f };
+				
+				bool x, y, z;
+				if (CollisionCheck(pos + max, pos + min, d3dxvMax, d3dxvMin, fTimeElapsed * m_physics.velocity, x, y, z))
+				{
+					std::cout << "충돌 : " << i << std::endl;
+					std::cout << "Pos : " << pos.x << ", " << pos.y << ", " << pos.z << std::endl;
+					pos = fTimeElapsed * m_physics.velocity;
+					std::cout<< "Vec : " << pos.x << ", " << pos.y << ", " << pos.z << std::endl;
+					if (y) m_physics.isValid = false;
+					break;
+				}
+			}
+
+		}
+		
+	}
 }
 
 void CGameObject::SetPosition(float x, float y, float z)
@@ -183,7 +234,7 @@ CRotatingObject::~CRotatingObject()
 }
 void CRotatingObject::Animate(ID3D11Device *pd3dDevice,float fTimeElapsed)
 {
-	Rotate(&m_d3dxvRotationAxis, m_fRotationSpeed);
+	//Rotate(&m_d3dxvRotationAxis, m_fRotationSpeed);
 
 }
 
@@ -254,4 +305,14 @@ void CTexture::SetTexture(int nIndex, ID3D11ShaderResourceView *pd3dsrvTexture, 
 	m_ppd3dSamplerStates[nIndex] = pd3dSamplerState;
 	if (m_ppd3dsrvTextures[nIndex]) m_ppd3dsrvTextures[nIndex]->AddRef();
 	if (m_ppd3dSamplerStates[nIndex]) m_ppd3dSamplerStates[nIndex]->AddRef();
+}
+
+CPhysics::CPhysics()
+{
+	isValid = false;
+	velocity = { 0.0, 0.0, 0.0 };
+	powersource = { 0.0, 0.0, 0.0 };
+	gravity = 9.8f;
+	weight = 2.0f;
+	friction = 3.0f;
 }
