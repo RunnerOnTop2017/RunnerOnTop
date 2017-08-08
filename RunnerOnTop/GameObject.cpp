@@ -59,11 +59,31 @@ void CGameObject::Animate(ID3D11Device *pd3dDevice,float fTimeElapsed)
 		//move *= fTimeElapsed;
 
 		// 이동
+		ResetUpLookRight();
 		m_d3dxmtxWorld = move * m_d3dxmtxWorld;
+		D3DXMATRIX mtxRotate;
+		rotateValue += 0.5f;
+		
+		D3DXMatrixRotationYawPitchRoll(&mtxRotate, 0.0f, rotateValue, 0.0f);
+
+		m_d3dxmtxWorld = mtxRotate * m_d3dxmtxWorld;
 
 		// 다음 이동 준비
 		float weight = m_physics.weight;
-		m_physics.velocity -= weight * D3DXVECTOR3(m_physics.friction , m_physics.gravity, m_physics.friction);
+		float xfrict = m_physics.friction;
+		float zfrict = m_physics.friction;
+
+		if (m_physics.velocity.x < 0)
+		{
+			xfrict *= -1.0f;
+		}
+
+		if (m_physics.velocity.z < 0)
+		{
+			zfrict *= -1.0f;
+		}
+
+		m_physics.velocity -= weight * D3DXVECTOR3(xfrict, m_physics.gravity, zfrict);
 		D3DXVECTOR3 pos = { 0.0f, 0.0f ,0.0f };// GetPosition();
 		D3DXVECTOR4 mPos;
 		D3DXVec3Transform(&mPos, &pos, &m_d3dxmtxWorld);
@@ -91,6 +111,7 @@ void CGameObject::Animate(ID3D11Device *pd3dDevice,float fTimeElapsed)
 					std::cout << "Pos : " << pos.x << ", " << pos.y << ", " << pos.z << std::endl;
 					pos = fTimeElapsed * m_physics.velocity;
 					std::cout<< "Vec : " << pos.x << ", " << pos.y << ", " << pos.z << std::endl;
+					ResetUpLookRight();
 					if (y) m_physics.isValid = false;
 					break;
 				}
@@ -138,6 +159,28 @@ D3DXVECTOR3 CGameObject::GetRight()
 	D3DXVECTOR3 d3dxvRight(m_d3dxmtxWorld._11, m_d3dxmtxWorld._12, m_d3dxmtxWorld._13);
 	D3DXVec3Normalize(&d3dxvRight, &d3dxvRight);
 	return(d3dxvRight);
+}
+
+void CGameObject::ResetUpLookRight()
+{
+	D3DXVECTOR3 m_d3dxvRight = D3DXVECTOR3(1.0f, 0.0f, 0.0f);
+	D3DXVECTOR3 m_d3dxvUp = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
+	D3DXVECTOR3 m_d3dxvLook = D3DXVECTOR3(0.0f, 0.0f, 1.0f);
+	D3DXVECTOR3 m_d3dxvPosition = GetPosition();
+	
+	m_d3dxmtxWorld._11 = m_d3dxvRight.x;
+	m_d3dxmtxWorld._12 = m_d3dxvRight.y;
+	m_d3dxmtxWorld._13 = m_d3dxvRight.z;
+	m_d3dxmtxWorld._21 = m_d3dxvUp.x;
+	m_d3dxmtxWorld._22 = m_d3dxvUp.y;
+	m_d3dxmtxWorld._23 = m_d3dxvUp.z;
+	m_d3dxmtxWorld._31 = m_d3dxvLook.x;
+	m_d3dxmtxWorld._32 = m_d3dxvLook.y;
+	m_d3dxmtxWorld._33 = m_d3dxvLook.z;
+	m_d3dxmtxWorld._41 = m_d3dxvPosition.x;
+	m_d3dxmtxWorld._42 = m_d3dxvPosition.y;
+	m_d3dxmtxWorld._43 = m_d3dxvPosition.z;
+
 }
 
 void CGameObject::MoveStrafe(float fDistance)

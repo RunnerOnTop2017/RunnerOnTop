@@ -396,10 +396,12 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 	D3DXVECTOR4 m_Pos;
 	D3DXVECTOR3 d3dxv_cPosition = GetPosition();
 
-	D3DXVec3Transform(&m_Pos, &d3dxv_cPosition, &m_d3dxmtxWorld);
-	d3dxv_cPosition = { m_Pos.x, m_Pos.y, m_Pos.z };
+	//D3DXVec3Transform(&m_Pos, &d3dxv_cPosition, &m_d3dxmtxWorld);
+	//d3dxv_cPosition = { m_Pos.x, m_Pos.y, m_Pos.z };
+	D3DXVECTOR3 min = { -15.0f, 0.0f, -15.0f };
+	D3DXVECTOR3 max = { 15.0f, 75.0f, 15.0f };
 
-	for (int i = 0; i < 8; ++i)
+	/*for (int i = 0; i < 8; ++i)
 	{
 		D3DXVec3Transform(&cPosition[i], &cVertex[i].m_d3dxvPosition, &m_d3dxmtxWorld);
 	}
@@ -416,10 +418,10 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 		if (cPosition[i].y < minY) minY = cPosition[i].y;
 		if (cPosition[i].z > maxZ) maxZ = cPosition[i].z;
 		if (cPosition[i].z < minZ) minZ = cPosition[i].z;
-	}
-
-	D3DXVECTOR3 d3dxv_cMax = { maxX, maxY, maxZ };
-	D3DXVECTOR3 d3dxv_cMin = { minX, minY, minZ };
+	}*/
+	
+	D3DXVECTOR3 d3dxv_cMax = d3dxv_cPosition + max;//{ maxX, maxY, maxZ };
+	D3DXVECTOR3 d3dxv_cMin = d3dxv_cPosition + min;//{ minX, minY, minZ };
 	D3DXVECTOR3 d3dxv_center = (d3dxv_cMax + d3dxv_cMin) / 2.0f;
 
 
@@ -537,6 +539,25 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 		//m_d3dxvVelocity.y = 0.0f;
 	}
 
+	if (EndAnimation)
+	{
+		if (m_pState->GetPrevState() == STATE_FALLFRONT)
+		{
+			D3DXVECTOR3 vec = GetPosition();
+			D3DXVECTOR3 look = GetLookAt();
+
+			vec += look*100.0f;
+
+			SetPosition(vec);
+		}
+
+		if (Interacted_OBJ)
+		{
+			Interacted_OBJ->ref->bInteracted = true;
+			Interacted_OBJ = NULL;
+		}
+		EndAnimation = false;
+	}
 
 	// 건물 충돌체크
 	for (int i = FLOOR_CNT; i < nObjects; ++i)
@@ -545,10 +566,10 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 		D3DXVECTOR3 d3dxvMax = { mVertices[1].m_d3dxvPosition.x , mVertices[4].m_d3dxvPosition.y, mVertices[2].m_d3dxvPosition.z };
 		D3DXVECTOR3 d3dxvMin = { mVertices[0].m_d3dxvPosition.x , mVertices[0].m_d3dxvPosition.y,  mVertices[0].m_d3dxvPosition.z };
 		bool x, y, z;
-
+		OBJECTTAG tag = ((CCubeMesh*)pShader->m_ppObjects[i]->m_pMesh)->m_tag;
 		if (true == CollisionCheck(d3dxv_cMax, d3dxv_cMin, d3dxvMax, d3dxvMin, dxvShift, x, y, z))
 		{
-			OBJECTTAG tag = ((CCubeMesh*)pShader->m_ppObjects[i]->m_pMesh)->m_tag;
+			
 			// 문?
 			if (DOOR == tag)
 			{
@@ -581,14 +602,15 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 			{
 				if (m_pState->GetState() != STATE_SLIDE)
 				{
-					if (x == true)
+					m_d3dxvVelocity = -50.0f*GetLookAt();
+					/*if (x == true)
 						m_d3dxvVelocity.x *= -1.0f;
 
 					if (y == true)
 						m_d3dxvVelocity.y *= -1.0f;
 
 					if (z == true)
-						m_d3dxvVelocity.z *= -1.0f;
+						m_d3dxvVelocity.z *= -1.0f;*/
 					m_pState->SetState(STATE_FALLBACK);
 				}
 			}
@@ -634,22 +656,22 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 					m_pState->SetState(STATE_FALLFRONT);
 				}
 			}
-			else if (BOX == tag)
-			{
-				if (true == bInteraction)
-				{
-					if (pShader->m_ppObjects[i]->ref)
-					{
-						if (pShader->m_ppObjects[i]->ref->m_physics.isValid == false)
-						{
-							pShader->m_ppObjects[i]->ref->m_physics.isValid = true;
-							D3DXVECTOR3 look = GetLookAt();
-							pShader->m_ppObjects[i]->ref->m_physics.velocity = { look.x, 400.0f, -1 * look.z };
-						}
-						//std::cout << "BOX!![" << i<<"]" << std::endl;
-					}
-				}
-			}
+			//else if (BOX == tag)
+			//{
+			//	if (true == bInteraction)
+			//	{
+			//		if (pShader->m_ppObjects[i]->ref)
+			//		{
+			//			if (pShader->m_ppObjects[i]->ref->m_physics.isValid == false)
+			//			{
+			//				pShader->m_ppObjects[i]->ref->m_physics.isValid = true;
+			//				D3DXVECTOR3 look = GetLookAt();
+			//				pShader->m_ppObjects[i]->ref->m_physics.velocity = { look.x, 400.0f, -1 * look.z };
+			//			}
+			//			//std::cout << "BOX!![" << i<<"]" << std::endl;
+			//		}
+			//	}
+			//}
 			else
 			{
 				//std::cout << "WALL : " << i << std::endl;
@@ -664,26 +686,73 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 			}
 
 		}
-	}
-	if (EndAnimation)
-	{
-		if (m_pState->GetPrevState() == STATE_FALLFRONT)
+	
+		if (tag == REALBOX)
 		{
-			D3DXVECTOR3 vec = GetPosition();
-			D3DXVECTOR3 look = GetLookAt();
+			//CDiffuseNormalVertex *mVertices = ((CCubeMesh*)pShader->m_ppObjects[i]->m_pMesh)->pVertices; //(8개)
+			D3DXVECTOR3 d3dxvMax = { mVertices[1].m_d3dxvPosition.x , mVertices[4].m_d3dxvPosition.y, mVertices[2].m_d3dxvPosition.z };
+			D3DXVECTOR3 d3dxvMin = { mVertices[0].m_d3dxvPosition.x , mVertices[0].m_d3dxvPosition.y,  mVertices[0].m_d3dxvPosition.z };
+			D3DXMATRIX world = pShader->m_ppObjects[i]->ref->m_d3dxmtxWorld;
+			D3DXVECTOR4 d3dv4Max, d3dv4Min;
 
-			vec += look*100.0f;
+			D3DXVec3Transform(&d3dv4Max, &d3dxvMax, &world);
+			D3DXVec3Transform(&d3dv4Min, &d3dxvMin, &world);
 
-			SetPosition(vec);
+			d3dxvMax = { d3dv4Max.x, d3dv4Max.y, d3dv4Max.z };
+			d3dxvMin = { d3dv4Min.x, d3dv4Min.y, d3dv4Min.z };
+
+			if (CollisionCheck(d3dxv_cMax, d3dxv_cMin, d3dxvMax, d3dxvMin, dxvShift, x, y, z))
+			{
+				if (m_pState->GetState() != STATE_RUNJUMP)
+				{
+					m_pState->SetState(STATE_FALLFRONT);
+				}
+			}
+
+
+		}
+		else if (tag == BOX)
+		{
+			//CDiffuseNormalVertex *mVertices = ((CCubeMesh*)pShader->m_ppObjects[i]->m_pMesh)->pVertices; //(8개)
+			D3DXVECTOR3 d3dxvMax = { mVertices[1].m_d3dxvPosition.x , mVertices[4].m_d3dxvPosition.y, mVertices[2].m_d3dxvPosition.z };
+			D3DXVECTOR3 d3dxvMin = { mVertices[0].m_d3dxvPosition.x , mVertices[0].m_d3dxvPosition.y,  mVertices[0].m_d3dxvPosition.z };
+			D3DXMATRIX world = pShader->m_ppObjects[i]->ref->m_d3dxmtxWorld;
+			D3DXVECTOR4 d3dv4Max, d3dv4Min;
+
+			D3DXVec3Transform(&d3dv4Max, &d3dxvMax, &world);
+			D3DXVec3Transform(&d3dv4Min, &d3dxvMin, &world);
+			D3DXVECTOR3 pos = pShader->m_ppObjects[i]->ref->GetPosition();
+			//d3dxvMax = { d3dv4Max.x, d3dv4Max.y, d3dv4Max.z };
+			//d3dxvMin = { d3dv4Min.x, d3dv4Min.y, d3dv4Min.z };
+
+			if (CollisionCheck(d3dxv_cMax, d3dxv_cMin, d3dxvMax+pos, d3dxvMin+pos, dxvShift, x, y, z))
+			{
+				if (true == bInteraction)
+				{
+					if (pShader->m_ppObjects[i]->ref)
+					{
+						if (pShader->m_ppObjects[i]->ref->m_physics.isValid == false)
+						{
+							pShader->m_ppObjects[i]->ref->m_physics.isValid = true;
+							pShader->m_ppObjects[i]->ref->rotateValue = 0.0f;
+							D3DXVECTOR3 look = GetLookAt();
+							D3DXVECTOR3 right = GetRight();
+							pShader->m_ppObjects[i]->ref->m_physics.velocity = { 0.0f, 0.0f ,0.0f };
+							pShader->m_ppObjects[i]->ref->m_physics.velocity += -300.0f * look;
+							pShader->m_ppObjects[i]->ref->m_physics.velocity += -300.0f * right;
+							pShader->m_ppObjects[i]->ref->m_physics.velocity.y = 400.0f;
+
+							std::cout << pShader->m_ppObjects[i]->ref->m_physics.velocity << std::endl;
+						}
+						
+					}
+				}
+			}
 		}
 
-		if (Interacted_OBJ)
-		{
-			Interacted_OBJ->ref->bInteracted = true;
-			Interacted_OBJ = NULL;
-		}
-		EndAnimation = false;
+
 	}
+	
 	return true;
 }
 

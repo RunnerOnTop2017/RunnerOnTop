@@ -29,6 +29,12 @@
 //		return false;
 //}
 
+std::ostream& operator<<(std::ostream& os, D3DXVECTOR3 d3v)
+{
+	os << d3v.x << ", " << d3v.y << ", " << d3v.z;
+	return os;
+}
+
 bool CollisionCheck(D3DXVECTOR3 & max1, D3DXVECTOR3 & min1, D3DXVECTOR3 & max2, D3DXVECTOR3 & min2, D3DXVECTOR3 & shift, bool & x, bool & y, bool & z)
 {
 	XNA::AxisAlignedBox aabbX;

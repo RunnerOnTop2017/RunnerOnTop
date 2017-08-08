@@ -37,6 +37,7 @@ private:
 
 
 public:
+	
 	CGameFramework();
 	~CGameFramework();
 
@@ -65,3 +66,4 @@ public:
 
 	POINT	m_ptOldCursorPos;    
 };
+

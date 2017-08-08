@@ -125,7 +125,8 @@ public:
 	D3DXVECTOR3 GetLookAt();
 	D3DXVECTOR3 GetUp();
 	D3DXVECTOR3 GetRight();
-
+	void ResetUpLookRight();
+	float rotateValue;
 public:
 	CMaterial *m_pMaterial;
 	void SetMaterial(CMaterial *pMaterial);
@@ -141,6 +142,8 @@ public:
 	void SetAlphaMap(CTexture *pAlpha);
 
 	CPhysics m_physics;
+
+
 };
 
 class CRotatingObject : public CGameObject
