@@ -339,7 +339,7 @@ void CGameFramework::BuildObjects(int mapNum)
 	pCamera->GenerateViewMatrix();
 
 	
-	pAirplanePlyer->SetPosition(D3DXVECTOR3(300.0f, 3300.0f, 3500.0f));
+	pAirplanePlyer->SetPosition(D3DXVECTOR3(300.0f, 3310.0f, 3500.0f));
 	pAirplanePlyer->Rotate(0.0f, 180.0f, 0.0f);
 	CState *pState = new CState();
 	CAnimationClip *pAnimationClip = new CAnimationClip();
@@ -371,7 +371,7 @@ void CGameFramework::BuildObjects(int mapNum)
 	m_pNPC->SetGravity(D3DXVECTOR3(0.0f, -400.0f, 0.0f));
 	m_pNPC->SetMaxVelocityXZ(125.0f);
 	m_pNPC->SetMaxVelocityY(400.0f);
-	m_pNPC->SetPosition(D3DXVECTOR3(1628.0f, 3260.0f, 3240.0f));
+	m_pNPC->SetPosition(D3DXVECTOR3(1628.0f, 3300.0f, 3240.0f));
 	m_pNPC->Rotate(0.0f, 180.0f, 0.0f);
 	pState = new CState();
 	pAnimationClip = new CAnimationClip();

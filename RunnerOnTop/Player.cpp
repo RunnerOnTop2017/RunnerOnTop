@@ -34,7 +34,6 @@ CPlayer::CPlayer()
 	currentPos.x = -1;
 	currentPos.y = -1;
 
-	// 테스트용임. 삭제해야 됨
 
 	for(int i = 0; i<map_size_n; ++i)
 	{ 
