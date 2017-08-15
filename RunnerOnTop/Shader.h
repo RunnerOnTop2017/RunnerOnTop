@@ -202,7 +202,7 @@ public:
 	virtual void CreateShader(ID3D11Device *pd3dDevice);
 	virtual void CreateShaderVariables(ID3D11Device *pd3dDevice);
 
-	virtual void BuildObjects(ID3D11Device *pd3dDevice);
+	virtual void BuildObjects(ID3D11Device *pd3dDevice, int mapNumber = 1);
 	virtual void ReleaseObjects();
 	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext, CCamera *pCamera = NULL, int index = -1);
 };

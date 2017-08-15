@@ -190,6 +190,71 @@ void CScene::BuildObjects(ID3D11Device *pd3dDevice)
 		//26번 건물 파이프
 		m_ppShaders[3]->m_ppObjects[198]->ref = m_ppShaders[1]->m_ppObjects[24];
 
+		//28번 건물 상자
+		m_ppShaders[3]->m_ppObjects[201]->ref = m_ppShaders[1]->m_ppObjects[26];
+		m_ppShaders[3]->m_ppObjects[202]->ref = m_ppShaders[1]->m_ppObjects[26];
+		m_ppShaders[1]->m_ppObjects[26]->collisionShader = m_ppShaders[3];
+
+
+		//2번 건물 펜스
+		//펜스
+		m_ppShaders[3]->m_ppObjects[204]->ref = m_ppShaders[4]->m_ppObjects[0];
+		m_ppShaders[3]->m_ppObjects[207]->ref = m_ppShaders[4]->m_ppObjects[0];
+		m_ppShaders[3]->m_ppObjects[208]->ref = m_ppShaders[4]->m_ppObjects[0];
+
+
+		//6번 건물 펜스
+		//펜스
+		m_ppShaders[3]->m_ppObjects[209]->ref = m_ppShaders[4]->m_ppObjects[5];
+		m_ppShaders[3]->m_ppObjects[212]->ref = m_ppShaders[4]->m_ppObjects[5];
+		m_ppShaders[3]->m_ppObjects[213]->ref = m_ppShaders[4]->m_ppObjects[5];
+
+		//10번 건물 펜스
+		//펜스
+		m_ppShaders[3]->m_ppObjects[214]->ref = m_ppShaders[4]->m_ppObjects[10];
+		m_ppShaders[3]->m_ppObjects[217]->ref = m_ppShaders[4]->m_ppObjects[10];
+		m_ppShaders[3]->m_ppObjects[218]->ref = m_ppShaders[4]->m_ppObjects[10];
+
+
+		//16번 건물 펜스
+		//펜스
+		m_ppShaders[3]->m_ppObjects[219]->ref = m_ppShaders[4]->m_ppObjects[15];
+		m_ppShaders[3]->m_ppObjects[222]->ref = m_ppShaders[4]->m_ppObjects[15];
+		m_ppShaders[3]->m_ppObjects[223]->ref = m_ppShaders[4]->m_ppObjects[15];
+
+
+
+		//25번 건물 펜스
+		//펜스
+		m_ppShaders[3]->m_ppObjects[224]->ref = m_ppShaders[4]->m_ppObjects[20];
+		m_ppShaders[3]->m_ppObjects[227]->ref = m_ppShaders[4]->m_ppObjects[20];
+		m_ppShaders[3]->m_ppObjects[228]->ref = m_ppShaders[4]->m_ppObjects[20];
+
+
+		//27번 건물 펜스
+		//펜스
+		m_ppShaders[3]->m_ppObjects[229]->ref = m_ppShaders[4]->m_ppObjects[25];
+		m_ppShaders[3]->m_ppObjects[232]->ref = m_ppShaders[4]->m_ppObjects[25];
+		m_ppShaders[3]->m_ppObjects[233]->ref = m_ppShaders[4]->m_ppObjects[25];
+
+
+
+		//3번 건물 문
+		m_ppShaders[3]->m_ppObjects[234]->ref = m_ppShaders[2]->m_ppObjects[0];
+		m_ppShaders[3]->m_ppObjects[235]->ref = m_ppShaders[2]->m_ppObjects[0];
+
+		//11번 건물 문
+		m_ppShaders[3]->m_ppObjects[236]->ref = m_ppShaders[2]->m_ppObjects[1];
+		m_ppShaders[3]->m_ppObjects[237]->ref = m_ppShaders[2]->m_ppObjects[1];
+
+		//18번 건물 문
+		m_ppShaders[3]->m_ppObjects[238]->ref = m_ppShaders[2]->m_ppObjects[2];
+		m_ppShaders[3]->m_ppObjects[239]->ref = m_ppShaders[2]->m_ppObjects[2];
+
+		//26번 건물 문
+		m_ppShaders[3]->m_ppObjects[240]->ref = m_ppShaders[2]->m_ppObjects[3];
+		m_ppShaders[3]->m_ppObjects[241]->ref = m_ppShaders[2]->m_ppObjects[3];
+
 	}
 
 	//캐릭터 쉐이더

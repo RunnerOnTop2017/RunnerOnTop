@@ -220,7 +220,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		bmp_win = (HBITMAP)LoadImage(NULL, L"Data\\UI\\youwin.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 		
 		FMOD_RESULT r;
-		//FMOD::System_Create(&pfmod);
+		FMOD::System_Create(&pfmod);
 		r = pfmod->init(1, FMOD_INIT_NORMAL, NULL);
 		
 		r = pfmod->createSound("Data\\Sound\\lobby.mp3", FMOD_LOOP_NORMAL, NULL, &lobbySound);

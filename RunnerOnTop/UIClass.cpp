@@ -2,7 +2,18 @@
 #include "UIClass.h"
 
 
-CUIClass::CUIClass(ID3D11Device *pd3dDevice)
+float DISTANCE(float STARTPOINT_X, float STARTPOINT_Z, float ENDPOINT_X, float ENDPOINT_Z)
+{
+	return abs(((ENDPOINT_X - STARTPOINT_X)*(ENDPOINT_X - STARTPOINT_X)) + ((ENDPOINT_Z - STARTPOINT_Z) * (ENDPOINT_Z - STARTPOINT_Z)));
+}
+
+float GETDISTANCE(float x, float z, float ENDPOINT_X, float ENDPOINT_Z)
+{
+	return abs(((ENDPOINT_X - x)*(ENDPOINT_X - x)) + ((ENDPOINT_Z - z) * (ENDPOINT_Z - z)));
+}
+
+
+CUIClass::CUIClass(ID3D11Device *pd3dDevice, int mapNumber)
 {
 	m_nVertices = 6;
 	m_nStride = sizeof(UIVertex);
@@ -10,9 +21,22 @@ CUIClass::CUIClass(ID3D11Device *pd3dDevice)
 	m_d3dPrimitiveTopology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
 	UIVertex vertex[6];
-
-
-	// ¹Ù
+	
+	if (mapNumber == 1)
+	{
+		STARTPOINT_X = 320.0f;
+		STARTPOINT_Z = 3480.0f;
+		ENDPOINT_X = 1617.0f;
+		ENDPOINT_Z = -2584.0f;
+	}
+	else
+	{
+		STARTPOINT_X = 200.0f;
+		STARTPOINT_Z = 3500.0f;
+		ENDPOINT_X = 1617.0f;
+		ENDPOINT_Z = -2584.0f;
+	}
+	// ¹Ù		 =
 	vertex[0] = { D3DXVECTOR3(-300.0f, 300.0f, 20.0f),D3DXCOLOR(0.3f,0.3f,0.3f,1.0f) };
 	vertex[1] = { D3DXVECTOR3(300.0f, 300.0f, 20.0f),D3DXCOLOR(0.3f,0.3f,0.3f,1.0f) };
 	vertex[2] = { D3DXVECTOR3(-300.0f, 290.0f, 20.0f),D3DXCOLOR(0.3f,0.3f,0.3f,1.0f) };

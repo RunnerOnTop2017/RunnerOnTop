@@ -338,8 +338,9 @@ void CGameFramework::BuildObjects(int mapNum)
 
 	pCamera->GenerateViewMatrix();
 
-	
-	pAirplanePlyer->SetPosition(D3DXVECTOR3(300.0f, 3310.0f, 3500.0f));
+	//-1000.0f, 3280.0f, -8150.0f
+	pAirplanePlyer->SetPosition(D3DXVECTOR3(200.0f, 3310.0f, 3500.0f));
+	//pAirplanePlyer->SetPosition(D3DXVECTOR3(-300.0f, 3310.0f, -8000.0f));
 	pAirplanePlyer->Rotate(0.0f, 180.0f, 0.0f);
 	CState *pState = new CState();
 	CAnimationClip *pAnimationClip = new CAnimationClip();

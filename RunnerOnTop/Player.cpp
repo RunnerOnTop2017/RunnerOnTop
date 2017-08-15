@@ -584,6 +584,7 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 			{
 				if (bInteraction)
 				{
+					std::cout << "Interected!" << std::endl;
 					if (pShader->m_ppObjects[i]->ref!= NULL && pShader->m_ppObjects[i]->ref->bInteracted == false && Interacted_OBJ == NULL)
 					{
 						m_pState->SetSubState(STATE_SMASH);

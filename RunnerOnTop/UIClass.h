@@ -1,14 +1,9 @@
 #pragma once
 #include"stdafx.h"
 
-#define STARTPOINT_X  320.0f
-#define STARTPOINT_Z  3480.0f
-#define ENDPOINT_X  1617.0f
-#define ENDPOINT_Z -2584.0f
 
-#define DISTANCE abs(((ENDPOINT_X - STARTPOINT_X)*(ENDPOINT_X - STARTPOINT_X)) + ((ENDPOINT_Z -STARTPOINT_Z ) * (ENDPOINT_Z -STARTPOINT_Z )))
-#define GETDISTANCE(x,z)  abs(((ENDPOINT_X - x)*(ENDPOINT_X - x)) + ((ENDPOINT_Z -z ) * (ENDPOINT_Z -z )))
-
+float DISTANCE(float STARTPOINT_X, float STARTPOINT_Z, float ENDPOINT_X, float ENDPOINT_Z);
+float GETDISTANCE(float x, float z, float ENDPOINT_X, float ENDPOINT_Z);
 struct UIVertex {
 	D3DXVECTOR3 position;
 	D3DXCOLOR color;
@@ -35,7 +30,16 @@ class CUIClass
 
 	D3D11_PRIMITIVE_TOPOLOGY m_d3dPrimitiveTopology;
 public:
-	CUIClass(ID3D11Device *pd3dDevice);
+
+
+	float STARTPOINT_X;
+	float STARTPOINT_Z;
+	float ENDPOINT_X  ;
+	float ENDPOINT_Z ;
+
+
+
+	CUIClass(ID3D11Device *pd3dDevice, int mapNumber = 1);
 	~CUIClass();
 
 	float GetBarLength() { return 600.0f; }
