@@ -39,18 +39,22 @@ STATENUMBER CState::GetState()
 
 void CState::SetState(STATENUMBER state)
 {
-	m_prev_state = m_state;
-
- 	m_next_state = m_state;
-	
-	m_state = state;
-
-	if (m_prev_state != m_state)
+	if (m_state != STATE_FALLFRONT)
 	{
-		frame2 = frame;
-		frame = 0;
-		//m_prev_state = prev;
+		m_prev_state = m_state;
+
+		m_next_state = m_state;
+
+		m_state = state;
+
+		if (m_prev_state != m_state)
+		{
+			frame2 = frame;
+			frame = 0;
+			//m_prev_state = prev;
+		}
 	}
+	
 }
 
 void CState::SetSubState(STATENUMBER state)

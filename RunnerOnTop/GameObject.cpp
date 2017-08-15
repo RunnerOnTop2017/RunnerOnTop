@@ -58,15 +58,7 @@ void CGameObject::Animate(ID3D11Device *pd3dDevice,float fTimeElapsed)
 		//이동 거리 계산
 		//move *= fTimeElapsed;
 
-		// 이동
-		ResetUpLookRight();
-		m_d3dxmtxWorld = move * m_d3dxmtxWorld;
-		D3DXMATRIX mtxRotate;
-		rotateValue += 0.5f;
 		
-		D3DXMatrixRotationYawPitchRoll(&mtxRotate, 0.0f, rotateValue, 0.0f);
-
-		m_d3dxmtxWorld = mtxRotate * m_d3dxmtxWorld;
 
 		// 다음 이동 준비
 		float weight = m_physics.weight;
@@ -112,13 +104,25 @@ void CGameObject::Animate(ID3D11Device *pd3dDevice,float fTimeElapsed)
 					pos = fTimeElapsed * m_physics.velocity;
 					std::cout<< "Vec : " << pos.x << ", " << pos.y << ", " << pos.z << std::endl;
 					ResetUpLookRight();
-					if (y) m_physics.isValid = false;
+					m_physics.isValid = false;
 					break;
 				}
 			}
 
 		}
-		
+
+		// 이동
+		ResetUpLookRight();
+		m_d3dxmtxWorld = move * m_d3dxmtxWorld;
+		D3DXMATRIX mtxRotate;
+		rotateValue += 0.5f;
+
+		D3DXMatrixRotationYawPitchRoll(&mtxRotate, 0.0f, rotateValue, 0.0f);
+
+		m_d3dxmtxWorld = mtxRotate * m_d3dxmtxWorld;
+		if(m_physics.isValid == false)
+			ResetUpLookRight();
+
 	}
 }
 

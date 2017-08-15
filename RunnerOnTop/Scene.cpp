@@ -33,12 +33,12 @@ void CScene::BuildObjects(ID3D11Device *pd3dDevice)
 	//기타 아이템
 	m_ppShaders[1] = new CItemShader();
 	m_ppShaders[1]->CreateShader(pd3dDevice);
-	m_ppShaders[1]->BuildObjects(pd3dDevice);
+	m_ppShaders[1]->BuildObjects(pd3dDevice, MapNumber);
 
 	// 문
 	m_ppShaders[2] = new CItemShader_Door();
 	m_ppShaders[2]->CreateShader(pd3dDevice);
-	m_ppShaders[2]->BuildObjects(pd3dDevice);
+	m_ppShaders[2]->BuildObjects(pd3dDevice, MapNumber);
 
 	// 바운딩박스
 	m_ppShaders[3] = new CDiffusedShader();
@@ -48,7 +48,7 @@ void CScene::BuildObjects(ID3D11Device *pd3dDevice)
 	// 마지막 알파맵
 	m_ppShaders[4] = new CItemShader_Alpha();
 	m_ppShaders[4]->CreateShader(pd3dDevice);
-	m_ppShaders[4]->BuildObjects(pd3dDevice);
+	m_ppShaders[4]->BuildObjects(pd3dDevice, MapNumber);
 
 	//스카이박스
 	m_pSkybox = new CSkyBoxShader();
@@ -78,16 +78,118 @@ void CScene::BuildObjects(ID3D11Device *pd3dDevice)
 	m_ppShaders[3]->m_ppObjects[77]->ref = m_ppShaders[4]->m_ppObjects[8];
 	m_ppShaders[3]->m_ppObjects[78]->ref = m_ppShaders[4]->m_ppObjects[8];
 
+
+	m_ppShaders[3]->m_ppObjects[87]->ref = m_ppShaders[4]->m_ppObjects[17];
+	m_ppShaders[3]->m_ppObjects[90]->ref = m_ppShaders[4]->m_ppObjects[17];
+
+
 	//파이프
 	m_ppShaders[3]->m_ppObjects[70]->ref = m_ppShaders[1]->m_ppObjects[1];
+	m_ppShaders[3]->m_ppObjects[85]->ref = m_ppShaders[1]->m_ppObjects[3];
+	m_ppShaders[3]->m_ppObjects[86]->ref = m_ppShaders[1]->m_ppObjects[4];
+
+
 
 	//박스
 	
 	//1번 박스
 	m_ppShaders[3]->m_ppObjects[81]->ref = m_ppShaders[1]->m_ppObjects[2];
 	m_ppShaders[3]->m_ppObjects[82]->ref = m_ppShaders[1]->m_ppObjects[2];
-	
 	m_ppShaders[1]->m_ppObjects[2]->collisionShader = m_ppShaders[3];
+	//2qjs qkrtm
+	m_ppShaders[3]->m_ppObjects[83]->ref = m_ppShaders[1]->m_ppObjects[5];
+	m_ppShaders[3]->m_ppObjects[84]->ref = m_ppShaders[1]->m_ppObjects[5];
+	m_ppShaders[1]->m_ppObjects[5]->collisionShader = m_ppShaders[3];
+
+
+	}
+	else
+	{
+		//1번건물 박스
+		m_ppShaders[3]->m_ppObjects[158]->ref = m_ppShaders[1]->m_ppObjects[1];
+		m_ppShaders[3]->m_ppObjects[159]->ref = m_ppShaders[1]->m_ppObjects[1];
+		m_ppShaders[1]->m_ppObjects[1]->collisionShader = m_ppShaders[3];
+
+		//1번 건물 파이프
+		m_ppShaders[3]->m_ppObjects[160]->ref = m_ppShaders[1]->m_ppObjects[2];
+
+
+		//5번 건물 박스
+		m_ppShaders[3]->m_ppObjects[163]->ref = m_ppShaders[1]->m_ppObjects[4];
+		m_ppShaders[3]->m_ppObjects[164]->ref = m_ppShaders[1]->m_ppObjects[4];
+		m_ppShaders[1]->m_ppObjects[4]->collisionShader = m_ppShaders[3];
+
+		m_ppShaders[3]->m_ppObjects[165]->ref = m_ppShaders[1]->m_ppObjects[5];
+		m_ppShaders[3]->m_ppObjects[166]->ref = m_ppShaders[1]->m_ppObjects[5];
+		m_ppShaders[1]->m_ppObjects[5]->collisionShader = m_ppShaders[3];
+
+		//6번건물 파이프
+		m_ppShaders[3]->m_ppObjects[167]->ref = m_ppShaders[1]->m_ppObjects[6];
+
+		//7번 건물 박스
+		m_ppShaders[3]->m_ppObjects[168]->ref = m_ppShaders[1]->m_ppObjects[7];
+		m_ppShaders[3]->m_ppObjects[169]->ref = m_ppShaders[1]->m_ppObjects[7];
+		m_ppShaders[1]->m_ppObjects[7]->collisionShader = m_ppShaders[3];
+
+		//8번건물 파이프
+		m_ppShaders[3]->m_ppObjects[170]->ref = m_ppShaders[1]->m_ppObjects[8];
+
+		//9번 건물 박스
+		m_ppShaders[3]->m_ppObjects[173]->ref = m_ppShaders[1]->m_ppObjects[10];
+		m_ppShaders[3]->m_ppObjects[174]->ref = m_ppShaders[1]->m_ppObjects[10];
+		m_ppShaders[1]->m_ppObjects[10]->collisionShader = m_ppShaders[3];
+
+		m_ppShaders[3]->m_ppObjects[175]->ref = m_ppShaders[1]->m_ppObjects[11];
+		m_ppShaders[3]->m_ppObjects[176]->ref = m_ppShaders[1]->m_ppObjects[11];
+		m_ppShaders[1]->m_ppObjects[11]->collisionShader = m_ppShaders[3];
+
+		//10번건물 파이프
+		m_ppShaders[3]->m_ppObjects[177]->ref = m_ppShaders[1]->m_ppObjects[12];
+
+		//12번 건물 상자
+		m_ppShaders[3]->m_ppObjects[178]->ref = m_ppShaders[1]->m_ppObjects[13];
+		m_ppShaders[3]->m_ppObjects[179]->ref = m_ppShaders[1]->m_ppObjects[13];
+		m_ppShaders[1]->m_ppObjects[13]->collisionShader = m_ppShaders[3];
+
+		//13번 건물 상자
+		m_ppShaders[3]->m_ppObjects[182]->ref = m_ppShaders[1]->m_ppObjects[15];
+		m_ppShaders[3]->m_ppObjects[183]->ref = m_ppShaders[1]->m_ppObjects[15];
+		m_ppShaders[1]->m_ppObjects[15]->collisionShader = m_ppShaders[3];
+
+		//15번 건물 상자
+		m_ppShaders[3]->m_ppObjects[184]->ref = m_ppShaders[1]->m_ppObjects[16];
+		m_ppShaders[3]->m_ppObjects[185]->ref = m_ppShaders[1]->m_ppObjects[16];
+		m_ppShaders[1]->m_ppObjects[16]->collisionShader = m_ppShaders[3];
+
+		m_ppShaders[3]->m_ppObjects[186]->ref = m_ppShaders[1]->m_ppObjects[17];
+		m_ppShaders[3]->m_ppObjects[187]->ref = m_ppShaders[1]->m_ppObjects[17];
+		m_ppShaders[1]->m_ppObjects[17]->collisionShader = m_ppShaders[3];
+
+		//17번 건물 상자
+		m_ppShaders[3]->m_ppObjects[188]->ref = m_ppShaders[1]->m_ppObjects[18];
+		m_ppShaders[3]->m_ppObjects[189]->ref = m_ppShaders[1]->m_ppObjects[18];
+		m_ppShaders[1]->m_ppObjects[18]->collisionShader = m_ppShaders[3];
+
+		//20번 건물 파이프
+		m_ppShaders[3]->m_ppObjects[190]->ref = m_ppShaders[1]->m_ppObjects[19];
+
+		//23번 건물 파이프
+		m_ppShaders[3]->m_ppObjects[193]->ref = m_ppShaders[1]->m_ppObjects[21];
+
+		//24번 건물 상자
+		m_ppShaders[3]->m_ppObjects[194]->ref = m_ppShaders[1]->m_ppObjects[22];
+		m_ppShaders[3]->m_ppObjects[195]->ref = m_ppShaders[1]->m_ppObjects[22];
+		m_ppShaders[1]->m_ppObjects[22]->collisionShader = m_ppShaders[3];
+
+		//25번 건물 상자
+		m_ppShaders[3]->m_ppObjects[196]->ref = m_ppShaders[1]->m_ppObjects[23];
+		m_ppShaders[3]->m_ppObjects[197]->ref = m_ppShaders[1]->m_ppObjects[23];
+		m_ppShaders[1]->m_ppObjects[23]->collisionShader = m_ppShaders[3];
+
+
+		//26번 건물 파이프
+		m_ppShaders[3]->m_ppObjects[198]->ref = m_ppShaders[1]->m_ppObjects[24];
+
 	}
 
 	//캐릭터 쉐이더

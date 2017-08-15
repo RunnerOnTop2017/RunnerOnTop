@@ -4,8 +4,8 @@
 #include "stdafx.h"
 #include "RunnerOnTop.h"
 #include "GameFramework.h"
-
-
+#include "fmod.hpp"
+#include "fmod_errors.h"
 #define MAX_LOADSTRING 100
 
 // 전역 변수:
@@ -137,7 +137,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 	HWND hMainWnd = CreateWindow(szWindowClass, szTitle, dwStyle, CW_USEDEFAULT, CW_USEDEFAULT, rc.right - rc.left, rc.bottom - rc.top, NULL, NULL, hInstance, NULL);
 	if (!hMainWnd) return(FALSE);
 
-	gGameFramework.OnCreate(hInstance, hMainWnd);
+	//gGameFramework.OnCreate(hInstance, hMainWnd);
 
 	::ShowWindow(hMainWnd, nCmdShow);
 	::UpdateWindow(hMainWnd);
@@ -171,6 +171,13 @@ static BOOL end_mouse;
 static RECT rt;
 
 int mx, my;
+
+
+static FMOD::System *pfmod;
+static FMOD::Channel *ch;
+static FMOD::Sound *lobbySound;
+static FMOD::Sound *map1Sound;
+static FMOD::Sound *map2Sound;
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -211,7 +218,17 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		bmp_Map2 = (HBITMAP)LoadImage(NULL, L"Data\\UI\\1_map2.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 		bmp_over = (HBITMAP)LoadImage(NULL, L"Data\\UI\\gameover.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 		bmp_win = (HBITMAP)LoadImage(NULL, L"Data\\UI\\youwin.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+		
+		FMOD_RESULT r;
+		//FMOD::System_Create(&pfmod);
+		r = pfmod->init(1, FMOD_INIT_NORMAL, NULL);
+		
+		r = pfmod->createSound("Data\\Sound\\lobby.mp3", FMOD_LOOP_NORMAL, NULL, &lobbySound);
+		r = pfmod->createSound("Data\\Sound\\map1.mp3", FMOD_LOOP_NORMAL, NULL, &map1Sound);
+		r = pfmod->createSound("Data\\Sound\\map2.mp3", FMOD_LOOP_NORMAL, NULL, &map2Sound);
 
+		r = pfmod->playSound(FMOD_CHANNEL_FREE, lobbySound, false, &ch);
+		
 		//InvalidateRect(hWnd, NULL, false);
 
 		break;
@@ -428,12 +445,16 @@ void UIProcessMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			{
 				gGameFramework.OnCreate(hInst, hWnd, 1);
 				gameState = INGAME;
+				
+				pfmod->playSound(FMOD_CHANNEL_FREE, map1Sound,false, &ch);
 			}
 			//map2
 			else if ((rt.right * (900.0f / 1280.0f) < mx && mx < rt.right * (1030.0f / 1280.0f)) && (rt.bottom * (540.0f / 720.0f) < my && my < rt.bottom * (600.0f / 720.0f)))
 			{
 				gGameFramework.OnCreate(hInst, hWnd,2);
 				gameState = INGAME;
+
+				pfmod->playSound(FMOD_CHANNEL_FREE, map2Sound,false,  &ch);
 
 			}
 			// back
@@ -446,6 +467,8 @@ void UIProcessMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		{
 		
 			gameState = LOBBY;
+			pfmod->playSound(FMOD_CHANNEL_FREE, lobbySound, false, &ch);
+
 		}
 	
 		InvalidateRect(hWnd, NULL, false);

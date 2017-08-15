@@ -386,6 +386,8 @@ void CPlayer::ResetUpLookRight()
 
 bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 {
+	
+
 	// 이동 거리
 	D3DXVECTOR3 dxvShift = m_d3dxvVelocity *fTimeElapsed;
 
@@ -426,9 +428,15 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 
 	
 #ifdef _DEBUG
-	//system("cls");
-	//printf("MAX[ %f | %f | %f ]\n", maxX, maxY, maxZ);
-	//printf("MIN[ %f | %f | %f ]\n", minX, minY, minZ);
+	system("cls");
+	//printf("POS : [%f, %f, %f]", maxX, maxY, maxZ);
+	std::cout << "Pos : [" << d3dxv_cPosition << "]" << std::endl;
+	int now = m_pState->GetState();
+	int prev = m_pState->GetPrevState();
+	int next = m_pState->GetNextState();
+	std::cout << "now : " << now << std::endl;
+	std::cout << "prev : " << prev << std::endl;
+	std::cout << "next : " << next << std::endl;
 	//node_pos pos = PositionToNodeIndex(d3dxv_center.x, d3dxv_center.z, D_METER, minMap, maxMap);
 	//std::cout << pos.x << "\t" << pos.y << std::endl;
 #endif
@@ -439,6 +447,26 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 	int OBJECT_CNT = pShader->OBJECT_CNT;
 	int FLOOR_CNT = pShader->FLOOR_CNT;
 	int WALL_CNT = pShader->WALL_CNT;
+
+	if (EndAnimation)
+	{
+		if (m_pState->GetPrevState() == STATE_FALLFRONT)
+		{
+			D3DXVECTOR3 vec = GetPosition();
+			D3DXVECTOR3 look = GetLookAt();
+
+			vec += look*100.0f;
+
+			SetPosition(vec);
+		}
+
+		if (Interacted_OBJ)
+		{
+			Interacted_OBJ->ref->bInteracted = true;
+			Interacted_OBJ = NULL;
+		}
+		EndAnimation = false;
+	}
 
 
 	// 바닥 충돌 체크
@@ -538,25 +566,7 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 		//m_d3dxvVelocity.y = 0.0f;
 	}
 
-	if (EndAnimation)
-	{
-		if (m_pState->GetPrevState() == STATE_FALLFRONT)
-		{
-			D3DXVECTOR3 vec = GetPosition();
-			D3DXVECTOR3 look = GetLookAt();
-
-			vec += look*100.0f;
-
-			SetPosition(vec);
-		}
-
-		if (Interacted_OBJ)
-		{
-			Interacted_OBJ->ref->bInteracted = true;
-			Interacted_OBJ = NULL;
-		}
-		EndAnimation = false;
-	}
+	
 
 	// 건물 충돌체크
 	for (int i = FLOOR_CNT; i < nObjects; ++i)
@@ -566,7 +576,7 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 		D3DXVECTOR3 d3dxvMin = { mVertices[0].m_d3dxvPosition.x , mVertices[0].m_d3dxvPosition.y,  mVertices[0].m_d3dxvPosition.z };
 		bool x, y, z;
 		OBJECTTAG tag = ((CCubeMesh*)pShader->m_ppObjects[i]->m_pMesh)->m_tag;
-		if (true == CollisionCheck(d3dxv_cMax, d3dxv_cMin, d3dxvMax, d3dxvMin, dxvShift, x, y, z))
+		if (true == CollisionCheck(d3dxv_cMax, d3dxv_cMin, d3dxvMax, d3dxvMin, dxvShift, x, y, z) && tag!=BOX && tag!=REALBOX)
 		{
 			
 			// 문?
@@ -627,7 +637,7 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 			}
 			else if (PIPE == tag)
 			{
-				if (m_pState->GetState() != STATE_RUNJUMP &&Interacted_OBJ == NULL)
+				if (m_pState->GetState() != STATE_RUNJUMP &&Interacted_OBJ == NULL && m_pState->GetPrevState() != STATE_FALLFRONT)
 				{
 					m_pState->SetState(STATE_FALLFRONT);
 					Interacted_OBJ = pShader->m_ppObjects[i];
@@ -648,29 +658,6 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 				ReleaseCapture();
 
 			}
-			else if (REALBOX == tag)
-			{
-				if (m_pState->GetState() != STATE_RUNJUMP)
-				{
-					m_pState->SetState(STATE_FALLFRONT);
-				}
-			}
-			//else if (BOX == tag)
-			//{
-			//	if (true == bInteraction)
-			//	{
-			//		if (pShader->m_ppObjects[i]->ref)
-			//		{
-			//			if (pShader->m_ppObjects[i]->ref->m_physics.isValid == false)
-			//			{
-			//				pShader->m_ppObjects[i]->ref->m_physics.isValid = true;
-			//				D3DXVECTOR3 look = GetLookAt();
-			//				pShader->m_ppObjects[i]->ref->m_physics.velocity = { look.x, 400.0f, -1 * look.z };
-			//			}
-			//			//std::cout << "BOX!![" << i<<"]" << std::endl;
-			//		}
-			//	}
-			//}
 			else
 			{
 				//std::cout << "WALL : " << i << std::endl;
@@ -686,7 +673,7 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 
 		}
 	
-		if (tag == REALBOX)
+		if (tag == REALBOX &&pShader->m_ppObjects[i]->ref->m_physics.isValid == false && m_pState->GetPrevState() != STATE_FALLFRONT)
 		{
 			//CDiffuseNormalVertex *mVertices = ((CCubeMesh*)pShader->m_ppObjects[i]->m_pMesh)->pVertices; //(8개)
 			D3DXVECTOR3 d3dxvMax = { mVertices[1].m_d3dxvPosition.x , mVertices[4].m_d3dxvPosition.y, mVertices[2].m_d3dxvPosition.z };
@@ -706,8 +693,9 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 				{
 					m_pState->SetState(STATE_FALLFRONT);
 				}
+				
 			}
-
+			
 
 		}
 		else if (tag == BOX)
@@ -751,6 +739,8 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 
 
 	}
+
+	
 	
 	return true;
 }
@@ -1195,38 +1185,38 @@ bool CNPC::OnPlayerUpdated(float fTimeElapsed)
 	//printf("STAT : %d, %d\n", start.x, start.y);
 
 
-	std::string str = "";
-	
-	bool b = false;
+	//std::string str = "";
+	//
+	//bool b = false;
 
-	for (int y = 0; y < map_size_m; ++y)
-	{
-		for (int x = 0; x < map_size_n; ++x)
-		{
-			b = false;
-			for (int i = 0; i < route.size(); ++i)
-			{
-				if (route[i].x == x && route[i].y == y)
-				{
-					b = true;
+	//for (int y = 0; y < map_size_m; ++y)
+	//{
+	//	for (int x = 0; x < map_size_n; ++x)
+	//	{
+	//		b = false;
+	//		for (int i = 0; i < route.size(); ++i)
+	//		{
+	//			if (route[i].x == x && route[i].y == y)
+	//			{
+	//				b = true;
 
-					break;
-				}
-			}
-			/*if (x == pos.x && y == pos.y) std::cout << "⊙";
-			else if (b) 	std::cout << "◎";
-			else if (map[x][y] == 0) std::cout << "○";
-			else if (map[x][y] == 1) std::cout << "  ";*/
-			if (x == dPos.x && y == dPos.y) str.append("⊙");
-			//else if (b) 	str.append("◎");
-			else if (detailmap[x][y] == 0) str.append("○");
-			else if (detailmap[x][y] == 1) str.append("●");
+	//				break;
+	//			}
+	//		}
+	//		/*if (x == pos.x && y == pos.y) std::cout << "⊙";
+	//		else if (b) 	std::cout << "◎";
+	//		else if (map[x][y] == 0) std::cout << "○";
+	//		else if (map[x][y] == 1) std::cout << "  ";*/
+	//		if (x == dPos.x && y == dPos.y) str.append("⊙");
+	//		//else if (b) 	str.append("◎");
+	//		else if (detailmap[x][y] == 0) str.append("○");
+	//		else if (detailmap[x][y] == 1) str.append("●");
 
 
-		}
-		//std::cout << std::endl;
-		str.append("\n");
-	}
+	//	}
+	//	//std::cout << std::endl;
+	//	str.append("\n");
+	//}
 	//std::cout << str << std::endl;
 	//printf("Position : %f, %f, %f\n", d3dxv_center.x, d3dxv_center.y, d3dxv_center.z);
 	//printf("Node Pos : %d, %d\n", pos.x, pos.y);
