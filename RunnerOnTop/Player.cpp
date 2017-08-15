@@ -425,21 +425,6 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 	D3DXVECTOR3 d3dxv_cMin = d3dxv_cPosition + min;//{ minX, minY, minZ };
 	D3DXVECTOR3 d3dxv_center = (d3dxv_cMax + d3dxv_cMin) / 2.0f;
 
-
-	
-#ifdef _DEBUG
-	system("cls");
-	//printf("POS : [%f, %f, %f]", maxX, maxY, maxZ);
-	std::cout << "Pos : [" << d3dxv_cPosition << "]" << std::endl;
-	int now = m_pState->GetState();
-	int prev = m_pState->GetPrevState();
-	int next = m_pState->GetNextState();
-	std::cout << "now : " << now << std::endl;
-	std::cout << "prev : " << prev << std::endl;
-	std::cout << "next : " << next << std::endl;
-	//node_pos pos = PositionToNodeIndex(d3dxv_center.x, d3dxv_center.z, D_METER, minMap, maxMap);
-	//std::cout << pos.x << "\t" << pos.y << std::endl;
-#endif
 	CDiffusedShader *pShader = (CDiffusedShader*)m_pPlayerUpdatedContext;
 
 	int nObjects = pShader->m_nObjects;
@@ -847,7 +832,7 @@ void CAirplanePlayer::ChangeCamera(ID3D11Device *pd3dDevice, DWORD nNewCameraMod
 
 
 
-CNPC::CNPC(ID3D11Device *pd3dDevice, CAnimateShader *pShader)
+CNPC::CNPC(ID3D11Device *pd3dDevice, CAnimateShader *pShader, int mapNumber)
 {
 	m_pCamera = NULL;
 	//비행기 메쉬를 생성한다.
@@ -857,6 +842,18 @@ CNPC::CNPC(ID3D11Device *pd3dDevice, CAnimateShader *pShader)
 	pCollision = Collision;
 	//플레이어(비행기) 메쉬를 렌더링할 때 사용할 쉐이더를 생성한다.
 	m_pShader = pShader;
+	
+	mapnumber = mapNumber;
+	if (mapNumber == 1)
+	{
+		maxMap = { 3000.0f, 3800.0f };
+		minMap = { -3000.0f, -3800.0f };
+	}
+	else
+	{
+		maxMap = { 345.0f, 3795.0f };
+		minMap = { -2005.0f, -9450.0f };
+	}
 
 						//플레이어를 위한 쉐이더 변수를 생성한다.
 	CreateShaderVariables(pd3dDevice);
@@ -906,6 +903,10 @@ bool CNPC::OnPlayerUpdated(float fTimeElapsed)
 	D3DXVECTOR4 cPosition[8];
 	D3DXVECTOR4 m_Pos;
 	D3DXVECTOR3 d3dxv_cPosition = GetPosition();
+
+
+
+
 
 	D3DXVec3Transform(&m_Pos, &d3dxv_cPosition, &m_d3dxmtxWorld);
 	d3dxv_cPosition = { m_Pos.x, m_Pos.y, m_Pos.z };
@@ -975,21 +976,8 @@ bool CNPC::OnPlayerUpdated(float fTimeElapsed)
 				else map[j][i] = 1;
 			}
 		}
-
-		//map[13][7] = 1;
-		//map[11][3] = 1;
-		//map[9][13] = 1;
-		//map[12][13] = 1;
-		//map[10][13] = 1;
-		//map[12][14] = 1;
-		//map[12][13] = 0;
-		//map[11][12] = 1;
-		//map[12][12] = 1;
-		//map[13][16] = 1;
-		//map[14][16] = 1;
-		////map[13][8] = 1;
-		////map[14][8] = 1;
-		//map[14][6] = 1;
+		if (mapnumber == 1)
+		{
 		map[24][26] = 1;
 		map[25][26] = 1;
 		map[26][16] = 1;
@@ -1006,13 +994,7 @@ bool CNPC::OnPlayerUpdated(float fTimeElapsed)
 		map[29][29] = 1;
 		map[29][17] = 1;
 
-
-
-
-		//map[29][27] = 1;
-
-		//map[30][27] = 1;
-
+		}
 		NPCDirection = 3;
 	}
 
@@ -1096,11 +1078,12 @@ bool CNPC::OnPlayerUpdated(float fTimeElapsed)
 			currentPos.x = pos.x;
 			currentPos.y = pos.y;
 			start = PositionToNodeIndex(d3dxv_center.x, d3dxv_center.z, 40, { minmax.x, minmax.y }, { minmax.z, minmax.w });
+
 			detailpath = detailpathFind(start.x, start.y, ex, ey, detailmap);
 
 			if (detailpath.length() == 0)
 			{
-				d = (d + 1) % 4;
+				d = (d+1)%4;
 				FindEndPoint(ex, ey, d, detailmap);
 				start = PositionToNodeIndex(d3dxv_center.x, d3dxv_center.z, 40, { minmax.x, minmax.y }, { minmax.z, minmax.w });
 				detailpath = detailpathFind(start.x, start.y, ex, ey, detailmap);
@@ -1114,6 +1097,8 @@ bool CNPC::OnPlayerUpdated(float fTimeElapsed)
 	}
 	
 	node_pos ndPos = PositionToNodeIndex(d3dxv_center.x, d3dxv_center.z, 40, { minmax.x, minmax.y }, { minmax.z, minmax.w });
+
+	
 	if (dPos != ndPos || !detailcheck)
 	{
 		detailcheck = true;
@@ -1178,7 +1163,7 @@ bool CNPC::OnPlayerUpdated(float fTimeElapsed)
 
 
 #ifdef _DEBUG
-	//system("cls");
+	system("cls");
 	//.printf("MAX[ %f | %f | %f ]\n", maxX, maxY, maxZ);
 	//printf("MIN[ %f | %f | %f ]\n", minX, minY, minZ);
 	//printf("NPOS : %d, %d\n", pos.x, pos.y);
@@ -1186,46 +1171,46 @@ bool CNPC::OnPlayerUpdated(float fTimeElapsed)
 	//printf("STAT : %d, %d\n", start.x, start.y);
 
 
-	//std::string str = "";
+	std::string str = "";
 	//
-	//bool b = false;
+	bool b = false;
 
-	//for (int y = 0; y < map_size_m; ++y)
-	//{
-	//	for (int x = 0; x < map_size_n; ++x)
-	//	{
-	//		b = false;
-	//		for (int i = 0; i < route.size(); ++i)
-	//		{
-	//			if (route[i].x == x && route[i].y == y)
-	//			{
-	//				b = true;
+	for (int y = 0; y < map_size_m; ++y)
+	{
+		for (int x = 0; x < map_size_n; ++x)
+		{
+			b = false;
+			for (int i = 0; i < route.size(); ++i)
+			{
+				if (route[i].x == x && route[i].y == y)
+				{
+					b = true;
 
-	//				break;
-	//			}
-	//		}
-	//		/*if (x == pos.x && y == pos.y) std::cout << "⊙";
-	//		else if (b) 	std::cout << "◎";
-	//		else if (map[x][y] == 0) std::cout << "○";
-	//		else if (map[x][y] == 1) std::cout << "  ";*/
-	//		if (x == dPos.x && y == dPos.y) str.append("⊙");
-	//		//else if (b) 	str.append("◎");
-	//		else if (detailmap[x][y] == 0) str.append("○");
-	//		else if (detailmap[x][y] == 1) str.append("●");
+					break;
+				}
+			}
+			/*if (x == pos.x && y == pos.y) std::cout << "⊙";
+			else if (b) 	std::cout << "◎";
+			else if (map[x][y] == 0) std::cout << "○";
+			else if (map[x][y] == 1) std::cout << "  ";*/
+			if (x == pos.x && y == pos.y) str.append("⊙");
+			//else if (b) 	str.append("◎");
+			else if (map[x][y] == 0) str.append("○");
+			else if (map[x][y] == 1) str.append("●");
 
 
-	//	}
-	//	//std::cout << std::endl;
-	//	str.append("\n");
-	//}
-	//std::cout << str << std::endl;
-	//printf("Position : %f, %f, %f\n", d3dxv_center.x, d3dxv_center.y, d3dxv_center.z);
-	//printf("Node Pos : %d, %d\n", pos.x, pos.y);
-	//printf("Current Path[0] : %c\n", path[0]);
-	//printf("Node Center : %f, %f\n", tmp.x, tmp.y);
-	//printf("Degree : %f\n", degree);
-	//std::cout << path << std::endl;
-	//std::cout << epos.x<<", "<< epos.y << std::endl;
+		}
+		//std::cout << std::endl;
+		str.append("\n");
+	}
+	std::cout << str << std::endl;
+	/*printf("Position : %f, %f, %f\n", d3dxv_center.x, d3dxv_center.y, d3dxv_center.z);
+	printf("Node Pos : %d, %d\n", pos.x, pos.y);
+	printf("Current Path[0] : %c\n", path[0]);
+	printf("Node Center : %f, %f\n", tmp.x, tmp.y);
+	printf("Degree : %f\n", degree);
+	std::cout << path << std::endl;
+	std::cout << epos.x<<", "<< epos.y << std::endl;*/
 #endif
 	//CDiffusedShader *pShader = (CDiffusedShader*)m_pPlayerUpdatedContext;
 
@@ -1341,16 +1326,17 @@ bool CNPC::OnPlayerUpdated(float fTimeElapsed)
 		D3DXVECTOR3 d3dxvMax = { mVertices[1].m_d3dxvPosition.x , mVertices[4].m_d3dxvPosition.y, mVertices[2].m_d3dxvPosition.z };
 		D3DXVECTOR3 d3dxvMin = { mVertices[0].m_d3dxvPosition.x , mVertices[0].m_d3dxvPosition.y,  mVertices[0].m_d3dxvPosition.z };
 		bool x, y, z;
-
-		if (true == CollisionCheck(d3dxv_cMax, d3dxv_cMin, d3dxvMax, d3dxvMin, dxvShift, x, y, z))
+		OBJECTTAG tag = ((CCubeMesh*)pShader->m_ppObjects[i]->m_pMesh)->m_tag;
+		if (true == CollisionCheck(d3dxv_cMax, d3dxv_cMin, d3dxvMax, d3dxvMin, dxvShift, x, y, z) && tag != BOX && tag != REALBOX)
 		{
-			OBJECTTAG tag = ((CCubeMesh*)pShader->m_ppObjects[i]->m_pMesh)->m_tag;
+
 			// 문?
 			if (DOOR == tag)
 			{
 				bInteraction = true;
 				if (bInteraction)
 				{
+					std::cout << "Interected!" << std::endl;
 					if (pShader->m_ppObjects[i]->ref != NULL && pShader->m_ppObjects[i]->ref->bInteracted == false && Interacted_OBJ == NULL)
 					{
 						m_pState->SetSubState(STATE_SMASH);
@@ -1378,26 +1364,21 @@ bool CNPC::OnPlayerUpdated(float fTimeElapsed)
 			{
 				if (m_pState->GetState() != STATE_SLIDE)
 				{
-				if (x == true)
-				m_d3dxvVelocity.x *= -1.0f;
+					m_d3dxvVelocity = -50.0f*GetLookAt();
+					/*if (x == true)
+					m_d3dxvVelocity.x *= -1.0f;
 
-				if (y == true)
-				m_d3dxvVelocity.y *= -1.0f;
+					if (y == true)
+					m_d3dxvVelocity.y *= -1.0f;
 
-				if (z == true)
-				m_d3dxvVelocity.z *= -1.0f;
-				m_pState->SetState(STATE_FALLBACK);
+					if (z == true)
+					m_d3dxvVelocity.z *= -1.0f;*/
+					m_pState->SetState(STATE_FALLBACK);
 				}
 			}
 			else if (FENCEHOLE == tag)
 			{
-				if (pShader->m_ppObjects[i]->ref != NULL && Interacted_OBJ == NULL)
-				{
-					Interacted_OBJ = pShader->m_ppObjects[i];
-					m_pState->SetState(STATE_SLIDE);
-					
-				}
-				/*if (bInteraction)
+				if (bInteraction)
 				{
 					if (pShader->m_ppObjects[i]->ref != NULL && Interacted_OBJ == NULL)
 					{
@@ -1405,11 +1386,11 @@ bool CNPC::OnPlayerUpdated(float fTimeElapsed)
 						m_pState->SetState(STATE_SLIDE);
 						bInteraction = false;
 					}
-				}*/
+				}
 			}
 			else if (PIPE == tag)
 			{
-				if (m_pState->GetState() != STATE_RUNJUMP &&Interacted_OBJ == NULL)
+				if (m_pState->GetState() != STATE_RUNJUMP &&Interacted_OBJ == NULL && m_pState->GetPrevState() != STATE_FALLFRONT)
 				{
 					m_pState->SetState(STATE_FALLFRONT);
 					Interacted_OBJ = pShader->m_ppObjects[i];
@@ -1419,15 +1400,20 @@ bool CNPC::OnPlayerUpdated(float fTimeElapsed)
 			{
 				m_d3dxvVelocity.x += 3.0f;
 			}
-			else if(JUMPAREA == tag)
+			else if (JUMPAREA == tag)
 			{
-				if(m_pState->GetState() != STATE_RUNJUMP)
-					m_pState->SetState(STATE_RUNJUMP);
+
+			}
+			else if (GOAL == tag)
+			{
+				gameState = YOUWIN;
+				InvalidateRect(mHwnd, NULL, false);
+				ReleaseCapture();
 
 			}
 			else
 			{
-			
+				//std::cout << "WALL : " << i << std::endl;
 				if (x == true)
 					m_d3dxvVelocity.x *= -1.0f;
 
@@ -1439,25 +1425,75 @@ bool CNPC::OnPlayerUpdated(float fTimeElapsed)
 			}
 
 		}
-	}
-	if (EndAnimation)
-	{
-		if (m_pState->GetPrevState() == STATE_FALLFRONT)
+
+		if (tag == REALBOX &&pShader->m_ppObjects[i]->ref->m_physics.isValid == false && m_pState->GetPrevState() != STATE_FALLFRONT)
 		{
-			D3DXVECTOR3 vec = GetPosition();
-			D3DXVECTOR3 look = GetLookAt();
+			//CDiffuseNormalVertex *mVertices = ((CCubeMesh*)pShader->m_ppObjects[i]->m_pMesh)->pVertices; //(8개)
+			D3DXVECTOR3 d3dxvMax = { mVertices[1].m_d3dxvPosition.x , mVertices[4].m_d3dxvPosition.y, mVertices[2].m_d3dxvPosition.z };
+			D3DXVECTOR3 d3dxvMin = { mVertices[0].m_d3dxvPosition.x , mVertices[0].m_d3dxvPosition.y,  mVertices[0].m_d3dxvPosition.z };
+			D3DXMATRIX world = pShader->m_ppObjects[i]->ref->m_d3dxmtxWorld;
+			D3DXVECTOR4 d3dv4Max, d3dv4Min;
 
-			vec += look*100.0f;
+			D3DXVec3Transform(&d3dv4Max, &d3dxvMax, &world);
+			D3DXVec3Transform(&d3dv4Min, &d3dxvMin, &world);
 
-			SetPosition(vec);
+			d3dxvMax = { d3dv4Max.x, d3dv4Max.y, d3dv4Max.z };
+			d3dxvMin = { d3dv4Min.x, d3dv4Min.y, d3dv4Min.z };
+
+			if (CollisionCheck(d3dxv_cMax, d3dxv_cMin, d3dxvMax, d3dxvMin, dxvShift, x, y, z))
+			{
+				if (m_pState->GetState() != STATE_RUNJUMP)
+				{
+					m_pState->SetState(STATE_FALLFRONT);
+				}
+
+			}
+
+
+		}
+		else if (tag == BOX)
+		{
+			//CDiffuseNormalVertex *mVertices = ((CCubeMesh*)pShader->m_ppObjects[i]->m_pMesh)->pVertices; //(8개)
+			D3DXVECTOR3 d3dxvMax = { mVertices[1].m_d3dxvPosition.x , mVertices[4].m_d3dxvPosition.y, mVertices[2].m_d3dxvPosition.z };
+			D3DXVECTOR3 d3dxvMin = { mVertices[0].m_d3dxvPosition.x , mVertices[0].m_d3dxvPosition.y,  mVertices[0].m_d3dxvPosition.z };
+			D3DXMATRIX world = pShader->m_ppObjects[i]->ref->m_d3dxmtxWorld;
+			D3DXVECTOR4 d3dv4Max, d3dv4Min;
+
+			D3DXVec3Transform(&d3dv4Max, &d3dxvMax, &world);
+			D3DXVec3Transform(&d3dv4Min, &d3dxvMin, &world);
+			D3DXVECTOR3 pos = pShader->m_ppObjects[i]->ref->GetPosition();
+			//d3dxvMax = { d3dv4Max.x, d3dv4Max.y, d3dv4Max.z };
+			//d3dxvMin = { d3dv4Min.x, d3dv4Min.y, d3dv4Min.z };
+
+			if (CollisionCheck(d3dxv_cMax, d3dxv_cMin, d3dxvMax + pos, d3dxvMin + pos, dxvShift, x, y, z))
+			{
+				if (true == bInteraction)
+				{
+					if (pShader->m_ppObjects[i]->ref)
+					{
+						if (pShader->m_ppObjects[i]->ref->m_physics.isValid == false)
+						{
+							pShader->m_ppObjects[i]->ref->m_physics.isValid = true;
+							pShader->m_ppObjects[i]->ref->rotateValue = 0.0f;
+							D3DXVECTOR3 look = GetLookAt();
+							D3DXVECTOR3 right = GetRight();
+							pShader->m_ppObjects[i]->ref->m_physics.velocity = { 0.0f, 0.0f ,0.0f };
+							pShader->m_ppObjects[i]->ref->m_physics.velocity += -300.0f * look;
+							pShader->m_ppObjects[i]->ref->m_physics.velocity += -300.0f * right;
+							pShader->m_ppObjects[i]->ref->m_physics.velocity.y = 400.0f;
+
+							std::cout << pShader->m_ppObjects[i]->ref->m_physics.velocity << std::endl;
+						}
+
+					}
+				}
+			}
 		}
 
-		if (Interacted_OBJ)
-		{
-			Interacted_OBJ->ref->bInteracted = true;
-			Interacted_OBJ = NULL;
-		}
-		EndAnimation = false;
+
 	}
+
+
+
 	return true;
 }

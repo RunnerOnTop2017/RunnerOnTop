@@ -367,12 +367,15 @@ void CGameFramework::BuildObjects(int mapNum)
 	pAirplanePlyer->SetState(pState);
 	m_ppPlayers[0] = pAirplanePlyer;
 
-	m_pNPC = new CNPC(m_pd3dDevice, m_pScene->m_pCharacters);
+	m_pNPC = new CNPC(m_pd3dDevice, m_pScene->m_pCharacters, mapNum);
 	m_pNPC->SetFriction(250.0f);
 	m_pNPC->SetGravity(D3DXVECTOR3(0.0f, -400.0f, 0.0f));
 	m_pNPC->SetMaxVelocityXZ(125.0f);
 	m_pNPC->SetMaxVelocityY(400.0f);
-	m_pNPC->SetPosition(D3DXVECTOR3(1628.0f, 3300.0f, 3240.0f));
+	if(mapNum == 1)
+		m_pNPC->SetPosition(D3DXVECTOR3(1628.0f, 3300.0f, 3240.0f));
+	else
+		m_pNPC->SetPosition(D3DXVECTOR3(345.0f, 5310.0f, 3790.0f));
 	m_pNPC->Rotate(0.0f, 180.0f, 0.0f);
 	pState = new CState();
 	pAnimationClip = new CAnimationClip();
@@ -526,7 +529,7 @@ void CGameFramework::FrameAdvance()
 	{
 		m_pNPC->UpdateShaderVariables(m_pd3dDeviceContext);
 		
-		//m_pNPC->SetPlayerUpdatedContext(m_pScene->m_ppShaders[3]);
+		m_pNPC->SetPlayerUpdatedContext(m_pScene->m_ppShaders[3]);
 		m_pNPC->Render(m_pd3dDeviceContext);
 	}
 	if (m_pScene) m_pScene->Render(m_pd3dDeviceContext, pCamera);

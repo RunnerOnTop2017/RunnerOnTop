@@ -33,8 +33,8 @@ CUIClass::CUIClass(ID3D11Device *pd3dDevice, int mapNumber)
 	{
 		STARTPOINT_X = 200.0f;
 		STARTPOINT_Z = 3500.0f;
-		ENDPOINT_X = 1617.0f;
-		ENDPOINT_Z = -2584.0f;
+		ENDPOINT_X = -1600.0f;
+		ENDPOINT_Z = -9030.0f;
 	}
 	// ¹Ù		 =
 	vertex[0] = { D3DXVECTOR3(-300.0f, 300.0f, 20.0f),D3DXCOLOR(0.3f,0.3f,0.3f,1.0f) };

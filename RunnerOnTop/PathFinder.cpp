@@ -436,7 +436,7 @@ void CreateNodeDetailMap(int map[map_size_n][map_size_m], D3DXVECTOR2 minMap, D3
 				D3DXVECTOR3 d3dxvMin = { mVertices[0].m_d3dxvPosition.x , mVertices[0].m_d3dxvPosition.y,  mVertices[0].m_d3dxvPosition.z };
 				D3DXVECTOR3 center = (d3dxvMax + d3dxvMin) / 2.0f;
 				aabb2.Center = { center.x, center.y, center.z };
-				aabb2.Extents = { center.x - d3dxvMin.x , center.y - d3dxvMin.y, center.z - d3dxvMin.z };
+				aabb2.Extents = { (d3dxvMax.x - d3dxvMin.x)/2.0f , (d3dxvMax.y - d3dxvMin.y)/2.0f, (d3dxvMax.z - d3dxvMin.z)/2.0f };
 				
 				if (tag == DOOR)
 				{
@@ -457,6 +457,15 @@ void CreateNodeDetailMap(int map[map_size_n][map_size_m], D3DXVECTOR2 minMap, D3
 					}
 				}
 				else if (tag == CONDITIONER)
+				{
+					if (true == XNA::IntersectAxisAlignedBoxAxisAlignedBox(&aabb1, &aabb2))
+					{
+						map[x][y] = 0;
+						break;
+
+					}
+				}
+				else if (tag == OBJ)
 				{
 					if (true == XNA::IntersectAxisAlignedBoxAxisAlignedBox(&aabb1, &aabb2))
 					{

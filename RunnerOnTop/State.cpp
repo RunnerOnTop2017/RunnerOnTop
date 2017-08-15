@@ -39,6 +39,10 @@ STATENUMBER CState::GetState()
 
 void CState::SetState(STATENUMBER state)
 {
+	if (state == m_state)
+	{
+		
+	}
 	if (m_state != STATE_FALLFRONT)
 	{
 		m_prev_state = m_state;
@@ -86,6 +90,10 @@ STATENUMBER CState::GetPrevState()
 
 void CState::ChangeState(STATENUMBER newState, unsigned int keyBuf)
 {
+	if (m_state == newState)
+	{
+		return;
+	}
 	if (m_state < STATE_INTERACTION)
 	{
 

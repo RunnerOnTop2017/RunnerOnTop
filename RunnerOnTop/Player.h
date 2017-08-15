@@ -134,8 +134,9 @@ public:
 class CNPC : public CPlayer
 {
 public:
+	int mapnumber;
 	CPlayer *enemy;
-	CNPC(ID3D11Device *pd3dDevice, CAnimateShader* pShader);
+	CNPC(ID3D11Device *pd3dDevice, CAnimateShader* pShader, int mapNumber = 1);
 	~CNPC();
 
 	virtual void ChangeCamera(ID3D11Device *pd3dDevice, DWORD nNewCameraMode, float fTimeElapsed);
