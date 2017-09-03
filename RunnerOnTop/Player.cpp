@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "Player.h"
 #include "PathFinder.h"
+#include "fmod.hpp"
+#include "fmod_errors.h"
 
 extern GAMESTATENUM gameState;
 extern HWND mHwnd;
@@ -384,9 +386,30 @@ void CPlayer::ResetUpLookRight()
 
 #define _WITH_DEBUG
 
+extern FMOD::System *pfmod;
+extern FMOD::Channel *footCh;
+extern FMOD::Sound *footstep;
+
 bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 {
-	
+	bool isPlaying;
+	footCh->getPaused(&isPlaying);
+	if (m_pState->GetState() == STATE_RUN)
+	{
+		if (isPlaying)
+		{
+			
+			footCh->setPaused(false);
+		}
+	}
+	else
+	{
+		if (!isPlaying)
+		{
+			footCh->setPaused(true);
+
+		}
+	}
 
 	// 이동 거리
 	D3DXVECTOR3 dxvShift = m_d3dxvVelocity *fTimeElapsed;
@@ -551,7 +574,11 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 		//m_d3dxvVelocity.y = 0.0f;
 	}
 
-	
+#ifdef _DEBUG
+	/*system("cls");
+	std::cout << GetPosition() << std::endl;*/
+
+#endif
 
 	// 건물 충돌체크
 	for (int i = FLOOR_CNT; i < nObjects; ++i)
@@ -706,6 +733,7 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 					{
 						if (pShader->m_ppObjects[i]->ref->m_physics.isValid == false)
 						{
+							m_pState->SetSubState(STATE_SMASH);
 							pShader->m_ppObjects[i]->ref->m_physics.isValid = true;
 							pShader->m_ppObjects[i]->ref->rotateValue = 0.0f;
 							D3DXVECTOR3 look = GetLookAt();
@@ -814,7 +842,7 @@ void CAirplanePlayer::ChangeCamera(ID3D11Device *pd3dDevice, DWORD nNewCameraMod
 		break;
 	case THIRD_PERSON_CAMERA:
 		//플레이어의 특성을 3인칭 카메라 모드에 맞게 변경한다. 지연 효과와 카메라 오프셋을 설정한다.
-		SetFriction(250.0f);
+		SetFriction(400.0f);
 		SetGravity(D3DXVECTOR3(0.0f, -400.0f, 0.0f));
 		SetMaxVelocityXZ(125.0f);
 		SetMaxVelocityY(400.0f);
@@ -839,11 +867,12 @@ CNPC::CNPC(ID3D11Device *pd3dDevice, CAnimateShader *pShader, int mapNumber)
 	//CMesh *pAirplaneMesh = new CCharacterMesh(pd3dDevice, "Police01");
 	CCubeMesh *Collision = new CCubeMesh(pd3dDevice, -15.0f, 15.0f, 0.0f, 75.0f, -15.0f, 15.0f);
 	//SetMesh(pAirplaneMesh);
-	pCollision = Collision;
+	pCollision = new CCubeMesh(pd3dDevice, -15.0f, 15.0f, 0.0f, 75.0f, -15.0f, 15.0f);//Collision;
 	//플레이어(비행기) 메쉬를 렌더링할 때 사용할 쉐이더를 생성한다.
 	m_pShader = pShader;
 	
 	mapnumber = mapNumber;
+	chasing = false;
 	if (mapNumber == 1)
 	{
 		maxMap = { 3000.0f, 3800.0f };
@@ -853,8 +882,29 @@ CNPC::CNPC(ID3D11Device *pd3dDevice, CAnimateShader *pShader, int mapNumber)
 	{
 		maxMap = { 345.0f, 3795.0f };
 		minMap = { -2005.0f, -9450.0f };
-	}
 
+
+		map2Route.push_back({ -733.247f, 3290.1f, 3382.35f });
+		map2Route.push_back({ -1706.73f, 3290.1f, 3382.35f });
+		map2Route.push_back({ -1706.95f, 3290.1f, 3237.79f });
+		map2Route.push_back({ -1701.95f, 3290.1f, 1585.66f });
+		map2Route.push_back({ -75.9984f, 3290.1f, 1634.86f });
+		map2Route.push_back({ -27.3715f, 3290.1f, -109.575f });
+		map2Route.push_back({ -1641.1f, 3290.1f, -134.71f });
+		map2Route.push_back({ -1645.38f, 3290.1f, -2186.21f });
+		map2Route.push_back({ -853.153f, 3290.1f, -2153.38f });
+		map2Route.push_back({ -861.297f, 3290.1f, -3491.64f });
+		map2Route.push_back({ -1662.36f, 3290.1f, -3489.93f });
+		map2Route.push_back({ -1651.3f, 3290.1f, -5388.16f });
+		map2Route.push_back({ -27.8956f, 3290.1f, -5393.5f });
+		map2Route.push_back({ -27.8509f, 3290.1f, -7205.38f });
+		map2Route.push_back({ -1674.4f, 3290.1f, -7238.39f });
+
+
+		
+
+	}
+	RouteIndex = 0;
 						//플레이어를 위한 쉐이더 변수를 생성한다.
 	CreateShaderVariables(pd3dDevice);
 
@@ -905,10 +955,11 @@ bool CNPC::OnPlayerUpdated(float fTimeElapsed)
 	D3DXVECTOR3 d3dxv_cPosition = GetPosition();
 
 
+	D3DXVECTOR3 min = { -15.0f, 0.0f, -15.0f };
+	D3DXVECTOR3 max = { 15.0f, 75.0f, 15.0f };
 
 
-
-	D3DXVec3Transform(&m_Pos, &d3dxv_cPosition, &m_d3dxmtxWorld);
+	/*D3DXVec3Transform(&m_Pos, &d3dxv_cPosition, &m_d3dxmtxWorld);
 	d3dxv_cPosition = { m_Pos.x, m_Pos.y, m_Pos.z };
 
 	for (int i = 0; i < 8; ++i)
@@ -928,13 +979,13 @@ bool CNPC::OnPlayerUpdated(float fTimeElapsed)
 		if (cPosition[i].y < minY) minY = cPosition[i].y;
 		if (cPosition[i].z > maxZ) maxZ = cPosition[i].z;
 		if (cPosition[i].z < minZ) minZ = cPosition[i].z;
-	}
+	}*/
 
-	D3DXVECTOR3 d3dxv_cMax = { maxX, maxY, maxZ };
-	D3DXVECTOR3 d3dxv_cMin = { minX, minY, minZ };
+	D3DXVECTOR3 d3dxv_cMax = d3dxv_cPosition + max;
+	D3DXVECTOR3 d3dxv_cMin = d3dxv_cPosition + min;
 	D3DXVECTOR3 d3dxv_center = (d3dxv_cMax + d3dxv_cMin) / 2.0f;
 
-	
+	/*
 	cVertex = enemy->pCollision->pVertices;
 	for (int i = 0; i < 8; ++i)
 	{
@@ -954,256 +1005,400 @@ bool CNPC::OnPlayerUpdated(float fTimeElapsed)
 		if (cPosition[i].z > maxZ) maxZ = cPosition[i].z;
 		if (cPosition[i].z < minZ) minZ = cPosition[i].z;
 	}
-
-
-	D3DXVECTOR3 d3dxv_eMax = { maxX, maxY, maxZ };
-	D3DXVECTOR3 d3dxv_eMin = { minX, minY, minZ };
+*/
+	
+	D3DXVECTOR3 d3dxv_eMax = enemy->GetPosition() + max;
+	D3DXVECTOR3 d3dxv_eMin = enemy->GetPosition() + min;
 	D3DXVECTOR3 d3dxv_eCenter = (d3dxv_eMax + d3dxv_eMin) / 2.0f;
 
 	CDiffusedShader *pShader = (CDiffusedShader*)m_pPlayerUpdatedContext;
 	int OBJECT_CNT = pShader->OBJECT_CNT;
 	int FLOOR_CNT = pShader->FLOOR_CNT;
 	int WALL_CNT = pShader->WALL_CNT;
+	float vtheta;
+	float vs;
+	float vt;
+	float v1length;
+	float v2length;
+	D3DXVECTOR3 v1;
+	D3DXVECTOR3 v2;
+	float cosRad;
 
-	if (currentPos.x == -1 && currentPos.y == -1)
+	if (EndAnimation)
 	{
-		CreateNodeMap(map, minMap, maxMap, (CDiffusedShader*)m_pPlayerUpdatedContext,2, FLOOR_CNT, true);
-		for (int i = 0; i < map_size_m; ++i)
+		if (m_pState->GetPrevState() == STATE_FALLFRONT)
 		{
-			for (int j = 0; j < map_size_n; ++j)
-			{
-				if (map[j][i] == 1) map[j][i] = 0;
-				else map[j][i] = 1;
-			}
+			D3DXVECTOR3 vec = GetPosition();
+			D3DXVECTOR3 look = GetLookAt();
+
+			vec += look*100.0f;
+
+			SetPosition(vec);
 		}
-		if (mapnumber == 1)
+
+		if (Interacted_OBJ)
 		{
-		map[24][26] = 1;
-		map[25][26] = 1;
-		map[26][16] = 1;
-		map[27][15] = 1;
-		map[28][15] = 1;
-		map[29][37] = 1;
-		map[29][36] = 1;
-		map[29][35] = 1;
-		map[29][34] = 1;
-		map[29][33] = 1;
-		map[29][32] = 1;
-		map[29][31] = 1;
-		map[29][30] = 1;
-		map[29][29] = 1;
-		map[29][17] = 1;
-
+			Interacted_OBJ->ref->bInteracted = true;
+			Interacted_OBJ = NULL;
 		}
-		NPCDirection = 3;
+		EndAnimation = false;
 	}
 
-
-	
-
-	node_pos pos = PositionToNodeIndex(d3dxv_center.x, d3dxv_center.z, D_METER, minMap, maxMap);
-
-	D3DXVECTOR4 minmax = NodeIndexToMinMax(pos, minMap, maxMap);
-
-	node_pos epos = PositionToNodeIndex(d3dxv_eCenter.x, d3dxv_eCenter.z, D_METER, minMap, maxMap);
-
-	static node_pos_float tmp;
-	static float degree;
-	static std::string path;
-	static std::string detailpath;
-	static int ex, ey;
-	static int detailPathIndex;
-	static node_pos dPos;
-	static bool detailcheck;
-	static node_pos start;
-
-	if( (pos.x == epos.x && pos.y == epos.y) && (pos.x != currentPos.x || pos.y != currentPos.y))
+	if (mapnumber == 1)
 	{
-		D3DXVECTOR3 look = GetLookVector();
-
-		D3DXVECTOR2 v1 = { look.x, look.z };
-
-		D3DXVECTOR2 v2 = { d3dxv_eCenter.x - d3dxv_center.x ,d3dxv_eCenter.z - d3dxv_center.z };
-
-		float v1length = D3DXVec2Length(&v1);
-		float v2length = D3DXVec2Length(&v2);
-		float vs = D3DXVec2Dot(&v1, &v2);         // 거리
-		float vt = acosf(vs / (v1length * v2length));
-		float vtheta = (180 * vt) / D3DX_PI;             // 각도
-		
-		Rotate(0.0f, -1*vtheta, 0.0f);
-		currentPos = pos;
-		
-	}
-
-	if( 50.0f>GetDistance(d3dxv_center.x, d3dxv_center.z, d3dxv_eCenter.x, d3dxv_eCenter.z))
-	{
-		if (m_pState->GetState() == STATE_RUN) m_pState->SetState(STATE_IDLE);
-		gameState = GAMEOVER;
-		InvalidateRect(mHwnd, NULL, false);
-		ReleaseCapture();
-	}
-	else
-	{
-		
-		if (m_pState->GetState() == STATE_IDLE && detailpath.length() != 0) m_pState->SetState(STATE_RUN);
-	}
-
-	if (pos.x != currentPos.x || pos.y != currentPos.y)
-	{
-		float mdx = (maxMap.x - minMap.x) / map_size_n;
-		float mdy = (maxMap.y - minMap.y) / map_size_m;
-		float dMx = (pos.x * mdx) + minMap.x + mdx;
-		float dmx = (pos.x * mdx) + minMap.x;
-
-		float dMz = (pos.y * mdy) + minMap.y + mdy;
-		float dmz = (pos.y * mdy) + minMap.y;
-
-		for (int i = 0; i < map_size_n; ++i) for (int j = 0; j < map_size_m; ++j)
-			detailmap[i][j] = 1;
-
-
-
-		CreateNodeDetailMap(detailmap, { minmax.x,minmax.y }, { minmax.z, minmax.w }, (CDiffusedShader*)m_pPlayerUpdatedContext, WALL_CNT, OBJECT_CNT);
-
-
-		path = pathFind(pos.x, pos.y, epos.x, epos.y, map);
-		route.clear();
-		route = PathStringToNodeIndex(path, pos);
-
-		if (path.length() != 0) {
-			char c = path.at(0);
-			int d = c - '0';
-			FindEndPoint(ex, ey, d, detailmap);
-			currentPos.x = pos.x;
-			currentPos.y = pos.y;
-			start = PositionToNodeIndex(d3dxv_center.x, d3dxv_center.z, 40, { minmax.x, minmax.y }, { minmax.z, minmax.w });
-
-			detailpath = detailpathFind(start.x, start.y, ex, ey, detailmap);
-
-			if (detailpath.length() == 0)
-			{
-				d = (d+1)%4;
-				FindEndPoint(ex, ey, d, detailmap);
-				start = PositionToNodeIndex(d3dxv_center.x, d3dxv_center.z, 40, { minmax.x, minmax.y }, { minmax.z, minmax.w });
-				detailpath = detailpathFind(start.x, start.y, ex, ey, detailmap);
-				
-			}
-
-			detailPathIndex = 0;
-			dPos = start;
-			detailcheck = false;
-		}
-	}
-	
-	node_pos ndPos = PositionToNodeIndex(d3dxv_center.x, d3dxv_center.z, 40, { minmax.x, minmax.y }, { minmax.z, minmax.w });
-
-	
-	if (dPos != ndPos || !detailcheck)
-	{
-		detailcheck = true;
-		if (detailpath.length() != 0 && detailPathIndex < detailpath.length())
+		if (currentPos.x == -1 && currentPos.y == -1)
 		{
-			if (detailpath.at(detailPathIndex) == '0')
+			CreateNodeMap(map, minMap, maxMap, (CDiffusedShader*)m_pPlayerUpdatedContext, 2, FLOOR_CNT, true);
+			for (int i = 0; i < map_size_m; ++i)
 			{
-				if (NPCDirection != 0)
+				for (int j = 0; j < map_size_n; ++j)
 				{
-					ResetUpLookRight();
-					Rotate(0.0f, 90.0f, 0.0);
-					NPCDirection = 0;
-
+					if (map[j][i] == 1) map[j][i] = 0;
+					else map[j][i] = 1;
 				}
+			}
+			if (mapnumber == 1)
+			{
+				map[24][26] = 1;
+				map[25][26] = 1;
+				map[26][16] = 1;
+				map[27][15] = 1;
+				map[28][15] = 1;
+				map[29][37] = 1;
+				map[29][36] = 1;
+				map[29][35] = 1;
+				map[29][34] = 1;
+				map[29][33] = 1;
+				map[29][32] = 1;
+				map[29][31] = 1;
+				map[29][30] = 1;
+				map[29][29] = 1;
+				map[29][17] = 1;
 
 			}
-			else if (detailpath.at(detailPathIndex) == '3')
-			{
-				if (NPCDirection != 3)
-				{
-					ResetUpLookRight();
-					Rotate(0.0f, 180.0f, 0.0);
-					NPCDirection = 3;
+			NPCDirection = 3;
+		}
 
-				}
 
-			}
-			else if (detailpath.at(detailPathIndex) == '2')
-			{
-				if (NPCDirection != 2)
-				{
-					ResetUpLookRight();
-					Rotate(0.0f, 270.0f, 0.0);
-					NPCDirection = 2;
 
-				}
 
-			}
-			else if (detailpath.at(detailPathIndex) == '1')
-			{
-				if (NPCDirection != 1)
-				{
-					ResetUpLookRight();
-					Rotate(0.0f, 0.0f, 0.0);
-					NPCDirection = 1;
+		node_pos pos = PositionToNodeIndex(d3dxv_center.x, d3dxv_center.z, D_METER, minMap, maxMap);
 
-				}
+		D3DXVECTOR4 minmax = NodeIndexToMinMax(pos, minMap, maxMap, 40);
 
-			}
+		node_pos epos = PositionToNodeIndex(d3dxv_eCenter.x, d3dxv_eCenter.z, D_METER, minMap, maxMap);
+
+		static node_pos_float tmp;
+		static float degree;
+		static std::string path;
+		static std::string detailpath;
+		static int ex, ey;
+		static int detailPathIndex;
+		static node_pos dPos;
+		static bool detailcheck;
+		static node_pos start;
+
+		if ((pos.x == epos.x && pos.y == epos.y) && (pos.x != currentPos.x || pos.y != currentPos.y))
+		{
+			D3DXVECTOR3 look = GetLookVector();
+
+			D3DXVECTOR3 v1 = { look.x,0.0f ,look.z };
+
+			D3DXVECTOR3 v2 = { d3dxv_eCenter.x - d3dxv_center.x, 0.0f ,d3dxv_eCenter.z - d3dxv_center.z };
+
+			float v1length = D3DXVec3Length(&v1);
+			float v2length = D3DXVec3Length(&v2);
+
+			float vs = D3DXVec3Dot(&v1, &v2);         // 거리
+			float vt = acosf(vs / (v1length * v2length));
+			float vtheta = (180 * vt) / D3DX_PI;             // 각도
+
+
+			Rotate(0.0f, -1 * vtheta, 0.0f);
+			currentPos = pos;
+
+		}
+
+		if (50.0f>GetDistance(d3dxv_center.x, d3dxv_center.z, d3dxv_eCenter.x, d3dxv_eCenter.z))
+		{
+			if (m_pState->GetState() == STATE_RUN) m_pState->SetState(STATE_IDLE);
+			gameState = GAMEOVER;
+			InvalidateRect(mHwnd, NULL, false);
+			ReleaseCapture();
 		}
 		else
 		{
-			m_pState->SetState(STATE_IDLE);
-		}
-		dPos = ndPos;
-		detailPathIndex++;
-	}
 
+			if (m_pState->GetState() == STATE_IDLE && detailpath.length() != 0) m_pState->SetState(STATE_RUN);
+		}
+
+		if (pos.x != currentPos.x || pos.y != currentPos.y)
+		{
+			float mdx = (maxMap.x - minMap.x) / map_size_n;
+			float mdy = (maxMap.y - minMap.y) / map_size_m;
+			float dMx = (pos.x * mdx) + minMap.x + mdx;
+			float dmx = (pos.x * mdx) + minMap.x;
+
+			float dMz = (pos.y * mdy) + minMap.y + mdy;
+			float dmz = (pos.y * mdy) + minMap.y;
+
+			for (int i = 0; i < detail_size_n; ++i) for (int j = 0; j < detail_size_m; ++j)
+				detailmap[i][j] = 1;
+
+
+
+			CreateNodeDetailMap(detailmap, { minmax.x,minmax.y }, { minmax.z, minmax.w }, (CDiffusedShader*)m_pPlayerUpdatedContext, WALL_CNT, OBJECT_CNT);
+
+
+			path = pathFind(pos.x, pos.y, epos.x, epos.y, map);
+			route.clear();
+			route = PathStringToNodeIndex(path, pos);
+
+			if (path.length() != 0) {
+				char c = path.at(0);
+				int d = c - '0';
+				start = PositionToNodeIndex(d3dxv_center.x, d3dxv_center.z, 20, { minmax.x, minmax.y }, { minmax.z, minmax.w });
+
+				FindEndPoint(ex, ey, d, detailmap, start.x, start.y);
+				currentPos.x = pos.x;
+				currentPos.y = pos.y;
+
+				detailpath = detailpathFind(start.x, start.y, ex, ey, detailmap);
+
+				if (detailpath.length() == 0)
+				{
+					start = PositionToNodeIndex(d3dxv_center.x, d3dxv_center.z, 20, { minmax.x, minmax.y }, { minmax.z, minmax.w });
+
+					d = (d + 3) % 4;
+					FindEndPoint(ex, ey, d, detailmap, start.x, start.y);
+					detailpath = detailpathFind(start.x, start.y, ex, ey, detailmap);
+
+				}
+
+				detailPathIndex = 0;
+				dPos = start;
+				detailcheck = false;
+			}
+		}
+
+		node_pos ndPos = PositionToNodeIndex(d3dxv_center.x, d3dxv_center.z, 20, { minmax.x, minmax.y }, { minmax.z, minmax.w });
+
+
+		if (dPos != ndPos || !detailcheck)
+		{
+			detailcheck = true;
+			if (detailpath.length() != 0 && detailPathIndex < detailpath.length())
+			{
+				if (detailpath.at(detailPathIndex) == '0')
+				{
+					if (NPCDirection != 0)
+					{
+						ResetUpLookRight();
+						Rotate(0.0f, 90.0f, 0.0);
+						NPCDirection = 0;
+
+					}
+
+				}
+				else if (detailpath.at(detailPathIndex) == '3')
+				{
+					if (NPCDirection != 3)
+					{
+						ResetUpLookRight();
+						Rotate(0.0f, 180.0f, 0.0);
+						NPCDirection = 3;
+
+					}
+
+				}
+				else if (detailpath.at(detailPathIndex) == '2')
+				{
+					if (NPCDirection != 2)
+					{
+						ResetUpLookRight();
+						Rotate(0.0f, 270.0f, 0.0);
+						NPCDirection = 2;
+
+					}
+
+				}
+				else if (detailpath.at(detailPathIndex) == '1')
+				{
+					if (NPCDirection != 1)
+					{
+						ResetUpLookRight();
+						Rotate(0.0f, 0.0f, 0.0);
+						NPCDirection = 1;
+
+					}
+
+				}
+			}
+			else
+			{
+				m_pState->SetState(STATE_IDLE);
+			}
+			dPos = ndPos;
+			detailPathIndex++;
+		}
+
+
+
+
+	}
+	else if (mapnumber == 2)
+	{
+
+		//유저한테 가장 가까운 포인트 찾기
+		D3DXVECTOR3 ePosition = enemy->GetPosition();
+		int enemyIndex = 0;
+		float eDistance = D3DXVec3Length(&D3DXVECTOR3(map2Route[0].x - ePosition.x , 0, map2Route[0].z - ePosition.z));
+
+		for (int i = 1; i < map2Route.size(); ++i)
+		{
+			float dist = D3DXVec3Length(&D3DXVECTOR3(map2Route[i].x - ePosition.x, 0, map2Route[i].z - ePosition.z));
+			if (dist < eDistance)
+			{
+				enemyIndex = i;
+			}
+		}
+
+
+		//유저를 보는 방향벡터 생성
+		D3DXVECTOR3 toEnemy = D3DXVECTOR3( ePosition.x - GetPosition().x, 0,  ePosition.z - GetPosition().z);
+		//유저까지와의 거리
+		float toEnemyDistance = D3DXVec3Length(&toEnemy);
+
+		if (enemyIndex == RouteIndex && toEnemyDistance < 200.0f)
+		{
+			if (!chasing) chasing = true;
+		}
+		else
+		{
+			if (chasing)
+			{
+				RouteIndex = enemyIndex;
+				chasing = false;
+			}
+		}
+
+		D3DXVECTOR3 look = GetLookVector();
+
+		v1 = { look.x, 0.0f ,look.z };
+
+		if(chasing)
+			v2 = toEnemy;
+		else
+			v2 = { map2Route[RouteIndex].x - GetPosition().x , 0.0f , map2Route[RouteIndex].z - GetPosition().z };
+		//D3DXVECTOR3 v2 = { d3dxv_eCenter.x - d3dxv_center.x, 0.0f ,d3dxv_eCenter.z - d3dxv_center.z };
+		//D3DXVec3Normalize(&v1, &v1);
+		D3DXVECTOR3 v3;
+		D3DXVec3Normalize(&v3, &v2);
+
+		 v1length = D3DXVec3Length(&v1);
+		 v2length = D3DXVec3Length(&v3);
+
+
+		vs = D3DXVec3Dot(&v1, &v3);// 거리
+
+		cosRad = vs / (v1length * v2length);
+		
+		if (!isnan(cosRad) && cosRad != 1.0f)
+		{
+			vt = acosf(cosRad);
+			if (!isnan(vt))
+			{
+				vtheta = (180.0f * vt) / 3.1415926535f;
+				if (vs != 1.0f && vs != -1.0f)
+				{
+					D3DXVECTOR3 cross;
+					D3DXVec3Cross(&cross, &v1, &v3);
+					if (cross.y < 0.0f) vtheta *= -1.0f;
+					if (cross.y != 0.0f) Rotate(0.0f, vtheta, 0.0f);
+
+
+				}
+			}
+			
+		}
+
+		if (D3DXVec3Length(&v2) < 10.0f)
+		{
+			RouteIndex++;
+		}
+
+		if (toEnemyDistance < 50.0f)
+		{
+			if (m_pState->GetState() == STATE_RUN) m_pState->SetState(STATE_IDLE);
+			gameState = GAMEOVER;
+			InvalidateRect(mHwnd, NULL, false);
+			ReleaseCapture();
+		}
 		
 
-
+	
+	}
 
 
 #ifdef _DEBUG
-	system("cls");
-	//.printf("MAX[ %f | %f | %f ]\n", maxX, maxY, maxZ);
-	//printf("MIN[ %f | %f | %f ]\n", minX, minY, minZ);
+	//system("cls");
+	//std::cout << GetPosition() << std::endl;
+	//std::cout << NPCDirection << std::endl;
 	//printf("NPOS : %d, %d\n", pos.x, pos.y);
 	//printf("DPOS : %d, %d\n", dPos.x, dPos.y);
 	//printf("STAT : %d, %d\n", start.x, start.y);
+	//system("cls");
+	/*std::cout << "v1 : " << v1 << std::endl;
+	std::cout << "v2 : " << v2 << std::endl;
+
+	std::cout << "v1length : " << v1length << std::endl;
+	std::cout << "v2length : " << v2length << std::endl;
+
+	std::cout << "vs : " << vs << std::endl;
+	std::cout << "cosRad : " << cosRad << std::endl;
+
+	std::cout << "vt : " << vt << std::endl;
 
 
-	std::string str = "";
+
+	std::cout << "vtheta : " << vtheta << std::endl;
+
+	std::cout << "Position : " << GetPosition() << std::endl;
+	std::cout << "YawPitchRoll : " << GetYaw() << ", " << GetPitch() << ", " << GetRoll() << std::endl << std::endl;;*/
+	//std::string str = "";
 	//
-	bool b = false;
+	//bool b = false;
 
-	for (int y = 0; y < map_size_m; ++y)
-	{
-		for (int x = 0; x < map_size_n; ++x)
-		{
-			b = false;
-			for (int i = 0; i < route.size(); ++i)
-			{
-				if (route[i].x == x && route[i].y == y)
-				{
-					b = true;
+	//for (int y = 0; y < detail_size_m; ++y)
+	//{
+	//	for (int x = 0; x < detail_size_n; ++x)
+	//	{
+	//		b = false;
+	//		for (int i = 0; i < route.size(); ++i)
+	//		{
+	//			if (route[i].x == x && route[i].y == y)
+	//			{
+	//				b = true;
 
-					break;
-				}
-			}
-			/*if (x == pos.x && y == pos.y) std::cout << "⊙";
-			else if (b) 	std::cout << "◎";
-			else if (map[x][y] == 0) std::cout << "○";
-			else if (map[x][y] == 1) std::cout << "  ";*/
-			if (x == pos.x && y == pos.y) str.append("⊙");
-			//else if (b) 	str.append("◎");
-			else if (map[x][y] == 0) str.append("○");
-			else if (map[x][y] == 1) str.append("●");
+	//				break;
+	//			}
+	//		}
+	//		/*if (x == pos.x && y == pos.y) std::cout << "⊙";
+	//		else if (b) 	std::cout << "◎";
+	//		else if (map[x][y] == 0) std::cout << "○";
+	//		else if (map[x][y] == 1) std::cout << "  ";*/
+	//		//if (x == dPos.x && y == dPos.y) str.append("⊙");
+	//		//else if (ex == x && ey == y) 	str.append("◎");
+	//		//else if (detailmap[x][y] == 0) str.append("○");
+	//		//else if (detailmap[x][y] == 1) str.append("●");
 
 
-		}
-		//std::cout << std::endl;
-		str.append("\n");
-	}
-	std::cout << str << std::endl;
+
+	//	}
+	//	//std::cout << std::endl;
+	//	////str.append("\n");
+	//}
+	//std::cout << str << std::endl;
 	/*printf("Position : %f, %f, %f\n", d3dxv_center.x, d3dxv_center.y, d3dxv_center.z);
 	printf("Node Pos : %d, %d\n", pos.x, pos.y);
 	printf("Current Path[0] : %c\n", path[0]);
@@ -1272,7 +1467,7 @@ bool CNPC::OnPlayerUpdated(float fTimeElapsed)
 					{
 
 						m_d3dxvVelocity.x = 0.0f;
-						m_d3dxvVelocity.y = 0.0f;
+						//m_d3dxvVelocity.y = 0.0f;
 						m_d3dxvVelocity.z = 0.0f;
 
 					}
@@ -1390,10 +1585,12 @@ bool CNPC::OnPlayerUpdated(float fTimeElapsed)
 			}
 			else if (PIPE == tag)
 			{
+				
 				if (m_pState->GetState() != STATE_RUNJUMP &&Interacted_OBJ == NULL && m_pState->GetPrevState() != STATE_FALLFRONT)
 				{
-					m_pState->SetState(STATE_FALLFRONT);
-					Interacted_OBJ = pShader->m_ppObjects[i];
+					//m_pState->SetState(STATE_FALLFRONT);
+					m_pState->SetState(STATE_RUNJUMP);
+					//Interacted_OBJ = pShader->m_ppObjects[i];
 				}
 			}
 			else if (CONDITIONER == tag)
@@ -1449,7 +1646,7 @@ bool CNPC::OnPlayerUpdated(float fTimeElapsed)
 
 			}
 
-
+			
 		}
 		else if (tag == BOX)
 		{
@@ -1473,6 +1670,7 @@ bool CNPC::OnPlayerUpdated(float fTimeElapsed)
 					{
 						if (pShader->m_ppObjects[i]->ref->m_physics.isValid == false)
 						{
+							m_pState->SetSubState(STATE_SMASH);
 							pShader->m_ppObjects[i]->ref->m_physics.isValid = true;
 							pShader->m_ppObjects[i]->ref->rotateValue = 0.0f;
 							D3DXVECTOR3 look = GetLookAt();
@@ -1493,7 +1691,25 @@ bool CNPC::OnPlayerUpdated(float fTimeElapsed)
 
 	}
 
+	//if (m_pState->GetState() == STATE_FALLBACK)
+	//{
+	//	FILE *fp = fopen("road.txt", "w");
+	//	for (int i = 0; i < detail_size_m; ++i)
+	//	{
+	//		for (int j = 0; j < detail_size_n; ++j)
+	//		{
+	//			if(j == dPos.x && i == dPos.y) fprintf(fp, "2");
 
+	//			else if (j == ex && i == ey) fprintf(fp, "3");
+
+	//			else fprintf(fp, "%d", detailmap[j][i]);
+
+
+	//		}
+	//		fprintf(fp, "\n");
+	//	}
+	//	fclose(fp);
+	//}
 
 	return true;
 }

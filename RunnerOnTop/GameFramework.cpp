@@ -2,7 +2,7 @@
 #include "GameFramework.h"
 #include "State.h"
 #include "UIClass.h"
-
+float tickTime = 0;
 CGameFramework::CGameFramework()
 {
 	m_pd3dDevice = NULL;
@@ -18,6 +18,7 @@ CGameFramework::CGameFramework()
 
 	m_nPlayers = 0;
 	m_ppPlayers = NULL;
+	m_pNPC = NULL;
 	m_pd3dDepthStencilBuffer = NULL;
 	m_pd3dDepthStencilView = NULL;
 }
@@ -367,41 +368,49 @@ void CGameFramework::BuildObjects(int mapNum)
 	pAirplanePlyer->SetState(pState);
 	m_ppPlayers[0] = pAirplanePlyer;
 
-	m_pNPC = new CNPC(m_pd3dDevice, m_pScene->m_pCharacters, mapNum);
-	m_pNPC->SetFriction(250.0f);
-	m_pNPC->SetGravity(D3DXVECTOR3(0.0f, -400.0f, 0.0f));
-	m_pNPC->SetMaxVelocityXZ(125.0f);
-	m_pNPC->SetMaxVelocityY(400.0f);
-	if(mapNum == 1)
-		m_pNPC->SetPosition(D3DXVECTOR3(1628.0f, 3300.0f, 3240.0f));
+
+	if (mapNum == 1)
+	{
+		m_pNPC = new CNPC(m_pd3dDevice, m_pScene->m_pCharacters, mapNum);
+		m_pNPC->SetFriction(400.0f);
+		m_pNPC->SetGravity(D3DXVECTOR3(0.0f, -400.0f, 0.0f));
+		m_pNPC->SetMaxVelocityXZ(125.0f);
+		m_pNPC->SetMaxVelocityY(400.0f);
+		
+			m_pNPC->SetPosition(D3DXVECTOR3(1628.0f, 3300.0f, 3240.0f));
+		
+		m_pNPC->Rotate(0.0f, 180.0f, 0.0f);
+		pState = new CState();
+		pAnimationClip = new CAnimationClip();
+
+		pAnimationClip->LoadAnimation("idle");
+		pAnimationClip->LoadAnimation("run2");
+		pAnimationClip->LoadAnimation("left");
+		pAnimationClip->LoadAnimation("right");
+		pAnimationClip->LoadAnimation("backward");
+		pAnimationClip->LoadAnimation("jump", 40);
+		pAnimationClip->LoadAnimation("jumping");
+		pAnimationClip->LoadAnimation("slide");
+		pAnimationClip->LoadAnimation("smash");
+		pAnimationClip->LoadAnimation("fallback");
+		pAnimationClip->LoadAnimation("standup");
+		pAnimationClip->LoadAnimation("fallfront");
+
+
+		pState->SetPlayer(m_pNPC);
+
+
+		pState->SetAnimationClip(pAnimationClip);
+		pState->SetTimer(&m_GameTimer);
+		m_pNPC->SetState(pState);
+		m_pNPC->enemy = m_ppPlayers[0];
+		m_pNPC->m_pState->SetState(STATE_RUN);
+	}
 	else
-		m_pNPC->SetPosition(D3DXVECTOR3(345.0f, 5310.0f, 3790.0f));
-	m_pNPC->Rotate(0.0f, 180.0f, 0.0f);
-	pState = new CState();
-	pAnimationClip = new CAnimationClip();
-
-	pAnimationClip->LoadAnimation("idle");
-	pAnimationClip->LoadAnimation("run2");
-	pAnimationClip->LoadAnimation("left");
-	pAnimationClip->LoadAnimation("right");
-	pAnimationClip->LoadAnimation("backward");
-	pAnimationClip->LoadAnimation("jump", 40);
-	pAnimationClip->LoadAnimation("jumping");
-	pAnimationClip->LoadAnimation("slide");
-	pAnimationClip->LoadAnimation("smash");
-	pAnimationClip->LoadAnimation("fallback");
-	pAnimationClip->LoadAnimation("standup");
-	pAnimationClip->LoadAnimation("fallfront");
-
-
-	pState->SetPlayer(m_pNPC);
-
-
-	pState->SetAnimationClip(pAnimationClip);
-	pState->SetTimer(&m_GameTimer);
-	m_pNPC->SetState(pState);
-	m_pNPC->enemy = m_ppPlayers[0];
-	m_pNPC->m_pState->SetState(STATE_RUN);
+	{
+		if (m_pNPC)m_pNPC = NULL;
+	}
+	tickTime = 0.0f;
 }
 
 void CGameFramework::ReleaseObjects()
@@ -468,24 +477,19 @@ void CGameFramework::ProcessInput()
 		}
 
 		dwDirection = 0;
-		m_pNPC->bInteraction = false;
+		if (m_pNPC) m_pNPC->bInteraction = true;
 
-		if (true)
+		if (m_pNPC)
 		{
 			if (m_pNPC->m_pState->GetState() == STATE_RUN || m_pNPC->m_pState->GetState() == STATE_RUNJUMP || m_pNPC->m_pState->GetState() == STATE_SLIDE) dwDirection |= DIR_FORWARD;
-			if (pKeyBuffer[VK_DOWN] & 0xF0 || pKeyBuffer[VkKeyScan('s')] & 0xF0) dwDirection |= DIR_BACKWARD;
-			if (pKeyBuffer[VK_LEFT] & 0xF0 || pKeyBuffer[VkKeyScan('a')] & 0xF0) dwDirection |= DIR_LEFT;
-			if (pKeyBuffer[VK_RIGHT] & 0xF0 || pKeyBuffer[VkKeyScan('d')] & 0xF0) dwDirection |= DIR_RIGHT;
-			if (pKeyBuffer[VK_SPACE] & 0xF0 || pKeyBuffer[VkKeyScan('r')] & 0xF0) dwDirection |= DIR_UP;
-			if (pKeyBuffer[VK_NEXT] & 0xF0 || pKeyBuffer[VkKeyScan('f')] & 0xF0) dwDirection |= DIR_DOWN;
-			if (pKeyBuffer[VkKeyScan('e')] & 0xF0) m_pNPC->bInteraction = true;
 		}
-		if (dwDirection) m_pNPC->Move(dwDirection, 500.0f * m_GameTimer.GetTimeElapsed(), true);
+		if (dwDirection && m_pNPC) m_pNPC->Move(dwDirection, 500.0f * m_GameTimer.GetTimeElapsed(), true);
 	}
 	//플레이어를 실제로 이동하고 카메라를 갱신한다. 중력과 마찰력의 영향을 속도 벡터에 적용한다.
 	float timeElapsed = m_GameTimer.GetTimeElapsed();
 	m_ppPlayers[0]->Update(timeElapsed);
-	m_pNPC->Update(timeElapsed);
+	if(m_pNPC != NULL &&m_pNPC->GetPlayerUpdatedContext() != NULL)
+		m_pNPC->Update(timeElapsed);
 	//std::cout << "Ftime = " << timeElapsed << std::endl;
 
 }
@@ -495,15 +499,55 @@ void CGameFramework::AnimateObjects()
 	if (m_pScene) m_pScene->AnimateObjects(m_pd3dDevice,m_GameTimer.GetTimeElapsed());
 }
 
+extern FMOD::System *pfmod;
+
 void CGameFramework::FrameAdvance()
 {
 	m_GameTimer.Tick(60.0f);
-
+	pfmod->update();
 	ProcessInput();
 	
 	AnimateObjects();
+	if (tickTime < 5.0f && m_pNPC == NULL)
+	{
+		tickTime += m_GameTimer.GetTimeElapsed();
+	}
+	else if (m_pNPC == NULL)
+	{
+		m_pNPC = new CNPC(m_pd3dDevice, m_pScene->m_pCharacters, 2);
+		m_pNPC->SetFriction(400.0f);
+		m_pNPC->SetGravity(D3DXVECTOR3(0.0f, -400.0f, 0.0f));
+		m_pNPC->SetMaxVelocityXZ(125.0f);
+		m_pNPC->SetMaxVelocityY(400.0f);
+		m_pNPC->SetPosition(D3DXVECTOR3(200.0f, 3310.0f, 3500.0f));
+		m_pNPC->Rotate(0.0f, 180.0f, 0.0f);
+		CState* pState = new CState();
+		CAnimationClip* pAnimationClip = new CAnimationClip();
 
-	
+		pAnimationClip->LoadAnimation("idle");
+		pAnimationClip->LoadAnimation("run2");
+		pAnimationClip->LoadAnimation("left");
+		pAnimationClip->LoadAnimation("right");
+		pAnimationClip->LoadAnimation("backward");
+		pAnimationClip->LoadAnimation("jump", 40);
+		pAnimationClip->LoadAnimation("jumping");
+		pAnimationClip->LoadAnimation("slide");
+		pAnimationClip->LoadAnimation("smash");
+		pAnimationClip->LoadAnimation("fallback");
+		pAnimationClip->LoadAnimation("standup");
+		pAnimationClip->LoadAnimation("fallfront");
+
+
+		pState->SetPlayer(m_pNPC);
+
+
+		pState->SetAnimationClip(pAnimationClip);
+		pState->SetTimer(&m_GameTimer);
+		m_pNPC->SetState(pState);
+		m_pNPC->enemy = m_ppPlayers[0];
+		m_pNPC->m_pState->SetState(STATE_RUN);
+	}
+
 	//m_pd3dDeviceContext->
 
 	float fClearColor[4] = { 0.0f, 0.125f, 0.3f, 1.0f };

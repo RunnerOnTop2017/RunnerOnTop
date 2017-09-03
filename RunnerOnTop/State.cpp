@@ -2,6 +2,10 @@
 #include "State.h"
 #include "Bone.h"
 #include "Player.h"
+
+
+
+
 CState::CState()
 {
 	hashMap.insert({ STATE_IDLE,"idle" });
@@ -292,6 +296,8 @@ void CState::ProcessInput(UINT uMessage, WPARAM wParam, LPARAM lParam)
 
 D3DXMATRIX * CState::GetAnimation()
 {
+	
+
 	D3DXMATRIX *buf = NULL;
 
 	time += pTimer->GetTimeElapsed();
@@ -332,6 +338,8 @@ D3DXMATRIX * CState::GetAnimation()
 	 // 달리는중
 	 if (m_state == STATE_RUN)
 	 {
+		
+
 		 if (m_sub_state == STATE_LEFT || m_sub_state == STATE_RIGHT)
 		 {
 			 if (m_next_state == STATE_LEFT || m_next_state == STATE_RIGHT)

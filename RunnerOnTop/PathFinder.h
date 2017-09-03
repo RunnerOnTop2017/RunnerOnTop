@@ -74,14 +74,14 @@ bool operator<(const path_node & a, const path_node & b);
 //A* 알고리즘
 // std:;string 형태의 디렉션 인덱스로 반환
 std::string pathFind(const int & xStart, const int & yStart, const int & xFinish, const int & yFinish, int map[map_size_n][map_size_m]);
-std::string detailpathFind(const int & xStart, const int & yStart, const int & xFinish, const int & yFinish, int map[map_size_n][map_size_m]);
+std::string detailpathFind(const int & xStart, const int & yStart, const int & xFinish, const int & yFinish, int map[detail_size_n][detail_size_m]);
 
 
 //현재 x,y  한변의 노드 개수, 미니멈 x,z 맥시멈 x,z
 node_pos PositionToNodeIndex(float fx, float fy, float dm, D3DXVECTOR2 minMap, D3DXVECTOR2 maxMap);
 
 node_pos_float NodeIndexToPosition(node_pos pos, float dm, D3DXVECTOR2 minMap, D3DXVECTOR2 maxMap);
-D3DXVECTOR4 NodeIndexToMinMax(node_pos pos, D3DXVECTOR2 minMap, D3DXVECTOR2 maxMap);
+D3DXVECTOR4 NodeIndexToMinMax(node_pos pos, D3DXVECTOR2 minMap, D3DXVECTOR2 maxMap, int dm);
 
 
 std::vector<node_pos> PathStringToNodeIndex(std::string path, node_pos pos);
@@ -89,8 +89,8 @@ std::vector<node_pos> PathStringToNodeIndex(std::string path, node_pos pos);
 // 노드맵을 만들어줌 노드맵과 바운딩박스의 충돌여부가 마지막 bool값이면 벽을 만들어줌
 void CreateNodeMap(int map[map_size_n][map_size_m], D3DXVECTOR2 minMap, D3DXVECTOR2 maxMap, CDiffusedShader* pShader, int start_Obj, int cnt_Obj, bool dis);
 
-void CreateNodeDetailMap(int map[map_size_n][map_size_m], D3DXVECTOR2 minMap, D3DXVECTOR2 maxMap, CDiffusedShader * pShader, int start_Obj, int cnt_Obj);
+void CreateNodeDetailMap(int map[detail_size_n][detail_size_m], D3DXVECTOR2 minMap, D3DXVECTOR2 maxMap, CDiffusedShader * pShader, int start_Obj, int cnt_Obj);
 
-void FindEndPoint(int &ex, int &ey, int direction, int map[map_size_n][map_size_m]);
+void FindEndPoint(int &ex, int &ey, int direction, int map[detail_size_n][detail_size_m], int startX, int startY);
 
 float GetDistance(float x1, float z1, float x2, float z2);

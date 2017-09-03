@@ -15,7 +15,7 @@ class CPlayer : public CGameObject
 protected:
 	// 길찾기용
 	int map[map_size_n][map_size_m];
-	int detailmap[map_size_n][map_size_m];
+	int detailmap[detail_size_n][detail_size_m];
 	node_pos currentPos;
 	std::vector<node_pos> route;
 	//플레이어의 위치 벡터, x-축(Right), y-축(Up), z-축(Look) 벡터이다.
@@ -102,6 +102,7 @@ public:
 	//플레이어의 위치가 바뀔 때마다 호출되는 함수와 그 함수에서 사용하는 정보를 설정하는 함수이다.
 	virtual bool OnPlayerUpdated(float fTimeElapsed);
 	void SetPlayerUpdatedContext(LPVOID pContext) { m_pPlayerUpdatedContext = pContext; }
+	LPVOID GetPlayerUpdatedContext() { return  m_pPlayerUpdatedContext; }
 
 	//카메라의 위치가 바뀔 때마다 호출되는 함수와 그 함수에서 사용하는 정보를 설정하는 함수이다.
 	virtual void OnCameraUpdated(float fTimeElapsed);
@@ -135,6 +136,9 @@ class CNPC : public CPlayer
 {
 public:
 	int mapnumber;
+	int RouteIndex;
+	bool chasing;
+	std::vector<D3DXVECTOR3> map2Route;
 	CPlayer *enemy;
 	CNPC(ID3D11Device *pd3dDevice, CAnimateShader* pShader, int mapNumber = 1);
 	~CNPC();
@@ -143,5 +147,7 @@ public:
 	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext);
 	void SetState(CState* pState);
 	virtual bool OnPlayerUpdated(float fTimeElapsed);
+
+
 
 };

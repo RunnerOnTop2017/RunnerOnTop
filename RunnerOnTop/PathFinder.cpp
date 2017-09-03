@@ -141,13 +141,13 @@ std::string pathFind(const int & xStart, const int & yStart, const int & xFinish
 }
 
 
-std::string detailpathFind(const int & xStart, const int & yStart, const int & xFinish, const int & yFinish, int map[map_size_n][map_size_m])
+std::string detailpathFind(const int & xStart, const int & yStart, const int & xFinish, const int & yFinish, int map[detail_size_n][detail_size_m])
 {
 
 	static std::priority_queue<path_node> pq[2]; // list of open (not-yet-tried) nodes
-	static int closed_nodes_map[map_size_n][map_size_m]; // map of closed (tried-out) nodes
-	static int open_nodes_map[map_size_n][map_size_m]; // map of open (not-yet-tried) nodes
-	static int dir_map[map_size_n][map_size_m]; // map of directions
+	static int closed_nodes_map[detail_size_n][detail_size_m]; // map of closed (tried-out) nodes
+	static int open_nodes_map[detail_size_n][detail_size_m]; // map of open (not-yet-tried) nodes
+	static int dir_map[detail_size_n][detail_size_m]; // map of directions
 
 	static int pqi; // pq index
 	static path_node* n0;
@@ -156,9 +156,9 @@ std::string detailpathFind(const int & xStart, const int & yStart, const int & x
 	static char c;
 	pqi = 0;
 	// reset the node maps
-	for (y = 0; y<map_size_m; y++)
+	for (y = 0; y<detail_size_m; y++)
 	{
-		for (x = 0; x<map_size_n; x++)
+		for (x = 0; x<detail_size_n; x++)
 		{
 			closed_nodes_map[x][y] = 0;
 			open_nodes_map[x][y] = 0;
@@ -220,7 +220,7 @@ std::string detailpathFind(const int & xStart, const int & yStart, const int & x
 		{
 			xdx = x + dx[i]; ydy = y + dy[i];
 
-			if (!(xdx<0 || xdx>map_size_n - 1 || ydy<0 || ydy>map_size_m - 1 || map[xdx][ydy] == 1
+			if (!(xdx<0 || xdx>detail_size_n - 1 || ydy<0 || ydy>detail_size_m - 1 || map[xdx][ydy] == 1
 				|| closed_nodes_map[xdx][ydy] == 1))
 			{
 				// generate a child node
@@ -310,7 +310,7 @@ node_pos_float NodeIndexToPosition(node_pos pos, float dm, D3DXVECTOR2 minMap, D
 	return ret;
 }
 
-D3DXVECTOR4 NodeIndexToMinMax(node_pos pos, D3DXVECTOR2 minMap, D3DXVECTOR2 maxMap)
+D3DXVECTOR4 NodeIndexToMinMax(node_pos pos, D3DXVECTOR2 minMap, D3DXVECTOR2 maxMap, int dm)
 {
 	D3DXVECTOR4 ret;
 
@@ -318,8 +318,8 @@ D3DXVECTOR4 NodeIndexToMinMax(node_pos pos, D3DXVECTOR2 minMap, D3DXVECTOR2 maxM
 	float distX = abs(maxMap.x - minMap.x);
 	float distZ = abs(maxMap.y - minMap.y);
 
-	float m_dx = (distX / map_size_n);
-	float m_dz = (distZ / map_size_m);
+	float m_dx = (distX / dm);
+	float m_dz = (distZ / dm);
 
 
 	ret.x = (m_dx * pos.x) +  minMap.x; // minx
@@ -401,14 +401,14 @@ void CreateNodeMap(int map[map_size_n][map_size_m], D3DXVECTOR2 minMap, D3DXVECT
 
 }
 
-void CreateNodeDetailMap(int map[map_size_n][map_size_m], D3DXVECTOR2 minMap, D3DXVECTOR2 maxMap, CDiffusedShader * pShader, int start_Obj, int cnt_Obj)
+void CreateNodeDetailMap(int map[detail_size_n][detail_size_m], D3DXVECTOR2 minMap, D3DXVECTOR2 maxMap, CDiffusedShader * pShader, int start_Obj, int cnt_Obj)
 {
 
 	CGameObject **Obj = pShader->m_ppObjects;
 
-	for (int y = 0; y < map_size_m; ++y)
+	for (int y = 0; y < detail_size_m; ++y)
 	{
-		for (int x = 0; x < map_size_n; ++x)
+		for (int x = 0; x < detail_size_n; ++x)
 		{
 			XNA::AxisAlignedBox aabb1;
 			XNA::AxisAlignedBox aabb2;
@@ -416,8 +416,8 @@ void CreateNodeDetailMap(int map[map_size_n][map_size_m], D3DXVECTOR2 minMap, D3
 			float distX = maxMap.x - minMap.x;
 			float distZ = maxMap.y - minMap.y;
 
-			float m_dx = (distX / map_size_n);
-			float m_dz = (distZ / map_size_m);
+			float m_dx = (distX / detail_size_n);
+			float m_dz = (distZ / detail_size_m);
 
 			float centerx = (m_dx * x) + (m_dx * 0.5f)  + minMap.x;
 			float centery = (m_dz * y) + (m_dz * 0.5f)  + minMap.y;
@@ -432,8 +432,8 @@ void CreateNodeDetailMap(int map[map_size_n][map_size_m], D3DXVECTOR2 minMap, D3
 			{
 				OBJECTTAG tag = (Obj[i]->m_pMesh)->GetTag();
 				CDiffuseNormalVertex *mVertices = ((CCubeMesh*)Obj[i]->m_pMesh)->pVertices;
-				D3DXVECTOR3 d3dxvMax = { mVertices[1].m_d3dxvPosition.x , mVertices[4].m_d3dxvPosition.y, mVertices[2].m_d3dxvPosition.z };
-				D3DXVECTOR3 d3dxvMin = { mVertices[0].m_d3dxvPosition.x , mVertices[0].m_d3dxvPosition.y,  mVertices[0].m_d3dxvPosition.z };
+				D3DXVECTOR3 d3dxvMax = { mVertices[1].m_d3dxvPosition.x - 5.0f , mVertices[4].m_d3dxvPosition.y, mVertices[2].m_d3dxvPosition.z - 5.0f };
+				D3DXVECTOR3 d3dxvMin = { mVertices[0].m_d3dxvPosition.x + 5.0f , mVertices[0].m_d3dxvPosition.y,  mVertices[0].m_d3dxvPosition.z + 5.0f };
 				D3DXVECTOR3 center = (d3dxvMax + d3dxvMin) / 2.0f;
 				aabb2.Center = { center.x, center.y, center.z };
 				aabb2.Extents = { (d3dxvMax.x - d3dxvMin.x)/2.0f , (d3dxvMax.y - d3dxvMin.y)/2.0f, (d3dxvMax.z - d3dxvMin.z)/2.0f };
@@ -465,7 +465,7 @@ void CreateNodeDetailMap(int map[map_size_n][map_size_m], D3DXVECTOR2 minMap, D3
 
 					}
 				}
-				else if (tag == OBJ)
+			/*	else if (tag == OBJ)
 				{
 					if (true == XNA::IntersectAxisAlignedBoxAxisAlignedBox(&aabb1, &aabb2))
 					{
@@ -473,7 +473,7 @@ void CreateNodeDetailMap(int map[map_size_n][map_size_m], D3DXVECTOR2 minMap, D3
 						break;
 
 					}
-				}
+				}*/
 				else if (true == XNA::IntersectAxisAlignedBoxAxisAlignedBox(&aabb1, &aabb2))
 				{
 					collisionCheck = true;
@@ -490,27 +490,27 @@ void CreateNodeDetailMap(int map[map_size_n][map_size_m], D3DXVECTOR2 minMap, D3
 	}
 }
 
-void FindEndPoint(int &ex, int &ey, int direction, int map[map_size_n][map_size_m])
+void FindEndPoint(int &ex, int &ey, int direction, int map[detail_size_n][detail_size_m], int startX, int startY)
 {
 	
 	if (direction == 0) // 오른
 	{
-		if (map[map_size_n - 1][map_size_m / 2] == 0)
+		if (map[detail_size_n - 1][detail_size_m / 2] == 0)
 		{
-			ex = map_size_n-1;
+			ex = detail_size_n -1;
 			ey = map_size_m/2;
 		}
 		else
 		{
-			if (map[map_size_n - 1][map_size_m / 2] == 1)
-			{
-				if (map[map_size_n - 1][map_size_m / 2 + 1] == 0)
+			/*if (map[detail_size_n - 1][detail_size_m / 2] == 1)
+			{*/
+				if (startY < detail_size_m / 2)
 				{
-					for (int i = map_size_m / 2; i < map_size_m; ++i)
+					for (int i = detail_size_m / 2; i > -1; --i)
 					{
-						if (map[map_size_n - 1][i] == 0)
+						if (map[detail_size_n - 1][i] == 0)
 						{
-							ex = map_size_n-1;
+							ex = detail_size_n - 1;
 							ey = i;
 							break;
 						}
@@ -518,35 +518,84 @@ void FindEndPoint(int &ex, int &ey, int direction, int map[map_size_n][map_size_
 				}
 				else
 				{
-					for (int i = map_size_m / 2; i > -1; --i)
+					for (int i = detail_size_m / 2; i < detail_size_m; ++i)
 					{
-						if (map[map_size_n - 1][i] == 0)
+						if (map[detail_size_n - 1][i] == 0)
 						{
-							ex = map_size_n-1;
+							ex = detail_size_n - 1;
 							ey = i;
 							break;
 						}
 					}
 				}
+				/*if (map[detail_size_n - 1][detail_size_m / 2 + 1] == 0)
+				{
+					for (int i = detail_size_m / 2; i < detail_size_m; ++i)
+					{
+						if (map[detail_size_n - 1][i] == 0)
+						{
+							ex = detail_size_n -1;
+							ey = i;
+							break;
+						}
+					}
+				}
+				else
+				{
+					for (int i = detail_size_m / 2; i > -1; --i)
+					{
+						if (map[detail_size_n - 1][i] == 0)
+						{
+							ex = detail_size_n -1;
+							ey = i;
+							break;
+						}
+					}
+				}*/
 				
-			}
+			
 		}
 		
 	}
 	else if (direction == 2) // 왼
 	{
-		if (map[0][map_size_m / 2] == 0)
+		if (map[0][detail_size_m / 2] == 0)
 		{
 			ex = 0;
-			ey = map_size_m / 2;
+			ey = detail_size_m / 2;
 		}
 		else
 		{
-			if (map[0][map_size_m / 2] == 1)
+			if (startY < detail_size_m/ 2)
 			{
-				if (map[0][map_size_m / 2 + 1] == 0)
+				for (int i = detail_size_m / 2; i > -1; --i)
 				{
-					for (int i = map_size_m / 2; i < map_size_m; ++i)
+					if (map[0][i] == 0)
+					{
+						ex = 0;
+						ey = i;
+						break;
+					}
+				}
+			}
+			else
+			{
+				for (int i = detail_size_m / 2; i < detail_size_m; ++i)
+				{
+					if (map[0][i] == 0)
+					{
+						ex = 0;
+						ey = i;
+						break;
+					}
+				}
+			}
+
+			/*if (map[0][detail_size_m / 2] == 1)
+			{
+				if (map[0][detail_size_m / 2 + 1] == 0)
+				{
+					for (int i = detail_size_m / 2; i < detail_size_m; ++i)
 					{
 						if (map[0][i] == 0)
 						{
@@ -558,7 +607,7 @@ void FindEndPoint(int &ex, int &ey, int direction, int map[map_size_n][map_size_
 				}
 				else
 				{
-					for (int i = map_size_m / 2; i > -1; --i)
+					for (int i = detail_size_m / 2; i > -1; --i)
 					{
 						if (map[0][i] == 0)
 						{
@@ -569,63 +618,115 @@ void FindEndPoint(int &ex, int &ey, int direction, int map[map_size_n][map_size_
 					}
 				}
 
-			}
+			}*/
 		}
 	}
 	else if (direction == 1) // 아래
 	{
-		if (map[map_size_n/2][map_size_m-1] == 0)
+		if (map[detail_size_n /2][detail_size_m -1] == 0)
 		{
-			ex = map_size_n / 2;
-			ey = map_size_m-1;
+			ex = detail_size_n / 2;
+			ey = detail_size_m -1;
 		}
 		else
 		{
-			if (map[map_size_n / 2][map_size_m-1] == 1)
+
+			if (startX < detail_size_n / 2)
 			{
-				if (map[map_size_n / 2 + 1][map_size_m-1] == 0)
+				for (int i = detail_size_n / 2; i > -1; --i)
 				{
-					for (int i = map_size_n / 2; i < map_size_n; ++i)
+					if (map[i][detail_size_m - 1] == 0)
 					{
-						if (map[i][map_size_m-1] == 0)
+						ex = i;
+						ey = detail_size_m - 1;
+						break;
+					}
+				}
+			}
+			else
+			{
+				for (int i = detail_size_n / 2; i < detail_size_n; ++i)
+				{
+					if (map[i][detail_size_m - 1] == 0)
+					{
+						ex = i;
+						ey = detail_size_m - 1;
+						break;
+					}
+				}
+			}
+
+			/*if (map[detail_size_n / 2][detail_size_m -1] == 1)
+			{
+				if (map[detail_size_n / 2 + 1][detail_size_m -1] == 0)
+				{
+					for (int i = detail_size_n / 2; i < detail_size_n; ++i)
+					{
+						if (map[i][detail_size_m -1] == 0)
 						{
 							ex = i;
-							ey = map_size_m - 1;
+							ey = detail_size_m - 1;
 							break;
 						}
 					}
 				}
 				else
 				{
-					for (int i = map_size_n / 2; i > -1; --i)
+					for (int i = detail_size_n / 2; i > -1; --i)
 					{
-						if (map[i][map_size_m - 1] == 0)
+						if (map[i][detail_size_m - 1] == 0)
 						{
 							ex = i;
-							ey = map_size_m - 1;
+							ey = detail_size_m - 1;
 							break;
 						}
 					}
 				}
 
-			}
+			}*/
 		}
 	}
 	else if (direction == 3) // 위
 	{
 
-		if (map[map_size_n / 2][0] == 0)
+		if (map[detail_size_n / 2][0] == 0)
 		{
-			ex = map_size_n / 2;
+			ex = detail_size_n / 2;
 			ey = 0;
 		}
 		else
 		{
-			if (map[map_size_n / 2][0] == 1)
+
+			if (startX < detail_size_n / 2)
 			{
-				if (map[map_size_n / 2 + 1][0] == 0)
+				for (int i = detail_size_n / 2; i > -1; --i)
 				{
-					for (int i = map_size_n / 2; i < map_size_n; ++i)
+					if (map[i][0] == 0)
+					{
+						ex = i;
+						ey = 0;
+						break;
+					}
+				}
+			}
+			else
+			{
+				for (int i = detail_size_n / 2; i < detail_size_n; ++i)
+				{
+					if (map[i][0] == 0)
+					{
+						ex = i;
+						ey = 0;
+						break;
+					}
+				}
+			}
+
+		/*	if (map[detail_size_n / 2][0] == 1)
+			{
+				if (map[detail_size_n / 2 + 1][0] == 0)
+				{
+					for (int i = detail_size_n / 2; i < detail_size_n; ++i)
 					{
 						if (map[i][0] == 0)
 						{
@@ -637,7 +738,7 @@ void FindEndPoint(int &ex, int &ey, int direction, int map[map_size_n][map_size_
 				}
 				else
 				{
-					for (int i = map_size_n / 2; i > -1; --i)
+					for (int i = detail_size_n / 2; i > -1; --i)
 					{
 						if (map[i][0] == 0)
 						{
@@ -648,7 +749,7 @@ void FindEndPoint(int &ex, int &ey, int direction, int map[map_size_n][map_size_
 					}
 				}
 
-			}
+			}*/
 		}
 	}
 }

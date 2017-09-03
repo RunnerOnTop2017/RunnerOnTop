@@ -32,7 +32,8 @@
 #include <math.h>
 #include <mmsystem.h>
 #include <d3d9types.h>
-
+#include "fmod.hpp"
+#include "fmod_errors.h"
 
 #include <xnamath.h>
 #include"RunnerOnTop.h"
@@ -69,6 +70,11 @@
 // 20x20 วüลย
 const int map_size_n = 40;
 const int map_size_m = 40;
+
+const int detail_size_n = 20;
+const int detail_size_m = 20;
+
+
 #define D_METER 40
 enum GAMESTATENUM {
 	LOBBY, MAPMENU, INGAME, INGAME2, GAMEOVER, YOUWIN

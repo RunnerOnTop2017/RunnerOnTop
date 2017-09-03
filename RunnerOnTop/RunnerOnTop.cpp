@@ -173,11 +173,13 @@ static RECT rt;
 int mx, my;
 
 
-static FMOD::System *pfmod;
-static FMOD::Channel *ch;
-static FMOD::Sound *lobbySound;
-static FMOD::Sound *map1Sound;
-static FMOD::Sound *map2Sound;
+FMOD::System *pfmod;
+FMOD::Channel *ch;
+FMOD::Channel *footCh;
+FMOD::Sound *lobbySound;
+FMOD::Sound *map1Sound;
+FMOD::Sound *map2Sound;
+FMOD::Sound *footstep;
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -208,29 +210,41 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		}
 		break;
 	case WM_CREATE:
+	{
 		//SetWindowLongPtr()
 		//SetWindowPos(hWnd, HWND_TOPMOST, 0, 0, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN), 0L);
 
-		
+	/*	D3DXVECTOR3 v1 = { 1.0f, 0.0f, 1.0f };
+		D3DXVECTOR3 v2 = { 2.0f, 0.0f, 1.0f };
+		D3DXVECTOR3 cross;
+		D3DXVec3Cross(&cross, &v1, &v2);
+		std::cout << cross << std::endl;
+		D3DXVec3Cross(&cross, &v2, &v1);
+
+		std::cout << cross << std::endl;*/
+
+
 		bmp_background = (HBITMAP)LoadImage(NULL, L"Data\\UI\\background.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);// (HBITMAP)LoadBitmap(g_hInstance, MAKEINTRESOURCE(IDB_BITMAP2));
 		bmp_menu = (HBITMAP)LoadImage(NULL, L"Data\\UI\\menu2.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 		bmp_Map1 = (HBITMAP)LoadImage(NULL, L"Data\\UI\\map1.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 		bmp_Map2 = (HBITMAP)LoadImage(NULL, L"Data\\UI\\1_map2.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 		bmp_over = (HBITMAP)LoadImage(NULL, L"Data\\UI\\gameover.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 		bmp_win = (HBITMAP)LoadImage(NULL, L"Data\\UI\\youwin.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-		
+
 		FMOD_RESULT r;
 		FMOD::System_Create(&pfmod);
-		r = pfmod->init(1, FMOD_INIT_NORMAL, NULL);
-		
+		r = pfmod->init(2, FMOD_INIT_NORMAL, NULL);
+
 		r = pfmod->createSound("Data\\Sound\\lobby.mp3", FMOD_LOOP_NORMAL, NULL, &lobbySound);
 		r = pfmod->createSound("Data\\Sound\\map1.mp3", FMOD_LOOP_NORMAL, NULL, &map1Sound);
 		r = pfmod->createSound("Data\\Sound\\map2.mp3", FMOD_LOOP_NORMAL, NULL, &map2Sound);
+		r = pfmod->createSound("Data\\Sound\\footstep.ogg", FMOD_LOOP_NORMAL, NULL, &footstep);
 
 		r = pfmod->playSound(FMOD_CHANNEL_FREE, lobbySound, false, &ch);
-		
+		ch->setVolume(0.3f);
+		pfmod->playSound(FMOD_CHANNEL_FREE, footstep, true, &footCh);
 		//InvalidateRect(hWnd, NULL, false);
-
+	}
 		break;
 	case WM_PAINT:
 	{
@@ -447,14 +461,16 @@ void UIProcessMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				gameState = INGAME;
 				
 				pfmod->playSound(FMOD_CHANNEL_FREE, map1Sound,false, &ch);
+				ch->setVolume(0.3f);
 			}
 			//map2
 			else if ((rt.right * (900.0f / 1280.0f) < mx && mx < rt.right * (1030.0f / 1280.0f)) && (rt.bottom * (540.0f / 720.0f) < my && my < rt.bottom * (600.0f / 720.0f)))
 			{
 				gGameFramework.OnCreate(hInst, hWnd,2);
 				gameState = INGAME;
-
+				
 				pfmod->playSound(FMOD_CHANNEL_FREE, map2Sound,false,  &ch);
+				ch->setVolume(0.3f);
 
 			}
 			// back
@@ -466,8 +482,11 @@ void UIProcessMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		else if (gameState == GAMEOVER || gameState == YOUWIN)
 		{
 		
+			
+
 			gameState = LOBBY;
 			pfmod->playSound(FMOD_CHANNEL_FREE, lobbySound, false, &ch);
+			ch->setVolume(0.3f);
 
 		}
 	
