@@ -30,15 +30,15 @@ CPlayer::CPlayer()
 	lastFloorIndex = -1;
 	m_pPlayerUpdatedContext = NULL;
 	m_pCameraUpdatedContext = NULL;
-	
+
 	m_pShader = NULL;
 
 	currentPos.x = -1;
 	currentPos.y = -1;
 
 
-	for(int i = 0; i<map_size_n; ++i)
-	{ 
+	for (int i = 0; i < map_size_n; ++i)
+	{
 		for (int j = 0; j < map_size_m; ++j)
 		{
 			map[i][j] = 0;
@@ -125,7 +125,7 @@ void CPlayer::Move(const D3DXVECTOR3& d3dxvShift, bool bUpdateVelocity)
 		//D3DXMatrixTranslation(&m_d3dxmtxWorld, d3dxvPosition.x, d3dxvPosition.y, d3dxvPosition.z);
 
 		//플레이어의 위치가 변경되었으므로 카메라의 위치도 d3dxvShift 벡터 만큼 이동한다.
-		if(m_pCamera) m_pCamera->Move(d3dxvShift);
+		if (m_pCamera) m_pCamera->Move(d3dxvShift);
 	}
 }
 
@@ -225,7 +225,7 @@ void CPlayer::Rotate(float x, float y, float z)
 		}
 
 	}
-	
+
 
 	/*회전으로 인해 플레이어의 로컬 x-축, y-축, z-축이 서로 직교하지 않을 수 있으므로 z-축(LookAt 벡터)을 기준으로 하여 서로 직교하고 단위벡터가 되도록 한다.*/
 	D3DXVec3Normalize(&m_d3dxvLook, &m_d3dxvLook);
@@ -287,7 +287,7 @@ void CPlayer::Update(float fTimeElapsed)
 	{
 		if (m_pPlayerUpdatedContext) OnPlayerUpdated(fTimeElapsed);
 
-		
+
 		Move(m_d3dxvVelocity * fTimeElapsed, false);
 
 	}
@@ -398,7 +398,7 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 	{
 		if (isPlaying)
 		{
-			
+
 			footCh->setPaused(false);
 		}
 	}
@@ -429,7 +429,7 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 	{
 		D3DXVec3Transform(&cPosition[i], &cVertex[i].m_d3dxvPosition, &m_d3dxmtxWorld);
 	}
-	
+
 
 	float minX = cPosition[0].x, minY = cPosition[0].y, minZ = cPosition[0].z;
 	float maxX = cPosition[0].x, maxY = cPosition[0].y, maxZ = cPosition[0].z;
@@ -443,7 +443,7 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 		if (cPosition[i].z > maxZ) maxZ = cPosition[i].z;
 		if (cPosition[i].z < minZ) minZ = cPosition[i].z;
 	}*/
-	
+
 	D3DXVECTOR3 d3dxv_cMax = d3dxv_cPosition + max;//{ maxX, maxY, maxZ };
 	D3DXVECTOR3 d3dxv_cMin = d3dxv_cPosition + min;//{ minX, minY, minZ };
 	D3DXVECTOR3 d3dxv_center = (d3dxv_cMax + d3dxv_cMin) / 2.0f;
@@ -451,7 +451,7 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 	CDiffusedShader *pShader = (CDiffusedShader*)m_pPlayerUpdatedContext;
 
 	int nObjects = pShader->m_nObjects;
-	
+
 	int OBJECT_CNT = pShader->OBJECT_CNT;
 	int FLOOR_CNT = pShader->FLOOR_CNT;
 	int WALL_CNT = pShader->WALL_CNT;
@@ -490,17 +490,17 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 		bool x, y, z;
 		CollisionCheck(d3dxv_cMax, d3dxv_cMin, d3dxvMax, d3dxvMin, dxvShift, x, y, z);
 		OBJECTTAG tag = ((CCubeMesh*)pShader->m_ppObjects[i]->m_pMesh)->m_tag;
-		
+
 		if (tag == FALL)
 		{
-			if( (-1 != lastFloorIndex) && (x||y||z))
+			if ((-1 != lastFloorIndex) && (x || y || z))
 			{
 				CDiffuseNormalVertex *vertices = ((CCubeMesh*)pShader->m_ppObjects[lastFloorIndex]->m_pMesh)->pVertices;
 
 				D3DXVECTOR3 dMax = { vertices[1].m_d3dxvPosition.x , vertices[4].m_d3dxvPosition.y, vertices[2].m_d3dxvPosition.z };
 				D3DXVECTOR3 dMin = { vertices[0].m_d3dxvPosition.x , vertices[0].m_d3dxvPosition.y,  vertices[0].m_d3dxvPosition.z };
 				D3DXVECTOR3 vec = (dMax + dMin) / 2.0f;
-				vec.y = dMax.y+0.1f;
+				vec.y = dMax.y + 0.1f;
 				SetPosition(vec);
 				m_d3dxvVelocity.x = 0.0f;
 				m_d3dxvVelocity.y = 0.0f;
@@ -562,7 +562,7 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 			}
 		}
 
-		
+
 
 		if (y) {
 			//std::cout << "[" << lastFloorIndex << "]" << std::endl;
@@ -588,16 +588,16 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 		D3DXVECTOR3 d3dxvMin = { mVertices[0].m_d3dxvPosition.x , mVertices[0].m_d3dxvPosition.y,  mVertices[0].m_d3dxvPosition.z };
 		bool x, y, z;
 		OBJECTTAG tag = ((CCubeMesh*)pShader->m_ppObjects[i]->m_pMesh)->m_tag;
-		if (true == CollisionCheck(d3dxv_cMax, d3dxv_cMin, d3dxvMax, d3dxvMin, dxvShift, x, y, z) && tag!=BOX && tag!=REALBOX)
+		if (true == CollisionCheck(d3dxv_cMax, d3dxv_cMin, d3dxvMax, d3dxvMin, dxvShift, x, y, z) && tag != BOX && tag != REALBOX)
 		{
-			
+
 			// 문?
 			if (DOOR == tag)
 			{
 				if (bInteraction)
 				{
-					std::cout << "Interected!" << std::endl;
-					if (pShader->m_ppObjects[i]->ref!= NULL && pShader->m_ppObjects[i]->ref->bInteracted == false && Interacted_OBJ == NULL)
+					
+					if (pShader->m_ppObjects[i]->ref != NULL && pShader->m_ppObjects[i]->ref->bInteracted == false && Interacted_OBJ == NULL)
 					{
 						m_pState->SetSubState(STATE_SMASH);
 						Interacted_OBJ = pShader->m_ppObjects[i];
@@ -611,13 +611,13 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 				{
 					m_pState->SetState(STATE_FALLBACK);
 					pShader->m_ppObjects[i]->ref->bInteracted = true;
-					if (NULL!=Interacted_OBJ)
+					if (NULL != Interacted_OBJ)
 					{
 						Interacted_OBJ->ref->bInteracted = true;
 						Interacted_OBJ = NULL;
 						EndAnimation = false;
 					}
-					
+
 				}
 			}
 			else if (FENCE == tag)
@@ -666,6 +666,8 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 			}
 			else if (GOAL == tag)
 			{
+				footCh->getPaused(&isPlaying);
+				if (!isPlaying) footCh->setPaused(true);
 				gameState = YOUWIN;
 				InvalidateRect(mHwnd, NULL, false);
 				ReleaseCapture();
@@ -685,7 +687,7 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 			}
 
 		}
-	
+
 		if (tag == REALBOX &&pShader->m_ppObjects[i]->ref->m_physics.isValid == false && m_pState->GetPrevState() != STATE_FALLFRONT)
 		{
 			//CDiffuseNormalVertex *mVertices = ((CCubeMesh*)pShader->m_ppObjects[i]->m_pMesh)->pVertices; //(8개)
@@ -706,9 +708,9 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 				{
 					m_pState->SetState(STATE_FALLFRONT);
 				}
-				
+
 			}
-			
+
 
 		}
 		else if (tag == BOX)
@@ -725,7 +727,7 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 			//d3dxvMax = { d3dv4Max.x, d3dv4Max.y, d3dv4Max.z };
 			//d3dxvMin = { d3dv4Min.x, d3dv4Min.y, d3dv4Min.z };
 
-			if (CollisionCheck(d3dxv_cMax, d3dxv_cMin, d3dxvMax+pos, d3dxvMin+pos, dxvShift, x, y, z))
+			if (CollisionCheck(d3dxv_cMax, d3dxv_cMin, d3dxvMax + pos, d3dxvMin + pos, dxvShift, x, y, z))
 			{
 				if (true == bInteraction)
 				{
@@ -743,9 +745,9 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 							pShader->m_ppObjects[i]->ref->m_physics.velocity += -300.0f * right;
 							pShader->m_ppObjects[i]->ref->m_physics.velocity.y = 400.0f;
 
-							std::cout << pShader->m_ppObjects[i]->ref->m_physics.velocity << std::endl;
+							
 						}
-						
+
 					}
 				}
 			}
@@ -754,8 +756,8 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 
 	}
 
-	
-	
+
+
 	return true;
 }
 
@@ -870,19 +872,34 @@ CNPC::CNPC(ID3D11Device *pd3dDevice, CAnimateShader *pShader, int mapNumber)
 	pCollision = new CCubeMesh(pd3dDevice, -15.0f, 15.0f, 0.0f, 75.0f, -15.0f, 15.0f);//Collision;
 	//플레이어(비행기) 메쉬를 렌더링할 때 사용할 쉐이더를 생성한다.
 	m_pShader = pShader;
-	
+
 	mapnumber = mapNumber;
 	chasing = false;
 	if (mapNumber == 1)
 	{
 		maxMap = { 3000.0f, 3800.0f };
 		minMap = { -3000.0f, -3800.0f };
+
+		map2Route.clear();
+
+		map2Route.push_back({ 1665.08f,	3263.1f, 1609.01f });
+		map2Route.push_back({ 1042.14f,	3263.1f, 1570.22f });
+		map2Route.push_back({ 396.036f,	3263.1f, 1593.52f }); // 플레이어 한계선									 
+		map2Route.push_back({ 959.119f,	3230.1f, 1160.55f });
+		map2Route.push_back({ 1016.42f,	2980.1f, -578.81f });
+		map2Route.push_back({ 1606.84f,	2980.1f, -576.032f });
+		map2Route.push_back({ 1602.25f,	2980.1f, -692.185f });
+		map2Route.push_back({ 1600.39f,	2823.1f, -1627.05f });
+		map2Route.push_back({ 1605.99f,	2723.1f, -2426.85f });
+
+
 	}
 	else
 	{
 		maxMap = { 345.0f, 3795.0f };
 		minMap = { -2005.0f, -9450.0f };
 
+		map2Route.clear();
 
 		map2Route.push_back({ -733.247f, 3290.1f, 3382.35f });
 		map2Route.push_back({ -1706.73f, 3290.1f, 3382.35f });
@@ -901,11 +918,11 @@ CNPC::CNPC(ID3D11Device *pd3dDevice, CAnimateShader *pShader, int mapNumber)
 		map2Route.push_back({ -1674.4f, 3290.1f, -7238.39f });
 
 
-		
+
 
 	}
 	RouteIndex = 0;
-						//플레이어를 위한 쉐이더 변수를 생성한다.
+	//플레이어를 위한 쉐이더 변수를 생성한다.
 	CreateShaderVariables(pd3dDevice);
 
 	m_pShader->m_ppObjects[1]->m_pState = m_pState;
@@ -918,11 +935,11 @@ CNPC::~CNPC()
 
 void CNPC::Render(ID3D11DeviceContext *pd3dDeviceContext)
 {
-	
+
 	if (m_pShader)
 	{
 		m_pShader->m_ppObjects[1]->m_d3dxmtxWorld = m_d3dxmtxWorld;
-		//std::cout << GetPosition().x << std::endl;
+		
 		//D3DXMATRIX matrix;
 		//D3DXMatrixTranslation(&matrix, 50.0f, 0.0f, 0.0f);
 		//m_pShader->m_ppObjects[1]->m_d3dxmtxWorld = matrix*m_d3dxmtxWorld;
@@ -940,11 +957,11 @@ void CNPC::SetState(CState * pState)
 
 void CNPC::ChangeCamera(ID3D11Device *pd3dDevice, DWORD nNewCameraMode, float fTimeElapsed)
 {
-	
+
 }
 bool CNPC::OnPlayerUpdated(float fTimeElapsed)
 {
-	//std::cout << "Called" << m_d3dxvVelocity.y <<std::endl;
+	
 	// 이동 거리
 	D3DXVECTOR3 dxvShift = m_d3dxvVelocity *fTimeElapsed;
 
@@ -1006,7 +1023,7 @@ bool CNPC::OnPlayerUpdated(float fTimeElapsed)
 		if (cPosition[i].z < minZ) minZ = cPosition[i].z;
 	}
 */
-	
+
 	D3DXVECTOR3 d3dxv_eMax = enemy->GetPosition() + max;
 	D3DXVECTOR3 d3dxv_eMin = enemy->GetPosition() + min;
 	D3DXVECTOR3 d3dxv_eCenter = (d3dxv_eMax + d3dxv_eMin) / 2.0f;
@@ -1046,6 +1063,7 @@ bool CNPC::OnPlayerUpdated(float fTimeElapsed)
 
 	if (mapnumber == 1)
 	{
+		/*
 		if (currentPos.x == -1 && currentPos.y == -1)
 		{
 			CreateNodeMap(map, minMap, maxMap, (CDiffusedShader*)m_pPlayerUpdatedContext, 2, FLOOR_CNT, true);
@@ -1121,10 +1139,10 @@ bool CNPC::OnPlayerUpdated(float fTimeElapsed)
 
 		if (50.0f>GetDistance(d3dxv_center.x, d3dxv_center.z, d3dxv_eCenter.x, d3dxv_eCenter.z))
 		{
-			if (m_pState->GetState() == STATE_RUN) m_pState->SetState(STATE_IDLE);
-			gameState = GAMEOVER;
-			InvalidateRect(mHwnd, NULL, false);
-			ReleaseCapture();
+			//if (m_pState->GetState() == STATE_RUN) m_pState->SetState(STATE_IDLE);
+			//gameState = GAMEOVER;
+			//InvalidateRect(mHwnd, NULL, false);
+			//ReleaseCapture();
 		}
 		else
 		{
@@ -1241,9 +1259,123 @@ bool CNPC::OnPlayerUpdated(float fTimeElapsed)
 			dPos = ndPos;
 			detailPathIndex++;
 		}
+		*/
+
+		D3DXVECTOR3 ePosition = enemy->GetPosition();
+		int enemyIndex = 0;
+		float eDistance = D3DXVec3Length(&D3DXVECTOR3(map2Route[0].x - ePosition.x, 0, map2Route[0].z - ePosition.z));
+		
+		for (int i = 1; i < map2Route.size(); ++i)
+		{
+			float dist = D3DXVec3Length(&D3DXVECTOR3(map2Route[i].x - ePosition.x, 0, map2Route[i].z - ePosition.z));
+			if (dist < eDistance)
+			{
+				enemyIndex = i;
+				eDistance = dist;
+			}
+		}
+		
+		//유저를 보는 방향벡터 생성
+		D3DXVECTOR3 toEnemy = D3DXVECTOR3(ePosition.x - GetPosition().x, 0, ePosition.z - GetPosition().z);
+		//유저까지와의 거리
+		float toEnemyDistance = D3DXVec3Length(&toEnemy);
+
+		if (toEnemyDistance < 200.0f)
+		{
+			if (!chasing) chasing = true;
+		}
+		else
+		{
+			if (chasing)
+			{
+				RouteIndex = enemyIndex;
+				chasing = false;
+			}
+		}
+
+		D3DXVECTOR3 look = GetLookVector();
+
+		v1 = { look.x, 0.0f ,look.z };
+
+		if (chasing)
+			v2 = toEnemy;
+		else
+			v2 = { map2Route[RouteIndex].x - GetPosition().x , 0.0f , map2Route[RouteIndex].z - GetPosition().z };
+		//D3DXVECTOR3 v2 = { d3dxv_eCenter.x - d3dxv_center.x, 0.0f ,d3dxv_eCenter.z - d3dxv_center.z };
+		//D3DXVec3Normalize(&v1, &v1);
+		D3DXVECTOR3 v3;
+		D3DXVec3Normalize(&v3, &v2);
+
+		v1length = D3DXVec3Length(&v1);
+		v2length = D3DXVec3Length(&v3);
 
 
+		vs = D3DXVec3Dot(&v1, &v3);// 거리
 
+		cosRad = vs / (v1length * v2length);
+
+		if (!isnan(cosRad) && cosRad != 1.0f)
+		{
+			vt = acosf(cosRad);
+			if (!isnan(vt))
+			{
+				vtheta = (180.0f * vt) / 3.1415926535f;
+				if (vs != 1.0f && vs != -1.0f)
+				{
+					D3DXVECTOR3 cross;
+					D3DXVec3Cross(&cross, &v1, &v3);
+					if (cross.y < 0.0f) vtheta *= -1.0f;
+					if (cross.y != 0.0f) Rotate(0.0f, vtheta, 0.0f);
+
+
+				}
+			}
+
+		}
+		
+		if (D3DXVec3Length(&v2) < 10.0f)
+		{
+			if (enemyIndex == 2 && RouteIndex == 1)
+			{
+
+				if (m_pState->GetState() == STATE_RUN)
+				{
+
+					m_pState->SetState(STATE_IDLE);
+				}
+
+			}
+			else
+			{
+				
+				if (m_pState->GetState() == STATE_IDLE)
+				{
+					m_pState->SetState(STATE_RUN);
+				}
+				if (RouteIndex == 2) RouteIndex = 3;
+				else RouteIndex++;
+
+			}
+		}
+		else
+		{
+			if (m_pState->GetState() == STATE_IDLE)
+			{
+				m_pState->SetState(STATE_RUN);
+			}
+		}
+
+		if (toEnemyDistance < 50.0f)
+		{
+			bool isPlaying;
+			footCh->getPaused(&isPlaying);
+			if (!isPlaying) footCh->setPaused(true);
+
+			if (m_pState->GetState() == STATE_RUN) m_pState->SetState(STATE_IDLE);
+			gameState = GAMEOVER;
+			InvalidateRect(mHwnd, NULL, false);
+			ReleaseCapture();
+		}
 
 	}
 	else if (mapnumber == 2)
@@ -1252,7 +1384,7 @@ bool CNPC::OnPlayerUpdated(float fTimeElapsed)
 		//유저한테 가장 가까운 포인트 찾기
 		D3DXVECTOR3 ePosition = enemy->GetPosition();
 		int enemyIndex = 0;
-		float eDistance = D3DXVec3Length(&D3DXVECTOR3(map2Route[0].x - ePosition.x , 0, map2Route[0].z - ePosition.z));
+		float eDistance = D3DXVec3Length(&D3DXVECTOR3(map2Route[0].x - ePosition.x, 0, map2Route[0].z - ePosition.z));
 
 		for (int i = 1; i < map2Route.size(); ++i)
 		{
@@ -1260,12 +1392,13 @@ bool CNPC::OnPlayerUpdated(float fTimeElapsed)
 			if (dist < eDistance)
 			{
 				enemyIndex = i;
+				eDistance = dist;
 			}
 		}
 
 
 		//유저를 보는 방향벡터 생성
-		D3DXVECTOR3 toEnemy = D3DXVECTOR3( ePosition.x - GetPosition().x, 0,  ePosition.z - GetPosition().z);
+		D3DXVECTOR3 toEnemy = D3DXVECTOR3(ePosition.x - GetPosition().x, 0, ePosition.z - GetPosition().z);
 		//유저까지와의 거리
 		float toEnemyDistance = D3DXVec3Length(&toEnemy);
 
@@ -1286,7 +1419,7 @@ bool CNPC::OnPlayerUpdated(float fTimeElapsed)
 
 		v1 = { look.x, 0.0f ,look.z };
 
-		if(chasing)
+		if (chasing)
 			v2 = toEnemy;
 		else
 			v2 = { map2Route[RouteIndex].x - GetPosition().x , 0.0f , map2Route[RouteIndex].z - GetPosition().z };
@@ -1295,14 +1428,14 @@ bool CNPC::OnPlayerUpdated(float fTimeElapsed)
 		D3DXVECTOR3 v3;
 		D3DXVec3Normalize(&v3, &v2);
 
-		 v1length = D3DXVec3Length(&v1);
-		 v2length = D3DXVec3Length(&v3);
+		v1length = D3DXVec3Length(&v1);
+		v2length = D3DXVec3Length(&v3);
 
 
 		vs = D3DXVec3Dot(&v1, &v3);// 거리
 
 		cosRad = vs / (v1length * v2length);
-		
+
 		if (!isnan(cosRad) && cosRad != 1.0f)
 		{
 			vt = acosf(cosRad);
@@ -1319,7 +1452,7 @@ bool CNPC::OnPlayerUpdated(float fTimeElapsed)
 
 				}
 			}
-			
+
 		}
 
 		if (D3DXVec3Length(&v2) < 10.0f)
@@ -1329,19 +1462,24 @@ bool CNPC::OnPlayerUpdated(float fTimeElapsed)
 
 		if (toEnemyDistance < 50.0f)
 		{
+			bool isPlaying;
+			footCh->getPaused(&isPlaying);
+			if (!isPlaying) footCh->setPaused(true);
+
 			if (m_pState->GetState() == STATE_RUN) m_pState->SetState(STATE_IDLE);
 			gameState = GAMEOVER;
 			InvalidateRect(mHwnd, NULL, false);
 			ReleaseCapture();
 		}
-		
 
-	
+
+
 	}
 
 
 #ifdef _DEBUG
-	//system("cls");
+	
+	
 	//std::cout << GetPosition() << std::endl;
 	//std::cout << NPCDirection << std::endl;
 	//printf("NPOS : %d, %d\n", pos.x, pos.y);
@@ -1531,7 +1669,6 @@ bool CNPC::OnPlayerUpdated(float fTimeElapsed)
 				bInteraction = true;
 				if (bInteraction)
 				{
-					std::cout << "Interected!" << std::endl;
 					if (pShader->m_ppObjects[i]->ref != NULL && pShader->m_ppObjects[i]->ref->bInteracted == false && Interacted_OBJ == NULL)
 					{
 						m_pState->SetSubState(STATE_SMASH);
@@ -1585,7 +1722,7 @@ bool CNPC::OnPlayerUpdated(float fTimeElapsed)
 			}
 			else if (PIPE == tag)
 			{
-				
+
 				if (m_pState->GetState() != STATE_RUNJUMP &&Interacted_OBJ == NULL && m_pState->GetPrevState() != STATE_FALLFRONT)
 				{
 					//m_pState->SetState(STATE_FALLFRONT);
@@ -1646,7 +1783,7 @@ bool CNPC::OnPlayerUpdated(float fTimeElapsed)
 
 			}
 
-			
+
 		}
 		else if (tag == BOX)
 		{
@@ -1680,7 +1817,7 @@ bool CNPC::OnPlayerUpdated(float fTimeElapsed)
 							pShader->m_ppObjects[i]->ref->m_physics.velocity += -300.0f * right;
 							pShader->m_ppObjects[i]->ref->m_physics.velocity.y = 400.0f;
 
-							std::cout << pShader->m_ppObjects[i]->ref->m_physics.velocity << std::endl;
+							
 						}
 
 					}
@@ -1690,26 +1827,5 @@ bool CNPC::OnPlayerUpdated(float fTimeElapsed)
 
 
 	}
-
-	//if (m_pState->GetState() == STATE_FALLBACK)
-	//{
-	//	FILE *fp = fopen("road.txt", "w");
-	//	for (int i = 0; i < detail_size_m; ++i)
-	//	{
-	//		for (int j = 0; j < detail_size_n; ++j)
-	//		{
-	//			if(j == dPos.x && i == dPos.y) fprintf(fp, "2");
-
-	//			else if (j == ex && i == ey) fprintf(fp, "3");
-
-	//			else fprintf(fp, "%d", detailmap[j][i]);
-
-
-	//		}
-	//		fprintf(fp, "\n");
-	//	}
-	//	fclose(fp);
-	//}
-
 	return true;
 }

@@ -99,10 +99,9 @@ void CGameObject::Animate(ID3D11Device *pd3dDevice,float fTimeElapsed)
 				bool x, y, z;
 				if (CollisionCheck(pos + max, pos + min, d3dxvMax, d3dxvMin, fTimeElapsed * m_physics.velocity, x, y, z))
 				{
-					std::cout << "Ãæµ¹ : " << i << std::endl;
-					std::cout << "Pos : " << pos.x << ", " << pos.y << ", " << pos.z << std::endl;
+					
 					pos = fTimeElapsed * m_physics.velocity;
-					std::cout<< "Vec : " << pos.x << ", " << pos.y << ", " << pos.z << std::endl;
+					
 					ResetUpLookRight();
 					m_physics.isValid = false;
 					break;

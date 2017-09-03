@@ -28,7 +28,6 @@ void CScene::BuildObjects(ID3D11Device *pd3dDevice)
 	m_ppShaders[0] = new CTextureShader();
 	m_ppShaders[0]->CreateShader(pd3dDevice);
 	m_ppShaders[0]->BuildObjects(pd3dDevice, MapNumber);
-	printf("%d", MapNumber);
 
 	//기타 아이템
 	m_ppShaders[1] = new CItemShader();

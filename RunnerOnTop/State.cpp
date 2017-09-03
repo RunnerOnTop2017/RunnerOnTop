@@ -308,7 +308,7 @@ D3DXMATRIX * CState::GetAnimation()
 		frame += 1;
 		time = 0;
 	}
-	// std::cout << frame2 << std::endl;
+	
 
 	 //상호작용중일때
 	 if (m_sub_state > STATE_INTERACTION)
@@ -416,7 +416,7 @@ D3DXMATRIX * CState::GetAnimation()
 				 m_prev_state = m_state;
 				 frame2 = 0;
 				 m_state = m_next_state;
-				 std::cout << m_next_state << std::endl;
+				
 
 				 m_pPlayer->EndAnimation = true;
 			 }

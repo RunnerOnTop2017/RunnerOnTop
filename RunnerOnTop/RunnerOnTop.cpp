@@ -211,19 +211,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		break;
 	case WM_CREATE:
 	{
-		//SetWindowLongPtr()
-		//SetWindowPos(hWnd, HWND_TOPMOST, 0, 0, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN), 0L);
-
-	/*	D3DXVECTOR3 v1 = { 1.0f, 0.0f, 1.0f };
-		D3DXVECTOR3 v2 = { 2.0f, 0.0f, 1.0f };
-		D3DXVECTOR3 cross;
-		D3DXVec3Cross(&cross, &v1, &v2);
-		std::cout << cross << std::endl;
-		D3DXVec3Cross(&cross, &v2, &v1);
-
-		std::cout << cross << std::endl;*/
-
-
 		bmp_background = (HBITMAP)LoadImage(NULL, L"Data\\UI\\background.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);// (HBITMAP)LoadBitmap(g_hInstance, MAKEINTRESOURCE(IDB_BITMAP2));
 		bmp_menu = (HBITMAP)LoadImage(NULL, L"Data\\UI\\menu2.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 		bmp_Map1 = (HBITMAP)LoadImage(NULL, L"Data\\UI\\map1.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);

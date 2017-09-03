@@ -137,7 +137,7 @@ void CShader::CreateShaderVariables(ID3D11Device *pd3dDevice)
 	d3dBufferDesc4.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	d3dBufferDesc4.ByteWidth = sizeof(VS_CB_ISALPHABLEND);
 	pd3dDevice->CreateBuffer(&d3dBufferDesc4, NULL, &m_isAlphaBlend);
-	std::cout << "";
+	
 }
 
 
