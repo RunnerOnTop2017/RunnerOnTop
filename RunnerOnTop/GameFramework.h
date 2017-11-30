@@ -24,10 +24,15 @@ private:
 	CGameTimer m_GameTimer;
 	CScene *m_pScene;
 	_TCHAR m_pszBuffer[50];
+public:
 	int m_nPlayers;
 	CPlayer **m_ppPlayers;
-	CNPC *m_pNPC;
+	int m_nNpc;
+	CNPC **m_pNPC;
 	int mNum;
+
+	bool loaded;
+
 private:
 	ID3D11Texture2D *m_pd3dDepthStencilBuffer;
 	ID3D11DepthStencilView *m_pd3dDepthStencilView;
@@ -51,7 +56,7 @@ public:
 	bool CreateDirect3DDisplay();
 
 	//렌더링할 메쉬, 객체를 생성하고 소멸하는 함수이다. 
-	void BuildObjects(int mapNum = 1);
+	void BuildObjects(int mapNum, int roll);
 	void ReleaseObjects();
 
 	//프레임워크의 핵심(사용자 입력, 애니메이션, 렌더링)을 구성하는 함수이다. 

@@ -53,6 +53,7 @@ protected:
 	//3인칭 카메라일 때 플레이어를 그리기 위해 사용하는 쉐이더이다.
 	CAnimateShader *m_pShader;
 
+	int roll;
 
 	int lastFloorIndex;
 public:
@@ -74,6 +75,10 @@ public:
 	bool bInteraction;
 	bool EndAnimation;
 	CGameObject *Interacted_OBJ;
+
+	//캐릭터 역할지정
+	void SetRoll(int n) { roll = n; }
+	int GetRoll() { return roll; }
 
 	/*플레이어의 위치를 d3dxvPosition 위치로 설정한다. d3dxvPosition 벡터에서 현재 플레이어의 위치 벡터를 빼면 현재 플레이어의 위치에서 d3dxvPosition 방향으로의 방향 벡터가 된다. 현재 플레이어의 위치에서 이 방향 벡터 만큼 이동한다.*/
 	void SetPosition(const D3DXVECTOR3& d3dxvPosition) { Move((d3dxvPosition - m_d3dxvPosition), false); }
@@ -119,12 +124,15 @@ public:
 	virtual void Render(ID3D11DeviceContext *pd3dDeviceContext);
 	virtual void ResetUpLookRight();
 	CCubeMesh *pCollision;
+	
+	//void CheckDistance(void *npc);
+	void* enemy;
 };
 
 class CAirplanePlayer : public CPlayer
 {
 public:
-	CAirplanePlayer(ID3D11Device *pd3dDevice, CAnimateShader* pShader);
+	CAirplanePlayer(ID3D11Device *pd3dDevice, CAnimateShader* pShader, int roll = 0);
 	~CAirplanePlayer();
 
 	virtual void ChangeCamera(ID3D11Device *pd3dDevice, DWORD nNewCameraMode, float fTimeElapsed);

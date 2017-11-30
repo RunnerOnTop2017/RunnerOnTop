@@ -4,11 +4,14 @@
 #pragma comment(linker, "/entry:wWinMainCRTStartup /subsystem:console") 
 #endif
 #pragma comment(lib, "fmodex_vc")
+#pragma comment(lib, "ws2_32")
 #include "targetver.h"
 
 #define WIN32_LEAN_AND_MEAN             // 거의 사용되지 않는 내용은 Windows 헤더에서 제외합니다.
 // Windows 헤더 파일:
 #include <windows.h>
+#include <WinSock2.h>
+#include <CommCtrl.h>
 
 // C 런타임 헤더 파일입니다.
 #include <stdlib.h>
@@ -38,6 +41,9 @@
 #include <xnamath.h>
 #include"RunnerOnTop.h"
 
+
+#define	WM_SOCKET	WM_USER + 1
+
 #define FRAME_BUFFER_WIDTH	GetSystemMetrics(SM_CXSCREEN) // 1600
 #define FRAME_BUFFER_HEIGHT	GetSystemMetrics(SM_CYSCREEN) //900
 #define VS_SLOT_VIEWPROJECTION_MATRIX	0x00
@@ -66,6 +72,16 @@
 #define WM_INTERACT WM_USER+1
 #define CHANGE_POS_SLIDE 0
 
+//서버용--------------
+//--------------------
+#define SERVERPORT 9000
+#define BUF_SIZE    1024
+#define MAX_BUFF_SIZE   4000
+#define MAX_PACKET_SIZE  255
+#define MAX_Client 999
+
+//---------------------
+
 // 길찾기용 알고리즘
 // 20x20 형태
 const int map_size_n = 40;
@@ -77,7 +93,7 @@ const int detail_size_m = 20;
 
 #define D_METER 40
 enum GAMESTATENUM {
-	LOBBY, MAPMENU, INGAME, INGAME2, GAMEOVER, YOUWIN
+	LOBBY, MAPMENU, INGAME, INGAME2, GAMEOVER, YOUWIN, MATCHING, LOADING
 };
 
 // 첫번째 박스의 max. min, 두번째 박스의 max, min을 인자로 받아 충돌하면 true 아니면 false. 인자로 받은 x,y,z,에 x축과 y축 z축 에 대한 충돌세부사항이 저장된다.

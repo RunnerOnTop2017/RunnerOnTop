@@ -6,6 +6,7 @@
 #include "GameFramework.h"
 #include "fmod.hpp"
 #include "fmod_errors.h"
+#include "ServerModule.h"
 #define MAX_LOADSTRING 100
 
 // 전역 변수:
@@ -17,6 +18,13 @@ HINSTANCE ghInstance;
 
 GAMESTATENUM gameState;
 HWND mHwnd;
+ServerModule network;
+
+#ifdef _DEBUG
+void test()
+{
+}
+#endif
 
 // 이 코드 모듈에 들어 있는 함수의 정방향 선언입니다.
 ATOM				MyRegisterClass(HINSTANCE hInstance);
@@ -24,6 +32,8 @@ BOOL				InitInstance(HINSTANCE, int);
 LRESULT CALLBACK	WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK	About(HWND, UINT, WPARAM, LPARAM);
 void UIProcessMessage(HWND hWnd,UINT message, WPARAM wParam, LPARAM lParam);
+BOOL CALLBACK MainDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM lParam);
+
 
 int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
 	_In_opt_ HINSTANCE hPrevInstance,
@@ -41,6 +51,10 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
 	LoadString(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
 	LoadString(hInstance, IDC_RUNNERONTOP, szWindowClass, MAX_LOADSTRING);
 	MyRegisterClass(hInstance);
+#ifdef _DEBUG
+	
+#endif
+
 	gameState = LOBBY;
 	// 응용 프로그램 초기화를 수행합니다.
 	if (!InitInstance(hInstance, nCmdShow))
@@ -163,6 +177,8 @@ static HBITMAP bmp_Map2;
 
 static HBITMAP bmp_over;
 static HBITMAP bmp_win;
+static HBITMAP bmp_matching;
+static HBITMAP bmp_loading;
 
 
 static BOOL start_mouse;
@@ -209,14 +225,40 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			return DefWindowProc(hWnd, message, wParam, lParam);
 		}
 		break;
+
+	case WM_SOCKET:
+	{
+		if (WSAGETSELECTERROR(lParam)) {
+			closesocket((SOCKET)wParam);
+			network.clienterror();
+			break;
+		}
+		switch (WSAGETSELECTEVENT(lParam)) {
+		case FD_READ:
+			network.ReadPacket((SOCKET)wParam);
+			break;
+		case FD_CLOSE:
+			closesocket((SOCKET)wParam);
+			network.clienterror();
+			break;
+		}
+	}
+	break;
 	case WM_CREATE:
 	{
+		DialogBox(hInst, MAKEINTRESOURCE(IDD_DIALOG1), NULL, MainDlgProc);
+		network.init(hInst, hWnd);
+		network.SetGameFrameWork(&gGameFramework);
+		//IDD_DIALOG1
+
 		bmp_background = (HBITMAP)LoadImage(NULL, L"Data\\UI\\background.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);// (HBITMAP)LoadBitmap(g_hInstance, MAKEINTRESOURCE(IDB_BITMAP2));
 		bmp_menu = (HBITMAP)LoadImage(NULL, L"Data\\UI\\menu2.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 		bmp_Map1 = (HBITMAP)LoadImage(NULL, L"Data\\UI\\map1.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 		bmp_Map2 = (HBITMAP)LoadImage(NULL, L"Data\\UI\\1_map2.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 		bmp_over = (HBITMAP)LoadImage(NULL, L"Data\\UI\\gameover.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 		bmp_win = (HBITMAP)LoadImage(NULL, L"Data\\UI\\youwin.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+		bmp_matching = (HBITMAP)LoadImage(NULL, L"Data\\UI\\matching.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+		bmp_loading = (HBITMAP)LoadImage(NULL, L"Data\\UI\\loading.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 
 		FMOD_RESULT r;
 		FMOD::System_Create(&pfmod);
@@ -318,7 +360,58 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 			DeleteDC(hMemDC);
 		}
+		else if (gameState == MATCHING)
+		{
+			GetClientRect(hWnd, &rt);
 
+			hMemDC = CreateCompatibleDC(hdc);
+			hBitmap = CreateCompatibleBitmap(hdc, 1280, 720);
+			hOldBitmap = (HBITMAP)SelectObject(hMemDC, hBitmap);
+
+			hOldMemDC = CreateCompatibleDC(hdc);
+
+			FillRect(hMemDC, &rt, WHITE_BRUSH);
+
+			// matching
+			SelectObject(hOldMemDC, bmp_matching);
+			StretchBlt(hMemDC, 0, 0, 1280, 720, hOldMemDC, 0, 0, 1920, 1080, SRCCOPY);
+
+			DeleteDC(hOldMemDC);
+
+
+			StretchBlt(hdc, 0, 0, rt.right, rt.bottom, hMemDC, 0, 0, 1280, 720, SRCCOPY);
+
+			SelectObject(hMemDC, hOldBitmap);
+			DeleteObject(hBitmap);
+
+			DeleteDC(hMemDC);
+		}
+		else if (gameState == LOADING)
+		{
+			GetClientRect(hWnd, &rt);
+
+			hMemDC = CreateCompatibleDC(hdc);
+			hBitmap = CreateCompatibleBitmap(hdc, 1280, 720);
+			hOldBitmap = (HBITMAP)SelectObject(hMemDC, hBitmap);
+
+			hOldMemDC = CreateCompatibleDC(hdc);
+
+			FillRect(hMemDC, &rt, WHITE_BRUSH);
+
+			// loading
+			SelectObject(hOldMemDC, bmp_loading);
+			StretchBlt(hMemDC, 0, 0, 1280, 720, hOldMemDC, 0, 0, 1920, 1080, SRCCOPY);
+
+			DeleteDC(hOldMemDC);
+
+
+			StretchBlt(hdc, 0, 0, rt.right, rt.bottom, hMemDC, 0, 0, 1280, 720, SRCCOPY);
+
+			SelectObject(hMemDC, hOldBitmap);
+			DeleteObject(hBitmap);
+
+			DeleteDC(hMemDC);
+		}
 		else if (gameState == GAMEOVER)
 		{
 			GetClientRect(hWnd, &rt);
@@ -377,6 +470,19 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	}
 		
 		break;
+	case WM_TIMER:
+	{
+		switch (wParam) {
+		case 0:
+			
+			network.SendPositionPacket(	gGameFramework.m_ppPlayers[0]->m_d3dxmtxWorld);
+			network.SendAnimationPacket(gGameFramework.m_ppPlayers[0]->m_pState->GetState());
+
+			break;
+		}
+	}
+		break;
+
 	case WM_DESTROY:
 		PostQuitMessage(0);
 		break;
@@ -444,8 +550,11 @@ void UIProcessMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			//map1
 			if ((rt.right * (220.0f / 1280.0f) < mx && mx < rt.right * (350.0f / 1280.0f)) && (rt.bottom * (540.0f / 720.0f) < my && my < rt.bottom * (600.0f / 720.0f)))
 			{
-				gGameFramework.OnCreate(hInst, hWnd, 1);
-				gameState = INGAME;
+				gameState = MATCHING;
+				network.SendStartMatchingPacket(0);
+				//gGameFramework.OnCreate(hInst, hWnd, 1);
+				//gGameFramework.BuildObjects(1, 0);
+				//gameState = INGAME;
 				
 				pfmod->playSound(FMOD_CHANNEL_FREE, map1Sound,false, &ch);
 				ch->setVolume(0.3f);
@@ -453,8 +562,10 @@ void UIProcessMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			//map2
 			else if ((rt.right * (900.0f / 1280.0f) < mx && mx < rt.right * (1030.0f / 1280.0f)) && (rt.bottom * (540.0f / 720.0f) < my && my < rt.bottom * (600.0f / 720.0f)))
 			{
-				gGameFramework.OnCreate(hInst, hWnd,2);
-				gameState = INGAME;
+				gameState = MATCHING;
+				network.SendStartMatchingPacket(1);
+				//gGameFramework.OnCreate(hInst, hWnd,2);
+				//gameState = INGAME;
 				
 				pfmod->playSound(FMOD_CHANNEL_FREE, map2Sound,false,  &ch);
 				ch->setVolume(0.3f);
@@ -464,6 +575,16 @@ void UIProcessMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			else if ((rt.right * (600.0f / 1280.0f) < mx && mx < rt.right * (730.0f / 1280.0f)) && (rt.bottom * (640.0f / 720.0f) < my && my < rt.bottom * (700.0f / 720.0f)))
 			{
 				gameState = LOBBY;
+			}
+		}
+		else if (gameState == MATCHING)
+		{
+			if ((rt.right * (1600.0f / 1920.0f) < mx && mx < rt.right * (1800.0f / 1920.0f)) && (rt.bottom * (900.0f / 1080.0f) < my && my < rt.bottom * (1000.0f / 1080.0f)))
+			{
+				gameState = LOBBY;
+				network.SendCancelMatchingPacket();
+				pfmod->playSound(FMOD_CHANNEL_FREE, lobbySound, false, &ch);
+				ch->setVolume(0.3f);
 			}
 		}
 		else if (gameState == GAMEOVER || gameState == YOUWIN)
@@ -504,3 +625,42 @@ void UIProcessMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	}
 
 }
+
+
+
+
+BOOL CALLBACK MainDlgProc(HWND hDlg, UINT iMessage, WPARAM wParam, LPARAM lParam)
+{
+
+	switch (iMessage)
+	{
+	case WM_INITDIALOG:
+		SetWindowPos(hDlg, HWND_TOP, 100, 100, 0,0,SWP_NOSIZE);
+		break;
+	case WM_COMMAND:
+		switch (LOWORD(wParam)) {
+		case IDOK:
+		{
+
+			SendMessage(GetDlgItem(hDlg, IDC_IPADDRESS1), IPM_GETADDRESS, 0, (LPARAM)&network.ipAddress);
+			LPWSTR msg = new WCHAR[10];
+			GetDlgItemText(hDlg, IDC_EDIT1, msg, 10);
+			sprintf(network.game_id, "%ws", msg);
+			EndDialog(hDlg, 0);
+		}
+			break;
+
+		case IDCANCEL:
+			exit(-1);
+			break;
+		}
+		break;
+
+	case WM_CLOSE:
+		PostQuitMessage(0);
+		break;
+
+	}
+	return 0;
+}
+

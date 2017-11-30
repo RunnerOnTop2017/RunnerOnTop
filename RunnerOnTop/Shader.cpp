@@ -3520,7 +3520,7 @@ void CAnimateShader::BuildObjects(ID3D11Device *pd3dDevice)
 
 
 	int i = 0;
-	m_nObjects = 2;
+	m_nObjects = 4;
 	m_ppObjects = new CGameObject*[m_nObjects];
 	CGameObject *pRotatingObject = NULL;
 	CMesh *pMeshIlluminatedTextured;
@@ -3632,6 +3632,81 @@ void CAnimateShader::BuildObjects(ID3D11Device *pd3dDevice)
 
 	m_ppObjects[i++] = pRotatingObject;
 
+
+	p_Texture = new CTexture(4);
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Character\\police2\\Police2_Bottom_Diffuse.png"), NULL, NULL, &pd3dTexture, NULL);
+	p_Texture->SetTexture(0, pd3dTexture, pd3dSamplerState);
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Character\\police2\\Police2_Top_Diffuse.png"), NULL, NULL, &pd3dTexture, NULL);
+	p_Texture->SetTexture(1, pd3dTexture, pd3dSamplerState);
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Character\\police2\\Police2_Body_Diffuse.png"), NULL, NULL, &pd3dTexture, NULL);
+	p_Texture->SetTexture(2, pd3dTexture, pd3dSamplerState);
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Character\\police2\\Police2_Shoes_Diffuse.png"), NULL, NULL, &pd3dTexture, NULL);
+	p_Texture->SetTexture(3, pd3dTexture, pd3dSamplerState);					 
+																				 
+																				 
+																				 
+	pBump = new CTexture(4);													 
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Character\\police2\\Police2_Bottom_Normal.png"), NULL, NULL, &pd3dTexture, NULL);
+	pBump->SetTexture(0, pd3dTexture, pd3dSamplerState);
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Character\\police2\\Police2_Top_Normal.png"), NULL, NULL, &pd3dTexture, NULL);
+	pBump->SetTexture(1, pd3dTexture, pd3dSamplerState);
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Character\\police2\\Police2_Body_Normal.png"), NULL, NULL, &pd3dTexture, NULL);
+	pBump->SetTexture(2, pd3dTexture, pd3dSamplerState);		
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Character\\police2\\Police2_Shoes_Normal.png"), NULL, NULL, &pd3dTexture, NULL);
+	pBump->SetTexture(3, pd3dTexture, pd3dSamplerState);
+	
+
+	pMeshIlluminatedTextured = new CCharacterMesh(pd3dDevice, "Police02", 12.0f, 12.0f, 12.0f);//CCubeMeshIlluminatedTextured(pd3dDevice, 12.0f, 12.0f, 12.0f);
+
+	pRotatingObject = NULL;
+	pRotatingObject = new CGameObject();
+	pRotatingObject->SetMesh(pMeshIlluminatedTextured);
+	pRotatingObject->SetMaterial(ppMaterials[0]);
+	pRotatingObject->SetTexture(p_Texture);
+	pRotatingObject->SetBump(pBump);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+
+	m_ppObjects[i++] = pRotatingObject;
+
+
+
+	p_Texture = new CTexture(5);
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Character\\police3\\Police03_Bottom_Diffuse.png"), NULL, NULL, &pd3dTexture, NULL);
+	p_Texture->SetTexture(0, pd3dTexture, pd3dSamplerState);					  		   
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Character\\police3\\Police03_Top_Diffuse.png"), NULL, NULL, &pd3dTexture, NULL);
+	p_Texture->SetTexture(1, pd3dTexture, pd3dSamplerState);					  		   
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Character\\police3\\Police03_Body_Diffuse.png"), NULL, NULL, &pd3dTexture, NULL);
+	p_Texture->SetTexture(2, pd3dTexture, pd3dSamplerState);					  		   
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Character\\police3\\Police03_Hat_Diffuse.png"), NULL, NULL, &pd3dTexture, NULL);
+	p_Texture->SetTexture(3, pd3dTexture, pd3dSamplerState);
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Character\\police3\\Police03_Shoes_Diffuse.png"), NULL, NULL, &pd3dTexture, NULL);
+	p_Texture->SetTexture(4, pd3dTexture, pd3dSamplerState);
+																				  		   
+																				  		   
+	pBump = new CTexture(5);													  		   
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Character\\police3\\Police03_Bottom_Normal.png"), NULL, NULL, &pd3dTexture, NULL);
+	pBump->SetTexture(0, pd3dTexture, pd3dSamplerState);						  		   
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Character\\police3\\Police03_Top_Normal.png"), NULL, NULL, &pd3dTexture, NULL);
+	pBump->SetTexture(1, pd3dTexture, pd3dSamplerState);						  		   
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Character\\police3\\Police03_Body_Normal.png"), NULL, NULL, &pd3dTexture, NULL);
+	pBump->SetTexture(2, pd3dTexture, pd3dSamplerState);						  		   
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Character\\police3\\Police03_Hat_Normal.png"), NULL, NULL, &pd3dTexture, NULL);
+	pBump->SetTexture(3, pd3dTexture, pd3dSamplerState);
+	D3DX11CreateShaderResourceViewFromFile(pd3dDevice, _T("Data\\Character\\police3\\Police03_Shoes_Normal.png"), NULL, NULL, &pd3dTexture, NULL);
+	pBump->SetTexture(4, pd3dTexture, pd3dSamplerState);
+
+
+	pMeshIlluminatedTextured = new CCharacterMesh(pd3dDevice, "Police02", 12.0f, 12.0f, 12.0f);//CCubeMeshIlluminatedTextured(pd3dDevice, 12.0f, 12.0f, 12.0f);
+
+	pRotatingObject = NULL;
+	pRotatingObject = new CGameObject();
+	pRotatingObject->SetMesh(pMeshIlluminatedTextured);
+	pRotatingObject->SetMaterial(ppMaterials[0]);
+	pRotatingObject->SetTexture(p_Texture);
+	pRotatingObject->SetBump(pBump);
+	pRotatingObject->SetPosition(0.0f, 0.0f, 0.0f);
+
+	m_ppObjects[i++] = pRotatingObject;
 
 
 

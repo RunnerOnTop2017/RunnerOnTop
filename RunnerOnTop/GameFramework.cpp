@@ -2,7 +2,9 @@
 #include "GameFramework.h"
 #include "State.h"
 #include "UIClass.h"
+#include "ServerModule.h"
 float tickTime = 0;
+extern ServerModule network;
 CGameFramework::CGameFramework()
 {
 	m_pd3dDevice = NULL;
@@ -21,6 +23,8 @@ CGameFramework::CGameFramework()
 	m_pNPC = NULL;
 	m_pd3dDepthStencilBuffer = NULL;
 	m_pd3dDepthStencilView = NULL;
+
+	loaded = false;
 }
 
 CGameFramework::~CGameFramework()
@@ -37,7 +41,7 @@ bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hMainWnd, int MapNumber)
 	if (!CreateDirect3DDisplay()) return(false);
 	
 	//렌더링할 객체(게임 월드 객체)를 생성한다. 
-	BuildObjects(MapNumber);
+	//BuildObjects(MapNumber);
 
 	return(true);
 }
@@ -317,7 +321,7 @@ void CGameFramework::OnDestroy()
 	if (m_pd3dDevice) m_pd3dDevice->Release();
 }
 
-void CGameFramework::BuildObjects(int mapNum)
+void CGameFramework::BuildObjects(int mapNum, int roll)
 {
 	m_pScene = new CScene(mapNum);
 	if (m_pScene)
@@ -328,7 +332,7 @@ void CGameFramework::BuildObjects(int mapNum)
 	m_nPlayers = 1;
 	m_ppPlayers = new CPlayer*[m_nPlayers];
 
-	CAirplanePlayer *pAirplanePlyer = new CAirplanePlayer(m_pd3dDevice, m_pScene->m_pCharacters);
+	CAirplanePlayer *pAirplanePlyer = new CAirplanePlayer(m_pd3dDevice, m_pScene->m_pCharacters,roll);
 	//플레이어의 카메라를 스페이스-쉽 카메라로 변경한다.
 	pAirplanePlyer->ChangeCamera(m_pd3dDevice, THIRD_PERSON_CAMERA, m_GameTimer.GetTimeElapsed());
 
@@ -340,14 +344,35 @@ void CGameFramework::BuildObjects(int mapNum)
 	pCamera->GenerateViewMatrix();
 
 	//-1000.0f, 3280.0f, -8150.0f
-	pAirplanePlyer->SetPosition(D3DXVECTOR3(200.0f, 3310.0f, 3500.0f));
+	if (roll == 0)
+	{
+		if(mapNum == 1)
+			pAirplanePlyer->SetPosition(D3DXVECTOR3(200.0f, 3310.0f, 3500.0f));
+		else
+			pAirplanePlyer->SetPosition(D3DXVECTOR3(-50.0f, 3310.0f, 3500.0f));
+
+	}
+	else
+	{
+		if(mapNum == 1)
+			pAirplanePlyer->SetPosition(D3DXVECTOR3(1628.0f, 3300.0f, 3240.0f));
+		else
+			pAirplanePlyer->SetPosition(D3DXVECTOR3(200.0f, 3310.0f, 3500.0f));
+	}
+
+
+	//m_pNPC->SetPosition(D3DXVECTOR3(200.0f, 3310.0f, 3500.0f));
 	//pAirplanePlyer->SetPosition(D3DXVECTOR3(-300.0f, 3310.0f, -8000.0f));
 	pAirplanePlyer->Rotate(0.0f, 180.0f, 0.0f);
 	CState *pState = new CState();
 	CAnimationClip *pAnimationClip = new CAnimationClip();
 
 	pAnimationClip->LoadAnimation("idle");
+	if(roll == 0)
 	pAnimationClip->LoadAnimation("run");
+	else
+		pAnimationClip->LoadAnimation("run2");
+
 	pAnimationClip->LoadAnimation("left");
 	pAnimationClip->LoadAnimation("right");
 	pAnimationClip->LoadAnimation("backward");
@@ -367,19 +392,70 @@ void CGameFramework::BuildObjects(int mapNum)
 	pState->SetTimer(&m_GameTimer);
 	pAirplanePlyer->SetState(pState);
 	m_ppPlayers[0] = pAirplanePlyer;
+	
 
+	m_nNpc = 4;
+	m_pNPC = new CNPC*[m_nNpc];
 
-	if (mapNum == 1)
+	for (int i = 0; i < m_nNpc; ++i)
 	{
-		m_pNPC = new CNPC(m_pd3dDevice, m_pScene->m_pCharacters, mapNum);
-		m_pNPC->SetFriction(400.0f);
-		m_pNPC->SetGravity(D3DXVECTOR3(0.0f, -400.0f, 0.0f));
-		m_pNPC->SetMaxVelocityXZ(125.0f);
-		m_pNPC->SetMaxVelocityY(400.0f);
+		if (i == roll) m_pNPC[i] = NULL;
+		else
+		{
+			m_pNPC[i] = new CNPC(m_pd3dDevice, m_pScene->m_pCharacters, i);
+			m_pNPC[i]->SetFriction(400.0f);
+			m_pNPC[i]->SetGravity(D3DXVECTOR3(0.0f, -400.0f, 0.0f));
+			m_pNPC[i]->SetMaxVelocityXZ(125.0f);
+			m_pNPC[i]->SetMaxVelocityY(400.0f);
+
+			m_pNPC[i]->SetPosition(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
+
+			m_pNPC[i]->Rotate(0.0f, 180.0f, 0.0f);
+			pState = new CState();
+			pAnimationClip = new CAnimationClip();
+
+			pAnimationClip->LoadAnimation("idle");
+			if(i == 0) pAnimationClip->LoadAnimation("run");
+			else pAnimationClip->LoadAnimation("run2");
+			pAnimationClip->LoadAnimation("left");
+			pAnimationClip->LoadAnimation("right");
+			pAnimationClip->LoadAnimation("backward");
+			pAnimationClip->LoadAnimation("jump", 40);
+			pAnimationClip->LoadAnimation("jumping");
+			pAnimationClip->LoadAnimation("slide");
+			pAnimationClip->LoadAnimation("smash");
+			pAnimationClip->LoadAnimation("fallback");
+			pAnimationClip->LoadAnimation("standup");
+			pAnimationClip->LoadAnimation("fallfront");
+
+
+			pState->SetPlayer(m_pNPC[i]);
+
+
+			pState->SetAnimationClip(pAnimationClip);
+			pState->SetTimer(&m_GameTimer);
+			m_pNPC[i]->SetState(pState);
+			
+			m_pNPC[i]->m_pState->SetState(STATE_IDLE);
+		}
+	}
+	if (roll != 0)
+	{
+		m_ppPlayers[0]->enemy = (void*)m_pNPC[0];
+	}
+	//m_ppPlayers[0]->npc = m_pNPC;
+
+	/*if (mapNum == 1||true)
+	{
+		m_pNPC[0] = new CNPC(m_pd3dDevice, m_pScene->m_pCharacters, mapNum);
+		m_pNPC[0]->SetFriction(400.0f);
+		m_pNPC[0]->SetGravity(D3DXVECTOR3(0.0f, -400.0f, 0.0f));
+		m_pNPC[0]->SetMaxVelocityXZ(125.0f);
+		m_pNPC[0]->SetMaxVelocityY(400.0f);
 		
-			m_pNPC->SetPosition(D3DXVECTOR3(1628.0f, 3300.0f, 3240.0f));
+		m_pNPC[0]->SetPosition(D3DXVECTOR3(1628.0f, 3300.0f, 3240.0f));
 		
-		m_pNPC->Rotate(0.0f, 180.0f, 0.0f);
+		m_pNPC[0]->Rotate(0.0f, 180.0f, 0.0f);
 		pState = new CState();
 		pAnimationClip = new CAnimationClip();
 
@@ -397,19 +473,19 @@ void CGameFramework::BuildObjects(int mapNum)
 		pAnimationClip->LoadAnimation("fallfront");
 
 
-		pState->SetPlayer(m_pNPC);
+		pState->SetPlayer(m_pNPC[0]);
 
 
 		pState->SetAnimationClip(pAnimationClip);
 		pState->SetTimer(&m_GameTimer);
-		m_pNPC->SetState(pState);
-		m_pNPC->enemy = m_ppPlayers[0];
-		m_pNPC->m_pState->SetState(STATE_RUN);
+		m_pNPC[0]->SetState(pState);
+		m_pNPC[0]->enemy = m_ppPlayers[0];
+		m_pNPC[0]->m_pState->SetState(STATE_RUN);
 	}
 	else
 	{
 		if (m_pNPC)m_pNPC = NULL;
-	}
+	}*/
 	tickTime = 0.0f;
 }
 
@@ -435,9 +511,9 @@ void CGameFramework::ProcessInput()
 	{
 		static UCHAR pKeyBuffer[256];
 		DWORD dwDirection = 0;
-		m_ppPlayers[0]->bInteraction = false;
+		if(m_ppPlayers[0])m_ppPlayers[0]->bInteraction = false;
 		/*키보드의 상태 정보를 반환한다. 화살표 키(‘→’, ‘←’, ‘↑’, ‘↓’)를 누르면 플레이어를 오른쪽/왼쪽(로컬 x-축), 앞/뒤(로컬 z-축)로 이동한다. ‘Page Up’과 ‘Page Down’ 키를 누르면 플레이어를 위/아래(로컬 y-축)로 이동한다.*/
-		if (GetKeyboardState(pKeyBuffer))
+		if (GetKeyboardState(pKeyBuffer) && m_ppPlayers[0] )
 		{
 			if (/*pKeyBuffer[VK_UP] & 0xF0 || pKeyBuffer[VkKeyScan('w')] & 0xF0 ||*/ m_ppPlayers[0]->m_pState->GetState() == STATE_RUN|| m_ppPlayers[0]->m_pState->GetState() == STATE_RUNJUMP ||m_ppPlayers[0]->m_pState->GetState() == STATE_SLIDE) dwDirection |= DIR_FORWARD;
 			if (pKeyBuffer[VK_DOWN] & 0xF0 || pKeyBuffer[VkKeyScan('s')] & 0xF0) dwDirection |= DIR_BACKWARD;
@@ -477,20 +553,21 @@ void CGameFramework::ProcessInput()
 		}
 
 		dwDirection = 0;
-		if (m_pNPC) m_pNPC->bInteraction = true;
+		/*if (m_pNPC[0]) m_pNPC[0]->bInteraction = true;
 
-		if (m_pNPC)
+		if (m_pNPC[0])
 		{
-			if (m_pNPC->m_pState->GetState() == STATE_RUN || m_pNPC->m_pState->GetState() == STATE_RUNJUMP || m_pNPC->m_pState->GetState() == STATE_SLIDE) dwDirection |= DIR_FORWARD;
+			if (m_pNPC[0]->m_pState->GetState() == STATE_RUN || m_pNPC[0]->m_pState->GetState() == STATE_RUNJUMP || m_pNPC[0]->m_pState->GetState() == STATE_SLIDE) dwDirection |= DIR_FORWARD;
 		}
-		if (dwDirection && m_pNPC) m_pNPC->Move(dwDirection, 500.0f * m_GameTimer.GetTimeElapsed(), true);
+		if (dwDirection && m_pNPC) m_pNPC[0]->Move(dwDirection, 500.0f * m_GameTimer.GetTimeElapsed(), true);*/
 	}
-	//플레이어를 실제로 이동하고 카메라를 갱신한다. 중력과 마찰력의 영향을 속도 벡터에 적용한다.
+	////플레이어를 실제로 이동하고 카메라를 갱신한다. 중력과 마찰력의 영향을 속도 벡터에 적용한다.
 	float timeElapsed = m_GameTimer.GetTimeElapsed();
-	m_ppPlayers[0]->Update(timeElapsed);
-	if(m_pNPC != NULL &&m_pNPC->GetPlayerUpdatedContext() != NULL)
-		m_pNPC->Update(timeElapsed);
-	//std::cout << "Ftime = " << timeElapsed << std::endl;
+	if(m_ppPlayers[0])m_ppPlayers[0]->Update(timeElapsed);
+	
+	/*if(m_pNPC[0] != NULL &&m_pNPC[0]->GetPlayerUpdatedContext() != NULL)
+		m_pNPC[0]->Update(timeElapsed);*/
+	
 
 }
 
@@ -514,7 +591,7 @@ void CGameFramework::FrameAdvance()
 	}
 	else if (m_pNPC == NULL)
 	{
-		m_pNPC = new CNPC(m_pd3dDevice, m_pScene->m_pCharacters, 2);
+		/*m_pNPC = new CNPC(m_pd3dDevice, m_pScene->m_pCharacters, 2);
 		m_pNPC->SetFriction(400.0f);
 		m_pNPC->SetGravity(D3DXVECTOR3(0.0f, -400.0f, 0.0f));
 		m_pNPC->SetMaxVelocityXZ(125.0f);
@@ -545,7 +622,7 @@ void CGameFramework::FrameAdvance()
 		pState->SetTimer(&m_GameTimer);
 		m_pNPC->SetState(pState);
 		m_pNPC->enemy = m_ppPlayers[0];
-		m_pNPC->m_pState->SetState(STATE_RUN);
+		m_pNPC->m_pState->SetState(STATE_RUN);*/
 	}
 
 	//m_pd3dDeviceContext->
@@ -558,6 +635,7 @@ void CGameFramework::FrameAdvance()
 	{
 		if (m_ppPlayers[i])
 		{
+			
 			m_ppPlayers[i]->UpdateShaderVariables(m_pd3dDeviceContext);
 			pCamera = m_ppPlayers[i]->GetCamera();
 			m_ppPlayers[i]->SetPlayerUpdatedContext(m_pScene->m_ppShaders[3]);
@@ -569,13 +647,17 @@ void CGameFramework::FrameAdvance()
 		
 	}
 
-	if (m_pNPC)
+	for (int i = 0; i < m_nNpc; ++i)
 	{
-		m_pNPC->UpdateShaderVariables(m_pd3dDeviceContext);
-		
-		m_pNPC->SetPlayerUpdatedContext(m_pScene->m_ppShaders[3]);
-		m_pNPC->Render(m_pd3dDeviceContext);
+		if (m_pNPC[i])
+		{
+			m_pNPC[i]->UpdateShaderVariables(m_pd3dDeviceContext);
+
+			m_pNPC[i]->SetPlayerUpdatedContext(m_pScene->m_ppShaders[3]);
+			m_pNPC[i]->Render(m_pd3dDeviceContext);
+		}
 	}
+	
 	if (m_pScene) m_pScene->Render(m_pd3dDeviceContext, pCamera);
 
 

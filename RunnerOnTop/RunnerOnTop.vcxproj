@@ -159,9 +159,11 @@
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="PathFinder.h" />
     <ClInclude Include="Player.h" />
+    <ClInclude Include="protocol.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="RunnerOnTop.h" />
     <ClInclude Include="Scene.h" />
+    <ClInclude Include="ServerModule.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="State.h" />
     <ClInclude Include="stdafx.h" />
@@ -181,6 +183,7 @@
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="RunnerOnTop.cpp" />
     <ClCompile Include="Scene.cpp" />
+    <ClCompile Include="ServerModule.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="State.cpp" />
     <ClCompile Include="stdafx.cpp">

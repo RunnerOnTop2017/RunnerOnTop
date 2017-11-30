@@ -3,9 +3,14 @@
 #include "PathFinder.h"
 #include "fmod.hpp"
 #include "fmod_errors.h"
+#include "ServerModule.h"
+#include "GameFramework.h"
 
 extern GAMESTATENUM gameState;
 extern HWND mHwnd;
+extern ServerModule network;
+
+
 CPlayer::CPlayer()
 {
 	m_pCamera = NULL;
@@ -384,11 +389,23 @@ void CPlayer::ResetUpLookRight()
 	RegenerateWorldMatrix();
 }
 
+
+
 #define _WITH_DEBUG
 
 extern FMOD::System *pfmod;
 extern FMOD::Channel *footCh;
 extern FMOD::Sound *footstep;
+
+//void CPlayer::CheckDistance(void* npc)
+//{
+//
+//	
+//
+//
+//
+//}
+
 
 bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 {
@@ -475,7 +492,30 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 		}
 		EndAnimation = false;
 	}
+	if (roll != 0)
+	{
 
+		CNPC *npc = (CNPC*)enemy;
+		D3DXMATRIX ma = npc->m_d3dxmtxWorld;
+		D3DXVECTOR3 ePosition = D3DXVECTOR3(ma._41, ma._42, ma._43);
+		std::cout << ePosition << std::endl;
+		D3DXVECTOR3 toEnemy = D3DXVECTOR3(ePosition.x - GetPosition().x, 0, ePosition.z - GetPosition().z);
+		float toEnemyDistance = D3DXVec3Length(&toEnemy);
+		if (toEnemyDistance < 50.0f)
+		{
+			bool isPlaying;
+			footCh->getPaused(&isPlaying);
+			if (!isPlaying) footCh->setPaused(true);
+
+			if (m_pState->GetState() == STATE_RUN) m_pState->SetState(STATE_IDLE);
+
+			network.SendCatchPacket();
+
+
+			//InvalidateRect(mHwnd, NULL, false);
+			//ReleaseCapture();
+		}
+	}
 
 	// 바닥 충돌 체크
 	for (int i = 0; i < FLOOR_CNT; ++i)
@@ -668,7 +708,9 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 			{
 				footCh->getPaused(&isPlaying);
 				if (!isPlaying) footCh->setPaused(true);
-				gameState = YOUWIN;
+				network.SendGoalPacket();
+
+				//gameState = YOUWIN;
 				InvalidateRect(mHwnd, NULL, false);
 				ReleaseCapture();
 
@@ -766,7 +808,7 @@ void CPlayer::OnCameraUpdated(float fTimeElapsed)
 }
 
 
-CAirplanePlayer::CAirplanePlayer(ID3D11Device *pd3dDevice, CAnimateShader *pShader)
+CAirplanePlayer::CAirplanePlayer(ID3D11Device *pd3dDevice, CAnimateShader *pShader, int rollnumber)
 {
 	//비행기 메쉬를 생성한다.
 	//CMesh *pAirplaneMesh = new CCharacterMesh(pd3dDevice, "Police01");
@@ -778,11 +820,11 @@ CAirplanePlayer::CAirplanePlayer(ID3D11Device *pd3dDevice, CAnimateShader *pShad
 	//m_pShader->CreateShader(pd3dDevice);
 	//m_pShader->CreateShaderVariables(pd3dDevice);
 	//m_pShader->BuildObjects(pd3dDevice);
-
+	roll = rollnumber;
 	//플레이어를 위한 쉐이더 변수를 생성한다.
 	CreateShaderVariables(pd3dDevice);
 
-	m_pShader->m_ppObjects[0]->m_pState = m_pState;
+	m_pShader->m_ppObjects[roll]->m_pState = m_pState;
 }
 
 CAirplanePlayer::~CAirplanePlayer()
@@ -797,12 +839,12 @@ void CAirplanePlayer::Render(ID3D11DeviceContext *pd3dDeviceContext)
 	{
 		if (m_pShader)
 		{
-			m_pShader->m_ppObjects[0]->m_d3dxmtxWorld = m_d3dxmtxWorld;
+			m_pShader->m_ppObjects[roll]->m_d3dxmtxWorld = m_d3dxmtxWorld;
 			//D3DXMATRIX matrix;
 			//D3DXMatrixTranslation(&matrix, 50.0f, 0.0f, 0.0f);
 			//m_pShader->m_ppObjects[1]->m_d3dxmtxWorld = matrix*m_d3dxmtxWorld;
 
-			m_pShader->Render(pd3dDeviceContext, NULL, 0);
+			m_pShader->Render(pd3dDeviceContext, NULL, roll);
 		}
 	}
 }
@@ -811,7 +853,7 @@ void CAirplanePlayer::SetState(CState * pState)
 {
 	m_pState = pState;
 
-	m_pShader->m_ppObjects[0]->m_pState = pState;
+	m_pShader->m_ppObjects[roll]->m_pState = pState;
 }
 
 void CAirplanePlayer::ChangeCamera(ID3D11Device *pd3dDevice, DWORD nNewCameraMode, float fTimeElapsed)
@@ -873,7 +915,7 @@ CNPC::CNPC(ID3D11Device *pd3dDevice, CAnimateShader *pShader, int mapNumber)
 	//플레이어(비행기) 메쉬를 렌더링할 때 사용할 쉐이더를 생성한다.
 	m_pShader = pShader;
 
-	mapnumber = mapNumber;
+	roll = mapNumber;
 	chasing = false;
 	if (mapNumber == 1)
 	{
@@ -925,7 +967,7 @@ CNPC::CNPC(ID3D11Device *pd3dDevice, CAnimateShader *pShader, int mapNumber)
 	//플레이어를 위한 쉐이더 변수를 생성한다.
 	CreateShaderVariables(pd3dDevice);
 
-	m_pShader->m_ppObjects[1]->m_pState = m_pState;
+	m_pShader->m_ppObjects[roll]->m_pState = m_pState;
 }
 
 CNPC::~CNPC()
@@ -938,13 +980,10 @@ void CNPC::Render(ID3D11DeviceContext *pd3dDeviceContext)
 
 	if (m_pShader)
 	{
-		m_pShader->m_ppObjects[1]->m_d3dxmtxWorld = m_d3dxmtxWorld;
+		m_pShader->m_ppObjects[roll]->m_d3dxmtxWorld = m_d3dxmtxWorld;
 		
-		//D3DXMATRIX matrix;
-		//D3DXMatrixTranslation(&matrix, 50.0f, 0.0f, 0.0f);
-		//m_pShader->m_ppObjects[1]->m_d3dxmtxWorld = matrix*m_d3dxmtxWorld;
 
-		m_pShader->Render(pd3dDeviceContext, NULL, 1);
+		m_pShader->Render(pd3dDeviceContext, NULL, roll);
 	}
 }
 
@@ -952,7 +991,7 @@ void CNPC::SetState(CState * pState)
 {
 	m_pState = pState;
 
-	m_pShader->m_ppObjects[1]->m_pState = pState;
+	m_pShader->m_ppObjects[roll]->m_pState = pState;
 }
 
 void CNPC::ChangeCamera(ID3D11Device *pd3dDevice, DWORD nNewCameraMode, float fTimeElapsed)
@@ -1024,22 +1063,22 @@ bool CNPC::OnPlayerUpdated(float fTimeElapsed)
 	}
 */
 
-	D3DXVECTOR3 d3dxv_eMax = enemy->GetPosition() + max;
-	D3DXVECTOR3 d3dxv_eMin = enemy->GetPosition() + min;
-	D3DXVECTOR3 d3dxv_eCenter = (d3dxv_eMax + d3dxv_eMin) / 2.0f;
+	//D3DXVECTOR3 d3dxv_eMax = enemy->GetPosition() + max;
+	//D3DXVECTOR3 d3dxv_eMin = enemy->GetPosition() + min;
+	//D3DXVECTOR3 d3dxv_eCenter = (d3dxv_eMax + d3dxv_eMin) / 2.0f;
 
 	CDiffusedShader *pShader = (CDiffusedShader*)m_pPlayerUpdatedContext;
 	int OBJECT_CNT = pShader->OBJECT_CNT;
 	int FLOOR_CNT = pShader->FLOOR_CNT;
 	int WALL_CNT = pShader->WALL_CNT;
-	float vtheta;
-	float vs;
-	float vt;
-	float v1length;
-	float v2length;
-	D3DXVECTOR3 v1;
-	D3DXVECTOR3 v2;
-	float cosRad;
+	//float vtheta;
+	//float vs;
+	//float vt;
+	//float v1length;
+	//float v2length;
+	//D3DXVECTOR3 v1;
+	//D3DXVECTOR3 v2;
+	//float cosRad;
 
 	if (EndAnimation)
 	{
@@ -1060,312 +1099,116 @@ bool CNPC::OnPlayerUpdated(float fTimeElapsed)
 		}
 		EndAnimation = false;
 	}
+	
 
 	if (mapnumber == 1)
 	{
-		/*
-		if (currentPos.x == -1 && currentPos.y == -1)
-		{
-			CreateNodeMap(map, minMap, maxMap, (CDiffusedShader*)m_pPlayerUpdatedContext, 2, FLOOR_CNT, true);
-			for (int i = 0; i < map_size_m; ++i)
-			{
-				for (int j = 0; j < map_size_n; ++j)
-				{
-					if (map[j][i] == 1) map[j][i] = 0;
-					else map[j][i] = 1;
-				}
-			}
-			if (mapnumber == 1)
-			{
-				map[24][26] = 1;
-				map[25][26] = 1;
-				map[26][16] = 1;
-				map[27][15] = 1;
-				map[28][15] = 1;
-				map[29][37] = 1;
-				map[29][36] = 1;
-				map[29][35] = 1;
-				map[29][34] = 1;
-				map[29][33] = 1;
-				map[29][32] = 1;
-				map[29][31] = 1;
-				map[29][30] = 1;
-				map[29][29] = 1;
-				map[29][17] = 1;
-
-			}
-			NPCDirection = 3;
-		}
-
-
-
-
-		node_pos pos = PositionToNodeIndex(d3dxv_center.x, d3dxv_center.z, D_METER, minMap, maxMap);
-
-		D3DXVECTOR4 minmax = NodeIndexToMinMax(pos, minMap, maxMap, 40);
-
-		node_pos epos = PositionToNodeIndex(d3dxv_eCenter.x, d3dxv_eCenter.z, D_METER, minMap, maxMap);
-
-		static node_pos_float tmp;
-		static float degree;
-		static std::string path;
-		static std::string detailpath;
-		static int ex, ey;
-		static int detailPathIndex;
-		static node_pos dPos;
-		static bool detailcheck;
-		static node_pos start;
-
-		if ((pos.x == epos.x && pos.y == epos.y) && (pos.x != currentPos.x || pos.y != currentPos.y))
-		{
-			D3DXVECTOR3 look = GetLookVector();
-
-			D3DXVECTOR3 v1 = { look.x,0.0f ,look.z };
-
-			D3DXVECTOR3 v2 = { d3dxv_eCenter.x - d3dxv_center.x, 0.0f ,d3dxv_eCenter.z - d3dxv_center.z };
-
-			float v1length = D3DXVec3Length(&v1);
-			float v2length = D3DXVec3Length(&v2);
-
-			float vs = D3DXVec3Dot(&v1, &v2);         // 거리
-			float vt = acosf(vs / (v1length * v2length));
-			float vtheta = (180 * vt) / D3DX_PI;             // 각도
-
-
-			Rotate(0.0f, -1 * vtheta, 0.0f);
-			currentPos = pos;
-
-		}
-
-		if (50.0f>GetDistance(d3dxv_center.x, d3dxv_center.z, d3dxv_eCenter.x, d3dxv_eCenter.z))
-		{
-			//if (m_pState->GetState() == STATE_RUN) m_pState->SetState(STATE_IDLE);
-			//gameState = GAMEOVER;
-			//InvalidateRect(mHwnd, NULL, false);
-			//ReleaseCapture();
-		}
-		else
-		{
-
-			if (m_pState->GetState() == STATE_IDLE && detailpath.length() != 0) m_pState->SetState(STATE_RUN);
-		}
-
-		if (pos.x != currentPos.x || pos.y != currentPos.y)
-		{
-			float mdx = (maxMap.x - minMap.x) / map_size_n;
-			float mdy = (maxMap.y - minMap.y) / map_size_m;
-			float dMx = (pos.x * mdx) + minMap.x + mdx;
-			float dmx = (pos.x * mdx) + minMap.x;
-
-			float dMz = (pos.y * mdy) + minMap.y + mdy;
-			float dmz = (pos.y * mdy) + minMap.y;
-
-			for (int i = 0; i < detail_size_n; ++i) for (int j = 0; j < detail_size_m; ++j)
-				detailmap[i][j] = 1;
-
-
-
-			CreateNodeDetailMap(detailmap, { minmax.x,minmax.y }, { minmax.z, minmax.w }, (CDiffusedShader*)m_pPlayerUpdatedContext, WALL_CNT, OBJECT_CNT);
-
-
-			path = pathFind(pos.x, pos.y, epos.x, epos.y, map);
-			route.clear();
-			route = PathStringToNodeIndex(path, pos);
-
-			if (path.length() != 0) {
-				char c = path.at(0);
-				int d = c - '0';
-				start = PositionToNodeIndex(d3dxv_center.x, d3dxv_center.z, 20, { minmax.x, minmax.y }, { minmax.z, minmax.w });
-
-				FindEndPoint(ex, ey, d, detailmap, start.x, start.y);
-				currentPos.x = pos.x;
-				currentPos.y = pos.y;
-
-				detailpath = detailpathFind(start.x, start.y, ex, ey, detailmap);
-
-				if (detailpath.length() == 0)
-				{
-					start = PositionToNodeIndex(d3dxv_center.x, d3dxv_center.z, 20, { minmax.x, minmax.y }, { minmax.z, minmax.w });
-
-					d = (d + 3) % 4;
-					FindEndPoint(ex, ey, d, detailmap, start.x, start.y);
-					detailpath = detailpathFind(start.x, start.y, ex, ey, detailmap);
-
-				}
-
-				detailPathIndex = 0;
-				dPos = start;
-				detailcheck = false;
-			}
-		}
-
-		node_pos ndPos = PositionToNodeIndex(d3dxv_center.x, d3dxv_center.z, 20, { minmax.x, minmax.y }, { minmax.z, minmax.w });
-
-
-		if (dPos != ndPos || !detailcheck)
-		{
-			detailcheck = true;
-			if (detailpath.length() != 0 && detailPathIndex < detailpath.length())
-			{
-				if (detailpath.at(detailPathIndex) == '0')
-				{
-					if (NPCDirection != 0)
-					{
-						ResetUpLookRight();
-						Rotate(0.0f, 90.0f, 0.0);
-						NPCDirection = 0;
-
-					}
-
-				}
-				else if (detailpath.at(detailPathIndex) == '3')
-				{
-					if (NPCDirection != 3)
-					{
-						ResetUpLookRight();
-						Rotate(0.0f, 180.0f, 0.0);
-						NPCDirection = 3;
-
-					}
-
-				}
-				else if (detailpath.at(detailPathIndex) == '2')
-				{
-					if (NPCDirection != 2)
-					{
-						ResetUpLookRight();
-						Rotate(0.0f, 270.0f, 0.0);
-						NPCDirection = 2;
-
-					}
-
-				}
-				else if (detailpath.at(detailPathIndex) == '1')
-				{
-					if (NPCDirection != 1)
-					{
-						ResetUpLookRight();
-						Rotate(0.0f, 0.0f, 0.0);
-						NPCDirection = 1;
-
-					}
-
-				}
-			}
-			else
-			{
-				m_pState->SetState(STATE_IDLE);
-			}
-			dPos = ndPos;
-			detailPathIndex++;
-		}
-		*/
-
-		D3DXVECTOR3 ePosition = enemy->GetPosition();
-		int enemyIndex = 0;
-		float eDistance = D3DXVec3Length(&D3DXVECTOR3(map2Route[0].x - ePosition.x, 0, map2Route[0].z - ePosition.z));
 		
-		for (int i = 1; i < map2Route.size(); ++i)
-		{
-			float dist = D3DXVec3Length(&D3DXVECTOR3(map2Route[i].x - ePosition.x, 0, map2Route[i].z - ePosition.z));
-			if (dist < eDistance)
-			{
-				enemyIndex = i;
-				eDistance = dist;
-			}
-		}
+
+		//
+		//int enemyIndex = 0;
+		//float eDistance = D3DXVec3Length(&D3DXVECTOR3(map2Route[0].x - ePosition.x, 0, map2Route[0].z - ePosition.z));
+		//
+		//for (int i = 1; i < map2Route.size(); ++i)
+		//{
+		//	float dist = D3DXVec3Length(&D3DXVECTOR3(map2Route[i].x - ePosition.x, 0, map2Route[i].z - ePosition.z));
+		//	if (dist < eDistance)
+		//	{
+		//		enemyIndex = i;
+		//		eDistance = dist;
+		//	}
+		//}
+		//
+		////유저를 보는 방향벡터 생성
 		
-		//유저를 보는 방향벡터 생성
-		D3DXVECTOR3 toEnemy = D3DXVECTOR3(ePosition.x - GetPosition().x, 0, ePosition.z - GetPosition().z);
-		//유저까지와의 거리
-		float toEnemyDistance = D3DXVec3Length(&toEnemy);
-
-		if (toEnemyDistance < 200.0f)
-		{
-			if (!chasing) chasing = true;
-		}
-		else
-		{
-			if (chasing)
-			{
-				RouteIndex = enemyIndex;
-				chasing = false;
-			}
-		}
-
-		D3DXVECTOR3 look = GetLookVector();
-
-		v1 = { look.x, 0.0f ,look.z };
-
-		if (chasing)
-			v2 = toEnemy;
-		else
-			v2 = { map2Route[RouteIndex].x - GetPosition().x , 0.0f , map2Route[RouteIndex].z - GetPosition().z };
-		//D3DXVECTOR3 v2 = { d3dxv_eCenter.x - d3dxv_center.x, 0.0f ,d3dxv_eCenter.z - d3dxv_center.z };
-		//D3DXVec3Normalize(&v1, &v1);
-		D3DXVECTOR3 v3;
-		D3DXVec3Normalize(&v3, &v2);
-
-		v1length = D3DXVec3Length(&v1);
-		v2length = D3DXVec3Length(&v3);
-
-
-		vs = D3DXVec3Dot(&v1, &v3);// 거리
-
-		cosRad = vs / (v1length * v2length);
-
-		if (!isnan(cosRad) && cosRad != 1.0f)
-		{
-			vt = acosf(cosRad);
-			if (!isnan(vt))
-			{
-				vtheta = (180.0f * vt) / 3.1415926535f;
-				if (vs != 1.0f && vs != -1.0f)
-				{
-					D3DXVECTOR3 cross;
-					D3DXVec3Cross(&cross, &v1, &v3);
-					if (cross.y < 0.0f) vtheta *= -1.0f;
-					if (cross.y != 0.0f) Rotate(0.0f, vtheta, 0.0f);
-
-
-				}
-			}
-
-		}
+		////유저까지와의 거리
 		
-		if (D3DXVec3Length(&v2) < 10.0f)
-		{
-			if (enemyIndex == 2 && RouteIndex == 1)
-			{
+		//if (toEnemyDistance < 200.0f)
+		//{
+		//	if (!chasing) chasing = true;
+		//}
+		//else
+		//{
+		//	if (chasing)
+		//	{
+		//		RouteIndex = enemyIndex;
+		//		chasing = false;
+		//	}
+		//}
 
-				if (m_pState->GetState() == STATE_RUN)
-				{
+		//D3DXVECTOR3 look = GetLookVector();
 
-					m_pState->SetState(STATE_IDLE);
-				}
+		//v1 = { look.x, 0.0f ,look.z };
 
-			}
-			else
-			{
-				
-				if (m_pState->GetState() == STATE_IDLE)
-				{
-					m_pState->SetState(STATE_RUN);
-				}
-				if (RouteIndex == 2) RouteIndex = 3;
-				else RouteIndex++;
+		//if (chasing)
+		//	v2 = toEnemy;
+		//else
+		//	v2 = { map2Route[RouteIndex].x - GetPosition().x , 0.0f , map2Route[RouteIndex].z - GetPosition().z };
+		////D3DXVECTOR3 v2 = { d3dxv_eCenter.x - d3dxv_center.x, 0.0f ,d3dxv_eCenter.z - d3dxv_center.z };
+		////D3DXVec3Normalize(&v1, &v1);
+		//D3DXVECTOR3 v3;
+		//D3DXVec3Normalize(&v3, &v2);
 
-			}
-		}
-		else
-		{
-			if (m_pState->GetState() == STATE_IDLE)
-			{
-				m_pState->SetState(STATE_RUN);
-			}
-		}
+		//v1length = D3DXVec3Length(&v1);
+		//v2length = D3DXVec3Length(&v3);
 
-		if (toEnemyDistance < 50.0f)
+
+		//vs = D3DXVec3Dot(&v1, &v3);// 거리
+
+		//cosRad = vs / (v1length * v2length);
+
+		//if (!isnan(cosRad) && cosRad != 1.0f)
+		//{
+		//	vt = acosf(cosRad);
+		//	if (!isnan(vt))
+		//	{
+		//		vtheta = (180.0f * vt) / 3.1415926535f;
+		//		if (vs != 1.0f && vs != -1.0f)
+		//		{
+		//			D3DXVECTOR3 cross;
+		//			D3DXVec3Cross(&cross, &v1, &v3);
+		//			if (cross.y < 0.0f) vtheta *= -1.0f;
+		//			if (cross.y != 0.0f) Rotate(0.0f, vtheta, 0.0f);
+
+
+		//		}
+		//	}
+
+		//}
+		//
+		//if (D3DXVec3Length(&v2) < 10.0f)
+		//{
+		//	if (enemyIndex == 2 && RouteIndex == 1)
+		//	{
+
+		//		if (m_pState->GetState() == STATE_RUN)
+		//		{
+
+		//			m_pState->SetState(STATE_IDLE);
+		//		}
+
+		//	}
+		//	else
+		//	{
+		//		
+		//		if (m_pState->GetState() == STATE_IDLE)
+		//		{
+		//			m_pState->SetState(STATE_RUN);
+		//		}
+		//		if (RouteIndex == 2) RouteIndex = 3;
+		//		else RouteIndex++;
+
+		//	}
+		//}
+		//else
+		//{
+		//	if (m_pState->GetState() == STATE_IDLE)
+		//	{
+		//		m_pState->SetState(STATE_RUN);
+		//	}
+		//}
+
+		/*if (toEnemyDistance < 50.0f)
 		{
 			bool isPlaying;
 			footCh->getPaused(&isPlaying);
@@ -1375,106 +1218,100 @@ bool CNPC::OnPlayerUpdated(float fTimeElapsed)
 			gameState = GAMEOVER;
 			InvalidateRect(mHwnd, NULL, false);
 			ReleaseCapture();
-		}
+		}*/
 
 	}
-	else if (mapnumber == 2)
-	{
+	//else if (mapnumber == 2)
+	//{
 
-		//유저한테 가장 가까운 포인트 찾기
-		D3DXVECTOR3 ePosition = enemy->GetPosition();
-		int enemyIndex = 0;
-		float eDistance = D3DXVec3Length(&D3DXVECTOR3(map2Route[0].x - ePosition.x, 0, map2Route[0].z - ePosition.z));
+	//	//유저한테 가장 가까운 포인트 찾기
+	//	D3DXVECTOR3 ePosition = enemy->GetPosition();
+	//	int enemyIndex = 0;
+	//	float eDistance = D3DXVec3Length(&D3DXVECTOR3(map2Route[0].x - ePosition.x, 0, map2Route[0].z - ePosition.z));
 
-		for (int i = 1; i < map2Route.size(); ++i)
-		{
-			float dist = D3DXVec3Length(&D3DXVECTOR3(map2Route[i].x - ePosition.x, 0, map2Route[i].z - ePosition.z));
-			if (dist < eDistance)
-			{
-				enemyIndex = i;
-				eDistance = dist;
-			}
-		}
-
-
-		//유저를 보는 방향벡터 생성
-		D3DXVECTOR3 toEnemy = D3DXVECTOR3(ePosition.x - GetPosition().x, 0, ePosition.z - GetPosition().z);
-		//유저까지와의 거리
-		float toEnemyDistance = D3DXVec3Length(&toEnemy);
-
-		if (enemyIndex == RouteIndex && toEnemyDistance < 200.0f)
-		{
-			if (!chasing) chasing = true;
-		}
-		else
-		{
-			if (chasing)
-			{
-				RouteIndex = enemyIndex;
-				chasing = false;
-			}
-		}
-
-		D3DXVECTOR3 look = GetLookVector();
-
-		v1 = { look.x, 0.0f ,look.z };
-
-		if (chasing)
-			v2 = toEnemy;
-		else
-			v2 = { map2Route[RouteIndex].x - GetPosition().x , 0.0f , map2Route[RouteIndex].z - GetPosition().z };
-		//D3DXVECTOR3 v2 = { d3dxv_eCenter.x - d3dxv_center.x, 0.0f ,d3dxv_eCenter.z - d3dxv_center.z };
-		//D3DXVec3Normalize(&v1, &v1);
-		D3DXVECTOR3 v3;
-		D3DXVec3Normalize(&v3, &v2);
-
-		v1length = D3DXVec3Length(&v1);
-		v2length = D3DXVec3Length(&v3);
+	//	for (int i = 1; i < map2Route.size(); ++i)
+	//	{
+	//		float dist = D3DXVec3Length(&D3DXVECTOR3(map2Route[i].x - ePosition.x, 0, map2Route[i].z - ePosition.z));
+	//		if (dist < eDistance)
+	//		{
+	//			enemyIndex = i;
+	//			eDistance = dist;
+	//		}
+	//	}
 
 
-		vs = D3DXVec3Dot(&v1, &v3);// 거리
+	//	//유저를 보는 방향벡터 생성
+	//	D3DXVECTOR3 toEnemy = D3DXVECTOR3(ePosition.x - GetPosition().x, 0, ePosition.z - GetPosition().z);
+	//	//유저까지와의 거리
+	//	float toEnemyDistance = D3DXVec3Length(&toEnemy);
 
-		cosRad = vs / (v1length * v2length);
+	//	if (enemyIndex < RouteIndex)
+	//	{
+	//	}
 
-		if (!isnan(cosRad) && cosRad != 1.0f)
-		{
-			vt = acosf(cosRad);
-			if (!isnan(vt))
-			{
-				vtheta = (180.0f * vt) / 3.1415926535f;
-				if (vs != 1.0f && vs != -1.0f)
-				{
-					D3DXVECTOR3 cross;
-					D3DXVec3Cross(&cross, &v1, &v3);
-					if (cross.y < 0.0f) vtheta *= -1.0f;
-					if (cross.y != 0.0f) Rotate(0.0f, vtheta, 0.0f);
+	//	if (enemyIndex == RouteIndex && toEnemyDistance < 200.0f)
+	//	{
+	//		if (!chasing) chasing = true;
+	//	}
+	//	else
+	//	{
+	//		if (chasing)
+	//		{
+	//			RouteIndex = enemyIndex;
+	//			chasing = false;
+	//		}
+	//	}
+
+	//	D3DXVECTOR3 look = GetLookVector();
+
+	//	v1 = { look.x, 0.0f ,look.z };
+
+	//	if (chasing)
+	//		v2 = toEnemy;
+	//	else
+	//		v2 = { map2Route[RouteIndex].x - GetPosition().x , 0.0f , map2Route[RouteIndex].z - GetPosition().z };
+	//	//D3DXVECTOR3 v2 = { d3dxv_eCenter.x - d3dxv_center.x, 0.0f ,d3dxv_eCenter.z - d3dxv_center.z };
+	//	//D3DXVec3Normalize(&v1, &v1);
+	//	D3DXVECTOR3 v3;
+	//	D3DXVec3Normalize(&v3, &v2);
+
+	//	v1length = D3DXVec3Length(&v1);
+	//	v2length = D3DXVec3Length(&v3);
 
 
-				}
-			}
+	//	vs = D3DXVec3Dot(&v1, &v3);// 거리
 
-		}
+	//	cosRad = vs / (v1length * v2length);
 
-		if (D3DXVec3Length(&v2) < 10.0f)
-		{
-			RouteIndex++;
-		}
+	//	if (!isnan(cosRad) && cosRad != 1.0f)
+	//	{
+	//		vt = acosf(cosRad);
+	//		if (!isnan(vt))
+	//		{
+	//			vtheta = (180.0f * vt) / 3.1415926535f;
+	//			if (vs != 1.0f && vs != -1.0f)
+	//			{
+	//				D3DXVECTOR3 cross;
+	//				D3DXVec3Cross(&cross, &v1, &v3);
+	//				if (cross.y < 0.0f) vtheta *= -1.0f;
+	//				if (cross.y != 0.0f) Rotate(0.0f, vtheta, 0.0f);
 
-		if (toEnemyDistance < 50.0f)
-		{
-			bool isPlaying;
-			footCh->getPaused(&isPlaying);
-			if (!isPlaying) footCh->setPaused(true);
 
-			if (m_pState->GetState() == STATE_RUN) m_pState->SetState(STATE_IDLE);
-			gameState = GAMEOVER;
-			InvalidateRect(mHwnd, NULL, false);
-			ReleaseCapture();
-		}
+	//			}
+	//		}
+
+	//	}
+
+	//	if (D3DXVec3Length(&v2) < 10.0f)
+	//	{
+	//		RouteIndex++;
+	//	}
+
+		
 
 
 
-	}
+	//}
 
 
 #ifdef _DEBUG
@@ -1740,9 +1577,9 @@ bool CNPC::OnPlayerUpdated(float fTimeElapsed)
 			}
 			else if (GOAL == tag)
 			{
-				gameState = YOUWIN;
-				InvalidateRect(mHwnd, NULL, false);
-				ReleaseCapture();
+				
+				
+				
 
 			}
 			else
