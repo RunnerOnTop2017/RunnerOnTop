@@ -112,7 +112,7 @@ void  ServerModule::ProcessPacket(char *ptr)
 	case SC_STARTGAME:
 	{
 		gameState = INGAME;
-		SetTimer(m_hWnd, 0, 50, NULL);
+		SetTimer(m_hWnd, 0, 15, NULL);
 	}
 	break;
 
@@ -143,6 +143,24 @@ void  ServerModule::ProcessPacket(char *ptr)
 		sc_packet_animation *my_packet = reinterpret_cast<sc_packet_animation *>(ptr);
 
 		game->m_pNPC[my_packet->character]->m_pState->SetState(my_packet->state);
+	}
+	break;
+	case SC_ITEM:
+	{
+		sc_packet_item *my_packet = reinterpret_cast<sc_packet_item *>(ptr);
+		CGameObject *obj = game->m_pScene->m_ppShaders[3]->m_ppObjects[my_packet->index];
+		if (obj->ref)
+		{
+			game->m_pScene->m_ppShaders[3]->m_ppObjects[my_packet->index]->ref->bInteracted = true;
+			if (my_packet->kind == 0)
+			{
+				obj->ref->m_physics.isValid = true;
+				obj->ref->rotateValue = 0.0f;
+				obj->ref->m_physics.velocity = { my_packet->x, my_packet->y, my_packet->z };
+				
+			}
+		}
+
 	}
 	break;
 	default:
@@ -255,6 +273,26 @@ void ServerModule::SendAnimationPacket(int state)
 	my_packet->type = CS_ANIMTAION;
 	my_packet->state = state;
 	
+	DWORD iobyte;
+	int ret = WSASend(g_mysocket, &send_wsabuf, 1, &iobyte, 0, NULL, NULL);
+	if (ret) {
+		int error_code = WSAGetLastError();
+	}
+}
+
+void ServerModule::SendItemPacket(int kind, int index, float x, float y, float z)
+{
+
+	cs_packet_item *my_packet = reinterpret_cast<cs_packet_item *>(send_buffer);
+	my_packet->size = sizeof(*my_packet);
+	send_wsabuf.len = sizeof(*my_packet);
+	my_packet->type = CS_ITEM;
+	my_packet->index = index;
+	my_packet->kind = kind;
+	my_packet->x = x;
+	my_packet->y = y;
+	my_packet->z = z;
+
 	DWORD iobyte;
 	int ret = WSASend(g_mysocket, &send_wsabuf, 1, &iobyte, 0, NULL, NULL);
 	if (ret) {

@@ -51,6 +51,8 @@ public:
 
 	void SendAnimationPacket(int state);
 
+	void SendItemPacket(int kind, int index, float x, float y, float z);
+
 	void SetGameFrameWork(CGameFramework *framework);
 };
 

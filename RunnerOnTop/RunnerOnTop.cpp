@@ -262,7 +262,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 		FMOD_RESULT r;
 		FMOD::System_Create(&pfmod);
-		r = pfmod->init(2, FMOD_INIT_NORMAL, NULL);
+		//r = pfmod->init(2, FMOD_INIT_NORMAL, NULL);
 
 		r = pfmod->createSound("Data\\Sound\\lobby.mp3", FMOD_LOOP_NORMAL, NULL, &lobbySound);
 		r = pfmod->createSound("Data\\Sound\\map1.mp3", FMOD_LOOP_NORMAL, NULL, &map1Sound);

@@ -22,9 +22,10 @@ private:
 	ID3D11RenderTargetView *m_pd3dRenderTargetView;
 
 	CGameTimer m_GameTimer;
-	CScene *m_pScene;
 	_TCHAR m_pszBuffer[50];
 public:
+	CScene *m_pScene;
+
 	int m_nPlayers;
 	CPlayer **m_ppPlayers;
 	int m_nNpc;

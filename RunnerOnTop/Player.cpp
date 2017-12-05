@@ -642,6 +642,7 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 						m_pState->SetSubState(STATE_SMASH);
 						Interacted_OBJ = pShader->m_ppObjects[i];
 						//pShader->m_ppObjects[i]->ref->bInteracted = true;
+						network.SendItemPacket(1, i, 0.0f,0.0f,0.0f);
 					}
 				}
 			}
@@ -786,7 +787,8 @@ bool CPlayer::OnPlayerUpdated(float fTimeElapsed)
 							pShader->m_ppObjects[i]->ref->m_physics.velocity += -300.0f * look;
 							pShader->m_ppObjects[i]->ref->m_physics.velocity += -300.0f * right;
 							pShader->m_ppObjects[i]->ref->m_physics.velocity.y = 400.0f;
-
+							D3DXVECTOR3 tempvec = pShader->m_ppObjects[i]->ref->m_physics.velocity;
+							network.SendItemPacket(0, i, tempvec.x, tempvec.y, tempvec.z);
 							
 						}
 

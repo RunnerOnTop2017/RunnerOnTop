@@ -9,7 +9,7 @@
 #define SC_ENDGAME    3
 #define SC_POSITION    4
 #define SC_ANIMTAION 5
-
+#define SC_ITEM 6
 
 // 패킷 정보 2 클라이언트->서버
 #define CS_STARTMATCHING   1
@@ -19,7 +19,7 @@
 #define CS_GOAL  5
 #define CS_LOADED 6
 #define CS_ANIMTAION 7
-
+#define CS_ITEM 8
 
 
 
@@ -58,6 +58,17 @@ struct sc_packet_animation {
 	BYTE character;
 	BYTE state;
 };
+
+struct sc_packet_item {
+	BYTE size;
+	BYTE type;
+	BYTE kind;
+	BYTE index;
+	float x;
+	float y;
+	float z;
+};
+
 
 //패킷정보 클라->서버
 
@@ -104,6 +115,16 @@ struct cs_packet_animation {
 	BYTE type;
 	BYTE character;
 	BYTE state;
+};
+
+struct cs_packet_item {
+	BYTE size;
+	BYTE type;
+	BYTE kind; // box = 0, door =1
+	BYTE index;
+	float x;
+	float y;
+	float z;
 };
 
 #endif
